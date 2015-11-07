@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorActivated">#caeeff</color>
+    <!--<color name="primary">#C41230</color>-->
+    <!--<color name="primaryDark">#9E0C24</color>-->
+    <!--<color name="primary">#0c5c71</color>-->
+    <color name="primary">#1C2931</color>
+    <!--<color name="accentColor">#2D9B98</color>-->
+    <!--<color name="windowColor">#091C21</color>-->
+    <color name="primaryDark">#19242A</color>
+    <color name="textPrimary">#fff</color>
+    <color name="primaryLight">#5F7580</color>
+    <color name="accent">#D4B236</color>
+    <!--<color name="secondaryTextColor">#f3beebea</color>-->
+    <color name="secondaryTextColor">#5F7580</color>
+    <color name="colorHighlight1">#ffaaff</color>
+</resources>

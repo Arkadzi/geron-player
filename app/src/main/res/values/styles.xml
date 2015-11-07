@@ -1,0 +1,23 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/primaryDark</item>
+        <item name="colorControlHighlight">@color/colorHighlight1</item>
+        <item name="colorControlActivated">@color/colorActivated</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <!--<item name="android:textColorPrimary">@color/textPrimary</item>-->
+    </style>
+
+    <!--<style name = "fontstyle" parent="android:Widget.TextView">-->
+    <!--<item name="fontFamily"></item>-->
+    <!--</style>-->
+
+</resources>

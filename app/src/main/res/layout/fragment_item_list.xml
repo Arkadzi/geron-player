@@ -1,0 +1,48 @@
+<!--<?xml version="1.0" encoding="utf-8"?>--><!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--xmlns:tools="http://schemas.android.com/tools"--><!--android:layout_width="match_parent"--><!--android:layout_height="match_parent"--><!--tools:context="me.arkadiy.geronplayer.fragment.pager.SongListFragment">-->
+<!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:recyclerviewfastscroller="http://schemas.android.com/apk/res-auto"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent">-->
+
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:id="@+id/list"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:clickable="true"-->
+        <!--android:focusable="true"-->
+        <!--android:focusableInTouchMode="true" />-->
+
+    <!--<xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller-->
+        <!--android:id="@+id/fast_scroller"-->
+        <!--android:layout_width="24dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:paddingRight="@dimen/margin_small"-->
+        <!--android:paddingEnd="@dimen/margin_small"-->
+        <!--/>-->
+
+    <!--&lt;!&ndash;<TextView&ndash;&gt;&lt;!&ndash;android:id="@+id/empty"&ndash;&gt;&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;&lt;!&ndash;android:text="aasddddasd"&ndash;&gt;&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;&lt;!&ndash;android:gravity="center" />&ndash;&gt;-->
+
+<!--</RelativeLayout>-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <me.arkadiy.geronplayer.views.RecyclerViewFastScroller
+        android:id="@+id/fast_scroller"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/list"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/list"
+        />
+</RelativeLayout>
