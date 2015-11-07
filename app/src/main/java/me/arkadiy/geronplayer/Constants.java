@@ -21,6 +21,5 @@ public class Constants {
 
     public interface NOTIFICATION_ID {
         public static int FOREGROUND_SERVICE = 101;
-        asdasd
     }
 }
