@@ -45,7 +45,13 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
         adapter.setListener(new MyCategoryAdapter.ItemListener() {
             @Override
             public void onClick(int position) {
-                Log.e("PlaylistFragment", "onClick");
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container,
+                                SongListFragment.newInstance(param, SongListFragment.PLAYLIST,
+                                        data.get(position).getID()))
+                        .addToBackStack(null)
+                        .commit();
             }
         });
     }

@@ -1,7 +1,6 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import java.util.List;
@@ -10,17 +9,25 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.MySongAdapter;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
+import me.arkadiy.geronplayer.loader.AllSongLoader;
 import me.arkadiy.geronplayer.loader.SongLoader;
 import me.arkadiy.geronplayer.plain.Song;
 
 public class SongListFragment extends AbstractListFragment<Song> {
-
+    public final static int ALL = 0;
+    public final static int PLAYLIST = 1;
+    public final static int ALBUM = 2;
+    public final static int FOLDER = 3;
+    private int mode;
     private String param;
+    private long id;
 
-    public static SongListFragment newInstance(String param1) {
+    public static SongListFragment newInstance(String param, int mode, long id) {
         SongListFragment fragment = new SongListFragment();
         Bundle args = new Bundle();
-        args.putString("asd", param1);
+        args.putString("asd", param);
+        args.putInt("mode", mode);
+        args.putLong("id", id);
         fragment.setArguments(args);
         return fragment;
     }
@@ -28,12 +35,16 @@ public class SongListFragment extends AbstractListFragment<Song> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        param = getArguments().getString("asd");
+        if (getArguments() != null) {
+            param = getArguments().getString("asd");
+            mode = getArguments().getInt("mode");
+            id = getArguments().getLong("id");
+        }
     }
 
     @Override
     public AbstractLoader<Song> getNewLoader() {
-        return new SongLoader(getActivity(), param);
+        return SongLoader.getLoader(getActivity(), param, mode, id);
     }
 
 

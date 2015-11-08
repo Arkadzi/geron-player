@@ -31,6 +31,7 @@ public abstract class AbstractListFragment<T> extends Fragment implements Loader
     protected RecyclerView mRecyclerView;
     protected AbstractLoader<T> loader;
     protected RecyclerViewFastScroller fastScroller;
+    protected List<T> data;
 
     @Override
     public void onPause() {
@@ -87,7 +88,8 @@ public abstract class AbstractListFragment<T> extends Fragment implements Loader
         mRecyclerView.setLayoutManager(manager);
         fastScroller.setRecyclerView(mRecyclerView);
         fastScroller.setViewsToUse(R.layout.recycler_view_fast_scroller__fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
-        MyCategoryAdapter adapter = getNewAdapter(new ArrayList<T>());
+        data = new ArrayList<T>();
+        MyCategoryAdapter adapter = getNewAdapter(data);
         mRecyclerView.setAdapter(adapter);
         setListener(adapter);
         return view;
@@ -116,13 +118,16 @@ public abstract class AbstractListFragment<T> extends Fragment implements Loader
 
     @Override
     public void onLoaderReset(Loader<List<T>> loader) {
-        if (mRecyclerView != null && mRecyclerView.getAdapter() != null)
-            ((Resetable) mRecyclerView.getAdapter()).setData(new ArrayList<T>());
+        if (mRecyclerView != null && mRecyclerView.getAdapter() != null) {
+            data = new ArrayList<T>();
+            ((Resetable) mRecyclerView.getAdapter()).setData(data);
+        }
     }
 
 
     @Override
     public void onLoadFinished(Loader<List<T>> loader, List<T> data) {
+        this.data = data;
         if (mRecyclerView != null)
             if (mRecyclerView.getAdapter() == null) {
                 MyCategoryAdapter adapter = getNewAdapter(data);
