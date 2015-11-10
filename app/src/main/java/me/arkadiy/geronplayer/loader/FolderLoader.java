@@ -58,39 +58,25 @@ public class FolderLoader extends AbstractLoader<Folder> {
             int filenameColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             //add songList to list
             do {
-                long thisId = musicCursor.getLong(idColumn);
-                long thisAlbumID = musicCursor.getLong(albumIdColumn);
-                long thisArtistID = musicCursor.getLong(artistIdColumn);
-                String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
                 String thisPath = musicCursor.getString(pathColumn);
                 String thisFilename = musicCursor.getString(filenameColumn);
                 thisPath = thisPath.substring(0, thisPath.lastIndexOf(thisFilename) - 1);
 
-                if (thisArtist.equals("<unknown>")) {
-                    thisArtist = unknownArtist;
-                }
-                String thisAlbum = musicCursor.getString(albumColumn);
-                int thisTrack = musicCursor.getInt(songNumberColumn);
-//                int key = musicCursor.getInt(playlist);
                 String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
                 if (!data.startsWith("application")) {
-                    Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, getUri());
                     Folder currentFolder = null;
-
                     for (Folder folder : folders) {
                         if (folder.getPath().equals(thisPath)) {
                             currentFolder = folder;
                             break;
                         }
                     }
-
                     if (currentFolder == null) {
                         String thisFolderName = thisPath.substring(thisPath.lastIndexOf("/") + 1);
                         currentFolder = new Folder(thisFolderName, thisPath);
                         folders.add(currentFolder);
                     }
-                    currentFolder.getSongs().add(newSong);
                 }
             }
             while (musicCursor.moveToNext());

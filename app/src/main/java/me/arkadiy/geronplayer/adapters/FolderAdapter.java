@@ -1,5 +1,7 @@
 package me.arkadiy.geronplayer.adapters;
 
+import android.widget.ImageView;
+
 import java.util.List;
 
 import me.arkadiy.geronplayer.plain.Folder;
@@ -9,8 +11,13 @@ import me.arkadiy.geronplayer.plain.Folder;
  */
 public class FolderAdapter extends MyCategoryAdapter<Folder> {
 
-    public FolderAdapter(List<Folder> categories, int viewId, int mainId, int secondaryId) {
-        super(categories, viewId, mainId, secondaryId);
+    public FolderAdapter(List<Folder> categories, int viewId, int mainId, int secondaryId, int imageId) {
+        super(categories, viewId, mainId, secondaryId, imageId);
+    }
+
+    @Override
+    protected void setImage(Folder element, ImageView image) {
+
     }
 
     @Override

@@ -9,7 +9,6 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.MySongAdapter;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
-import me.arkadiy.geronplayer.loader.AllSongLoader;
 import me.arkadiy.geronplayer.loader.SongLoader;
 import me.arkadiy.geronplayer.plain.Song;
 
@@ -22,12 +21,13 @@ public class SongListFragment extends AbstractListFragment<Song> {
     private String param;
     private long id;
 
-    public static SongListFragment newInstance(String param, int mode, long id) {
+    public static SongListFragment newInstance(String param, int mode, long id, boolean showScroller) {
         SongListFragment fragment = new SongListFragment();
         Bundle args = new Bundle();
         args.putString("asd", param);
         args.putInt("mode", mode);
         args.putLong("id", id);
+        args.putBoolean("scroller", showScroller);
         fragment.setArguments(args);
         return fragment;
     }
@@ -39,12 +39,18 @@ public class SongListFragment extends AbstractListFragment<Song> {
             param = getArguments().getString("asd");
             mode = getArguments().getInt("mode");
             id = getArguments().getLong("id");
+            showScroller = getArguments().getBoolean("scroller");
         }
     }
 
     @Override
     public AbstractLoader<Song> getNewLoader() {
         return SongLoader.getLoader(getActivity(), param, mode, id);
+    }
+
+    @Override
+    protected int getColumnCount() {
+        return 1;
     }
 
 
@@ -59,7 +65,7 @@ public class SongListFragment extends AbstractListFragment<Song> {
     }
 
     @Override
-    protected MyCategoryAdapter<Song> getNewAdapter(List<Song> data) {
+    protected MyCategoryAdapter getNewAdapter(List<Song> data) {
         return new MySongAdapter(data,
                 R.layout.song_item,
                 R.id.main,

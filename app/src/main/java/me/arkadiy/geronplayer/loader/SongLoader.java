@@ -16,6 +16,8 @@ public class SongLoader {
                 return new AllSongLoader(c, param);
             case SongListFragment.PLAYLIST:
                 return new PlaylistSongLoader(c, param, id);
+            case SongListFragment.FOLDER:
+                return new FolderSongLoader(c, param, param);
         }
         return null;
     }

@@ -82,9 +82,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initLayoutViews() {
-//        toolbar = (Toolbar) findViewById(R.id.tool_bar);
-//        setSupportActionBar(toolbar);
-//        adapter = new ViewAdapter(getSupportFragmentManager());
         panel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 //        viewPager = (ViewPager) findViewById(R.id.pager);
 //        viewPager.setOffscreenPageLimit(1);

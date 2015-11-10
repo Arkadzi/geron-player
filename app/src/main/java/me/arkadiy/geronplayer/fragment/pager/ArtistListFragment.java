@@ -1,14 +1,12 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import java.util.List;
 
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
-import me.arkadiy.geronplayer.adapters.MyPrefixSecondaryTextAdapter;
+import me.arkadiy.geronplayer.adapters.MyPrefixCategoryAdapter;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.ArtistLoader;
 import me.arkadiy.geronplayer.plain.Category;
@@ -41,21 +39,34 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
+    protected int getColumnCount() {
+        return 1;
+    }
+
+    @Override
     protected void setListener(MyCategoryAdapter adapter) {
         adapter.setListener(new MyCategoryAdapter.ItemListener() {
             @Override
             public void onClick(int position) {
-                Log.e("ArtistListFragment", "onClick");
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container,
+                                ToolbarFragment.newInstance(ToolbarFragment.ARTIST,
+                                        data.get(position).getID(), null))
+                        .addToBackStack(null)
+                        .commit();
             }
         });
     }
 
     @Override
-    protected MyCategoryAdapter<Category> getNewAdapter(List<Category> data) {
-        return new MyPrefixSecondaryTextAdapter(data,
+    protected MyCategoryAdapter getNewAdapter(List<Category> data) {
+        return new MyPrefixCategoryAdapter(null,
+                data,
                 R.layout.artist_item,
                 R.id.main,
                 R.id.secondary,
+                R.id.icon,
                 getResources().getString(R.string.album_count));
     }
 }

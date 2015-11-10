@@ -48,7 +48,7 @@ public class GenreLoader extends AbstractLoader<Category> {
                 if (thisName.equals("<unknown>")) {
                     thisName = unknown;
                 }
-                int numberOfAlbums = numberOfAlbums(thisId, thisName);
+                int numberOfAlbums = numberOfAlbums(thisId);
                 if (numberOfAlbums > 0)
                     categories.add(new Category(thisId, thisName, numberOfAlbums));
 
@@ -63,14 +63,19 @@ public class GenreLoader extends AbstractLoader<Category> {
         return categories;
     }
 
-    private int numberOfAlbums(long genreId, String genreName) {
+    private int numberOfAlbums(long genreId) {
+        int number = 0;
         Cursor cursor = musicResolver.query(
                 MediaStore.Audio.Genres.Members.getContentUri("external", Long.valueOf(genreId)),
-                new String[]{"distinct " + MediaStore.Audio.Genres.Members.ALBUM_ID,
-                        MediaStore.Audio.Genres.Members.ALBUM}, null, null, null);
+                new String[]{"distinct " + MediaStore.Audio.Genres.Members.ALBUM_ID},
+                null,
+                null,
+                null);
         if (cursor != null && cursor.moveToFirst()) {
-            return cursor.getCount();
+
+            number = cursor.getCount();
+            cursor.close();
         }
-        return 0;
+        return number;
     }
 }

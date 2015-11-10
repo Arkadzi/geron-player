@@ -1,5 +1,7 @@
 package me.arkadiy.geronplayer.adapters;
 
+import android.widget.ImageView;
+
 import java.util.List;
 
 import me.arkadiy.geronplayer.plain.Song;
@@ -9,7 +11,12 @@ import me.arkadiy.geronplayer.plain.Song;
  */
 public class MySongAdapter extends MyCategoryAdapter<Song> {
     public MySongAdapter(List<Song> categories, int viewId, int mainId, int secondaryId) {
-        super(categories, viewId, mainId, secondaryId);
+        super(categories, viewId, mainId, secondaryId, 0);
+    }
+
+    @Override
+    protected void setImage(Song element, ImageView image) {
+
     }
 
     @Override

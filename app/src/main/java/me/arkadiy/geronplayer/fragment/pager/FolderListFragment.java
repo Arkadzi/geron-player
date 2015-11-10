@@ -1,8 +1,6 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import java.util.List;
 
@@ -39,17 +37,33 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
     }
 
     @Override
+    protected int getColumnCount() {
+        return 1;
+    }
+
+    @Override
     protected void setListener(MyCategoryAdapter adapter) {
         adapter.setListener(new MyCategoryAdapter.ItemListener() {
             @Override
             public void onClick(int position) {
-                Log.e("FolderListFragment", "onClick");
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container,
+                                ToolbarFragment.newInstance(ToolbarFragment.FOLDER,
+                                        0,
+                                        data.get(position).getPath()))
+                        .addToBackStack(null)
+                        .commit();
             }
         });
     }
 
     @Override
-    protected MyCategoryAdapter<Folder> getNewAdapter(List<Folder> data) {
-        return new FolderAdapter(data, R.layout.folder_item, R.id.main, R.id.secondary);
+    protected MyCategoryAdapter getNewAdapter(List<Folder> data) {
+        return new FolderAdapter(data,
+                R.layout.folder_item,
+                R.id.main,
+                R.id.secondary,
+                R.id.icon);
     }
 }

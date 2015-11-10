@@ -9,12 +9,12 @@ import java.util.List;
 public class Folder {
     private String name;
     private String path;
-    private List<Song> songs;
+//    private List<Song> songs;
 
     public Folder(String name, String path) {
         this.name = name;
         this.path = path;
-        songs = new ArrayList<>();
+//        songs = new ArrayList<>();
     }
 
     public String getName() {
@@ -25,7 +25,7 @@ public class Folder {
         return path;
     }
 
-    public List<Song> getSongs() {
-        return songs;
-    }
+//    public List<Song> getSongs() {
+//        return songs;
+//    }
 }

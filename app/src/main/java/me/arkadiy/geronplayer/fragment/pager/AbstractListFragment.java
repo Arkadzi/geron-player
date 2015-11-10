@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,15 +19,13 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.Resetable;
 import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
-import me.arkadiy.geronplayer.loader.ArtistLoader;
-import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.views.RecyclerViewFastScroller;
 
 /**
  * Created by Arkadiy on 03.11.2015.
  */
 public abstract class AbstractListFragment<T> extends Fragment implements LoaderManager.LoaderCallbacks<List<T>> {
-
+    protected boolean showScroller = true;
     protected RecyclerView mRecyclerView;
     protected AbstractLoader<T> loader;
     protected RecyclerViewFastScroller fastScroller;
@@ -74,6 +72,8 @@ public abstract class AbstractListFragment<T> extends Fragment implements Loader
 
     }
 
+    protected abstract int getColumnCount();
+
     protected abstract void setListener(MyCategoryAdapter adapter);
 
     protected abstract MyCategoryAdapter getNewAdapter(List<T> data);
@@ -81,10 +81,12 @@ public abstract class AbstractListFragment<T> extends Fragment implements Loader
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        LinearLayoutManager manager = new RecyclerLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        GridLayoutManager manager = new RecyclerLayoutManager(getActivity(), getColumnCount(), GridLayoutManager.VERTICAL, false);
         View view = inflater.inflate(R.layout.fragment_item_list, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
         fastScroller = (RecyclerViewFastScroller) view.findViewById(R.id.fast_scroller);
+        if (!showScroller)
+        fastScroller.setVisibility(View.GONE);
         mRecyclerView.setLayoutManager(manager);
         fastScroller.setRecyclerView(mRecyclerView);
         fastScroller.setViewsToUse(R.layout.recycler_view_fast_scroller__fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
@@ -95,10 +97,13 @@ public abstract class AbstractListFragment<T> extends Fragment implements Loader
         return view;
     }
 
-    public class RecyclerLayoutManager extends LinearLayoutManager {
-        public RecyclerLayoutManager(Context context, int orientation, boolean reverseLayout) {
-            super(context, orientation, reverseLayout);
+    public class RecyclerLayoutManager extends GridLayoutManager {
+        public RecyclerLayoutManager(Context context, int spanCount, int orientation, boolean reverseLayout) {
+            super(context, spanCount, orientation, reverseLayout);
         }
+//        public RecyclerLayoutManager(Context context, int orientation, boolean reverseLayout) {
+//            super(context, orientation, reverseLayout);
+//        }
 
         @Override
         public void onLayoutChildren(final RecyclerView.Recycler recycler, final RecyclerView.State state) {
