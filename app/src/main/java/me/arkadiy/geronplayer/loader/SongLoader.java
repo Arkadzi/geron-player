@@ -18,6 +18,8 @@ public class SongLoader {
                 return new PlaylistSongLoader(c, param, id);
             case SongListFragment.FOLDER:
                 return new FolderSongLoader(c, param, param);
+            case SongListFragment.ALBUM:
+                return new AlbumSongLoader(c, param, id);
         }
         return null;
     }

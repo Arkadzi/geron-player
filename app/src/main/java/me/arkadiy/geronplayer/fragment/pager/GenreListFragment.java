@@ -51,7 +51,9 @@ public class GenreListFragment extends AbstractListFragment<Category> {
                         .beginTransaction()
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.GENRE,
-                                        data.get(position).getID(), null))
+                                        getItem(position).getID(),
+                                        getItem(position).getName(),
+                                        null))
                         .addToBackStack(null)
                         .commit();
             }
@@ -62,10 +64,11 @@ public class GenreListFragment extends AbstractListFragment<Category> {
     protected MyCategoryAdapter getNewAdapter(List<Category> data) {
         return new MyPrefixCategoryAdapter(null,
                 data,
-                R.layout.genre_item,
+                R.layout.list_item,
                 R.id.main,
                 R.id.secondary,
                 R.id.icon,
-                getResources().getString(R.string.album_count));
+                getResources().getString(R.string.album_count),
+                R.drawable.ic_music_note_white_36dp);
     }
 }

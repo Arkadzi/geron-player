@@ -5,15 +5,15 @@ import android.net.Uri;
 /**
  * Created by Arkadiy on 13.07.2015.
  */
-public class Song {
+public class Song implements Nameable {
     private long albumID;
     private long artistID;
     private int track;
     private long id;
     private String title;
     private String album;
-    private String artist;
     private Uri uri;
+    private String artist;
 
     public Song(int track, long id, String title, String album, long albumID, String artist, long artistID, Uri uri) {
         this.track = track;
@@ -24,6 +24,17 @@ public class Song {
         this.albumID = albumID;
         this.artist = artist;
         this.artistID = artistID;
+    }
+    public long getAlbumID() {
+        return albumID;
+    }
+
+    public long getArtistID() {
+        return artistID;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public long getID() {
@@ -58,5 +69,10 @@ public class Song {
 
     public String getArtist() {
         return artist;
+    }
+
+    @Override
+    public String getName() {
+        return title;
     }
 }

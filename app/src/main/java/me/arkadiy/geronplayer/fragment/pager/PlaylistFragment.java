@@ -52,7 +52,9 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
                         .beginTransaction()
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.PLAYLIST,
-                                        data.get(position).getID(), null))
+                                        getItem(position).getID(),
+                                        getItem(position).getName(),
+                                        null))
                         .addToBackStack(null)
                         .commit();
             }
@@ -63,10 +65,11 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
     protected MyCategoryAdapter getNewAdapter(List<Category> data) {
         return new MyPrefixCategoryAdapter(null,
                 data,
-                R.layout.playlist_item,
+                R.layout.list_item,
                 R.id.main,
                 R.id.secondary,
                 R.id.icon,
-                getResources().getString(R.string.song_count));
+                getResources().getString(R.string.song_count),
+                R.drawable.ic_grade_white_36dp);
     }
 }

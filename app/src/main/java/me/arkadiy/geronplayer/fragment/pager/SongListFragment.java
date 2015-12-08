@@ -1,10 +1,13 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import java.util.List;
 
+import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.MySongAdapter;
@@ -18,13 +21,15 @@ public class SongListFragment extends AbstractListFragment<Song> {
     public final static int ALBUM = 2;
     public final static int FOLDER = 3;
     private int mode;
-    private String param;
+//    private String toolbarText;
     private long id;
+    private String additional;
 
-    public static SongListFragment newInstance(String param, int mode, long id, boolean showScroller) {
+    public static SongListFragment newInstance(int mode, long id, boolean showScroller, String additional) {
         SongListFragment fragment = new SongListFragment();
         Bundle args = new Bundle();
-        args.putString("asd", param);
+//        args.putString("toolbar", toolbarText);
+        args.putString("add", additional);
         args.putInt("mode", mode);
         args.putLong("id", id);
         args.putBoolean("scroller", showScroller);
@@ -36,16 +41,18 @@ public class SongListFragment extends AbstractListFragment<Song> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            param = getArguments().getString("asd");
+//            toolbarText = getArguments().getString("toolbar");
+            additional = getArguments().getString("add");
             mode = getArguments().getInt("mode");
             id = getArguments().getLong("id");
             showScroller = getArguments().getBoolean("scroller");
+
         }
     }
 
     @Override
     public AbstractLoader<Song> getNewLoader() {
-        return SongLoader.getLoader(getActivity(), param, mode, id);
+        return SongLoader.getLoader(getActivity(), additional, mode, id);
     }
 
     @Override
@@ -60,6 +67,13 @@ public class SongListFragment extends AbstractListFragment<Song> {
             @Override
             public void onClick(int position) {
                 Log.e("SongListFragment", "onClick");
+                int size = data.size();
+                for (int i = 0; i < size; i++) {
+                    if (data.get(i).getID() == getItem(position).getID()) {
+                        ((MainActivity) getActivity()).playQueue(data, i);
+                        break;
+                    }
+                }
             }
         });
     }

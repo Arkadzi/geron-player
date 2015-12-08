@@ -1,6 +1,7 @@
 package me.arkadiy.geronplayer.adapters;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.arkadiy.geronplayer.Resetable;
+import me.arkadiy.geronplayer.plain.Nameable;
 import me.arkadiy.geronplayer.views.RecyclerViewFastScroller;
 
 /**
  * Created by Arkadiy on 10.11.2015.
  */
-public abstract class MyCategoryAdapter<T>
+public abstract class MyCategoryAdapter<T extends Nameable>
         extends RecyclerView.Adapter<MyCategoryAdapter.ViewHolder>
         implements RecyclerViewFastScroller.BubbleTextGetter, Resetable<T> {
 
@@ -24,13 +26,24 @@ public abstract class MyCategoryAdapter<T>
     private int viewId;
     private int mainId;
     private int secondaryId;
-
     private List<T> categories;
-    private ItemListener listener;
+
+    public T getItem(int position) {
+        if (position >= 0 && position < categories.size()) {
+            return categories.get(position);
+        }
+        return null;
+    }
+//    public List<T> getCategories() {
+//        return categories;
+//    private List<T> categories;
+private ItemListener listener;
+
+//    }
 
     @Override
     public String getTextToShowInBubble(int pos) {
-        return Character.toString(getMainText(categories.get(pos)).charAt(0));
+        return Character.toString(Character.toUpperCase(getMainText(categories.get(pos)).charAt(0)));
     }
 
     public interface ItemListener {
@@ -62,7 +75,7 @@ public abstract class MyCategoryAdapter<T>
         this.viewId = viewId;
         this.mainId = mainId;
         this.secondaryId = secondaryId;
-        this.categories = categories;
+        this.categories = new ArrayList<>(categories);
         this.imageId = imageId;
     }
 
@@ -101,12 +114,64 @@ public abstract class MyCategoryAdapter<T>
         if (categories != null) {
             categories.clear();
         } else {
-            categories = new ArrayList<T>();
+            categories = new ArrayList<>();
         }
         if (data != null) {
             categories.addAll(data);
         }
         notifyDataSetChanged();
+    }
+
+    public T removeItem(int position) {
+        final T model = categories.remove(position);
+        notifyItemRemoved(position);
+        return model;
+    }
+
+    public void addItem(int position, T model) {
+        categories.add(position, model);
+        notifyItemInserted(position);
+    }
+
+    public void moveItem(int fromPosition, int toPosition) {
+        final T model = categories.remove(fromPosition);
+        categories.add(toPosition, model);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    public void animateTo(List<T> models) {
+        applyAndAnimateRemovals(models);
+        applyAndAnimateAdditions(models);
+        applyAndAnimateMovedItems(models);
+        notifyDataSetChanged();
+    }
+
+    private void applyAndAnimateRemovals(List<T> newModels) {
+        for (int i = categories.size() - 1; i >= 0; i--) {
+            final T model = categories.get(i);
+            if (!newModels.contains(model)) {
+                removeItem(i);
+            }
+        }
+    }
+
+    private void applyAndAnimateAdditions(List<T> newModels) {
+        for (int i = 0, count = newModels.size(); i < count; i++) {
+            final T model = newModels.get(i);
+            if (!categories.contains(model)) {
+                addItem(i, model);
+            }
+        }
+    }
+
+    private void applyAndAnimateMovedItems(List<T> newModels) {
+        for (int toPosition = newModels.size() - 1; toPosition >= 0; toPosition--) {
+            final T model = newModels.get(toPosition);
+            final int fromPosition = categories.indexOf(model);
+            if (fromPosition >= 0 && fromPosition != toPosition) {
+                moveItem(fromPosition, toPosition);
+            }
+        }
     }
 
     protected abstract String getMainText(T element);

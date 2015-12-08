@@ -11,6 +11,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,8 +29,24 @@ public class RecyclerViewFastScroller extends LinearLayout {
     private int height;
     private boolean isInitialized = false;
     private ObjectAnimator currentAnimator = null;
-    
+    private final Runnable hider = new Runnable() {
+        @Override
+        public void run() {
+            if (currentAnimator != null)
+                currentAnimator.start();
+        }
+    };
     private final RecyclerView.OnScrollListener onScrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            if (newState == RecyclerView.SCROLL_STATE_DRAGGING && handle.getVisibility() == INVISIBLE) {
+                showHandle();
+            }
+            else if (newState == RecyclerView.SCROLL_STATE_IDLE && handle.getVisibility() == VISIBLE) {
+                hideHandle();
+            }
+        }
+
         @Override
         public void onScrolled(final RecyclerView recyclerView, final int dx, final int dy) {
             if (bubble == null || handle.isSelected())
@@ -75,6 +92,8 @@ public class RecyclerViewFastScroller extends LinearLayout {
         if (bubble != null)
             bubble.setVisibility(INVISIBLE);
         handle = findViewById(handleResId);
+        if (handle != null)
+            handle.setVisibility(INVISIBLE);
     }
 
     @Override
@@ -85,26 +104,30 @@ public class RecyclerViewFastScroller extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent event) {
-        final int action = event.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                if (event.getX() < handle.getX() - ViewCompat.getPaddingStart(handle))
-                    return false;
-                if (currentAnimator != null)
-                    currentAnimator.cancel();
-                if (bubble != null && bubble.getVisibility() == INVISIBLE)
-                    showBubble();
-                handle.setSelected(true);
-            case MotionEvent.ACTION_MOVE:
-                final float y = event.getY();
-                setBubbleAndHandlePosition(y);
-                setRecyclerViewPosition(y);
-                return true;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                handle.setSelected(false);
-                hideBubble();
-                return true;
+        getHandler().removeCallbacks(hider);
+        if (handle != null && handle.getVisibility() == VISIBLE) {
+            final int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    if (event.getX() < handle.getX() - ViewCompat.getPaddingStart(handle))
+                        return false;
+                    if (currentAnimator != null)
+                        currentAnimator.cancel();
+                    if (bubble != null && bubble.getVisibility() == INVISIBLE)
+                        showBubble();
+                    handle.setSelected(true);
+                case MotionEvent.ACTION_MOVE:
+                    final float y = event.getY();
+                    setBubbleAndHandlePosition(y);
+                    setRecyclerViewPosition(y);
+                    return true;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    handle.setSelected(false);
+                    hideBubble();
+                    hideHandle();
+                    return true;
+            }
         }
         return super.onTouchEvent(event);
     }
@@ -164,6 +187,47 @@ public class RecyclerViewFastScroller extends LinearLayout {
             int bubbleHeight = bubble.getHeight();
             bubble.setY(getValueInRange(0, height - bubbleHeight - handleHeight / 2, (int) (y - bubbleHeight)));
         }
+    }
+
+    private void showHandle() {
+        getHandler().removeCallbacks(hider);
+        if (handle == null) {
+            return;
+        }
+        if (handle.getVisibility() == INVISIBLE) {
+            handle.setVisibility(VISIBLE);
+            if (currentAnimator != null)
+                currentAnimator.cancel();
+            currentAnimator = ObjectAnimator.ofFloat(handle, "alpha", 0f, 1f).setDuration(BUBBLE_ANIMATION_DURATION);
+            currentAnimator.start();
+        }
+    }
+
+    private void hideHandle() {
+        if (handle == null) {
+            return;
+        }
+        if (handle.getVisibility() == VISIBLE)
+            if (currentAnimator != null) {
+                currentAnimator.cancel();
+            }
+        currentAnimator = ObjectAnimator.ofFloat(handle, "alpha", 1f, 0f).setDuration(BUBBLE_ANIMATION_DURATION);
+        currentAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                handle.setVisibility(INVISIBLE);
+                currentAnimator = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
+                handle.setVisibility(INVISIBLE);
+                currentAnimator = null;
+            }
+        });
+        getHandler().postDelayed(hider, 3000);
     }
 
     private void showBubble() {

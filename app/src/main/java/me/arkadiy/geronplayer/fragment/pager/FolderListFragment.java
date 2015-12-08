@@ -51,7 +51,8 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.FOLDER,
                                         0,
-                                        data.get(position).getPath()))
+                                        getItem(position).getName(),
+                                        getItem(position).getPath()))
                         .addToBackStack(null)
                         .commit();
             }
@@ -61,9 +62,10 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
     @Override
     protected MyCategoryAdapter getNewAdapter(List<Folder> data) {
         return new FolderAdapter(data,
-                R.layout.folder_item,
+                R.layout.list_item,
                 R.id.main,
                 R.id.secondary,
-                R.id.icon);
+                R.id.icon,
+                R.drawable.ic_folder_white_36dp);
     }
 }

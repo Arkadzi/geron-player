@@ -7,5 +7,7 @@
     <string name="unknown_artist" >Unknown name</string>
     <string name="album_count">albums:</string>
     <string name="song_count">songs:</string>
+    <string name="action_search">search</string>
+    <string name="load_error">Unable to load song</string>
 
 </resources>

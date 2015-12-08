@@ -22,7 +22,7 @@ public class ViewAdapter extends FragmentPagerAdapter {
     public ViewAdapter(FragmentManager fm) {
         super(fm);
         fragments.add(ArtistListFragment.newInstance("1"));
-        fragments.add(SongListFragment.newInstance("2", SongListFragment.ALL, 0, true));
+        fragments.add(SongListFragment.newInstance(SongListFragment.ALL, 0, true, null));
         fragments.add(GenreListFragment.newInstance("3"));
         fragments.add(PlaylistFragment.newInstance("4"));
         fragments.add(FolderListFragment.newInstance("5"));

@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by Arkadiy on 06.11.2015.
  */
-public class Folder {
+public class Folder implements Nameable {
     private String name;
     private String path;
 //    private List<Song> songs;
@@ -17,6 +17,7 @@ public class Folder {
 //        songs = new ArrayList<>();
     }
 
+    @Override
     public String getName() {
         return name;
     }

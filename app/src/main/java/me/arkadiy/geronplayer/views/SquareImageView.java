@@ -16,29 +16,31 @@ public class SquareImageView extends ImageView {
 
     public SquareImageView(Context context) {
         super(context);
-
+        setDirection(context, null, 0);
     }
 
     public SquareImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setDirection(context, attrs);
+        setDirection(context, attrs, 0);
     }
 
     public SquareImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setDirection(context, attrs);
+        setDirection(context, attrs, defStyleAttr);
     }
 
-    private void setDirection(Context context, AttributeSet attrs) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.SquareImageView,
-                0, 0);
+    private void setDirection(Context context, AttributeSet attrs, int defStyleAttr) {
+        if (attrs != null) {
+            TypedArray a = context.obtainStyledAttributes(
+                    attrs,
+                    R.styleable.SquareImageView,
+                    defStyleAttr, 0);
 
-        try {
-            maxWidth = (a.getInteger(R.styleable.SquareImageView_direction, 0) == 0);
-        } finally {
-            a.recycle();
+            try {
+                maxWidth = (a.getInteger(R.styleable.SquareImageView_direction, 0) == 0);
+            } finally {
+                a.recycle();
+            }
         }
     }
 
@@ -51,9 +53,5 @@ public class SquareImageView extends ImageView {
         else {
             super.onMeasure(heightMeasureSpec, heightMeasureSpec);
         }
-    }
-
-    public void isMaxHeight(boolean maxHeight) {
-        this.maxWidth = maxHeight;
     }
 }

@@ -53,6 +53,7 @@ public class ArtistAlbumLoader extends AbstractLoader<Category> {
                 projection, null, null, null);
         if (musicCursor != null && musicCursor.moveToFirst()) {
             do {
+                Log.e("album", musicCursor.getLong(0) + " " + musicCursor.getString(1));
                 albums.add(new Category(musicCursor.getLong(0),
                         musicCursor.getString(1),
                         musicCursor.getInt(2)));

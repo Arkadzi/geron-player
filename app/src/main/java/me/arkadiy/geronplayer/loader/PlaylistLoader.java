@@ -45,7 +45,7 @@ public class PlaylistLoader extends AbstractLoader<Category> {
             Collections.sort(playlists, new Comparator<Category>() {
                 @Override
                 public int compare(Category a, Category b) {
-                    return a.getName().compareTo(b.getName());
+                    return a.getName().compareToIgnoreCase(b.getName());
                 }
             });
         }

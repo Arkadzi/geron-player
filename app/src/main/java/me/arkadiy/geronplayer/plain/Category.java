@@ -3,7 +3,7 @@ package me.arkadiy.geronplayer.plain;
 /**
  * Created by Arkadiy on 03.11.2015.
  */
-public class Category {
+public class Category implements Nameable {
     private long id;
     private String name;
     private int count;
@@ -19,6 +19,11 @@ public class Category {
         return o instanceof Category && getID() == ((Category) o).getID();
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public long getID() {
         return id;
     }
@@ -28,7 +33,7 @@ public class Category {
         return (int) (id ^ (id >>> 32));
     }
 
-
+    @Override
     public String getName() {
         return name;
     }

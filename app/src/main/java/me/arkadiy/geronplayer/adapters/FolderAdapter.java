@@ -11,13 +11,17 @@ import me.arkadiy.geronplayer.plain.Folder;
  */
 public class FolderAdapter extends MyCategoryAdapter<Folder> {
 
-    public FolderAdapter(List<Folder> categories, int viewId, int mainId, int secondaryId, int imageId) {
+    private final int resourceId;
+
+    public FolderAdapter(List<Folder> categories, int viewId, int mainId, int secondaryId, int imageId, int resourceId) {
         super(categories, viewId, mainId, secondaryId, imageId);
+        this.resourceId = resourceId;
     }
+
 
     @Override
     protected void setImage(Folder element, ImageView image) {
-
+        image.setImageResource(resourceId);
     }
 
     @Override

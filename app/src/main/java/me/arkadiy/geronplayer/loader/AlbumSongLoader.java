@@ -14,33 +14,31 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 
 /**
- * Created by Arkadiy on 08.11.2015.
+ * Created by Arkadiy on 11.11.2015.
  */
-public class FolderSongLoader extends AbstractLoader<Song> {
-    private final String path;
+public class AlbumSongLoader extends AbstractLoader<Song> {
+
+    private final long id;
     private String unknownArtist;
 
-    public FolderSongLoader(Context context, String param, String path) {
+    public AlbumSongLoader(Context context, String param, long id) {
         super(context, param);
-        this.path = path;
+        this.id = id;
         try {
             this.unknownArtist = context.getResources().getString(R.string.unknown_artist);
-        } catch (Exception e) {
-        }
+        } catch (Exception e) { }
     }
 
     @Override
     protected Uri getUri() {
-        return MediaStore.Audio.Media.getContentUriForPath(path + "/");
+        return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     }
 
     @Override
     protected List<Song> getList() {
-        String selection = String.format("%s!=0",// AND %s LIKE \"%s\"%%",
-                MediaStore.Audio.Media.IS_MUSIC);
-//                MediaStore.Audio.Media.DATA,
-//                path);
-        Cursor musicCursor = musicResolver.query(getUri(), null, selection, null, null);
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!=0 AND " + MediaStore.Audio.Media.ALBUM_ID + " = ?";
+        String[] args = new String[] {Long.toString(id)};
+        Cursor musicCursor = musicResolver.query(getUri(), null, selection, args, null);
         ArrayList<Song> songs = new ArrayList<>();
         if (musicCursor != null && musicCursor.moveToFirst()) {
             //get columns
@@ -60,32 +58,31 @@ public class FolderSongLoader extends AbstractLoader<Song> {
             int songNumberColumn = musicCursor.getColumnIndex
                     (MediaStore.Audio.Media.TRACK);
             int pathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-
+            int filenameColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             //add songList to list
             do {
-                String thisPath = musicCursor.getString(pathColumn);
-                String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
-                if (thisPath.startsWith(path) && !data.startsWith("application")) {
-                    long thisId = musicCursor.getLong(idColumn);
-                    long thisAlbumID = musicCursor.getLong(albumIdColumn);
-                    long thisArtistID = musicCursor.getLong(artistIdColumn);
-                    String thisTitle = musicCursor.getString(titleColumn);
-                    String thisArtist = musicCursor.getString(artistColumn);
-
-                    if (thisArtist.equals("<unknown>")) {
-                        thisArtist = unknownArtist;
-                    }
-                    String thisAlbum = musicCursor.getString(albumColumn);
-                    int thisTrack = musicCursor.getInt(songNumberColumn);
+                long thisId = musicCursor.getLong(idColumn);
+                long thisAlbumID = musicCursor.getLong(albumIdColumn);
+                long thisArtistID = musicCursor.getLong(artistIdColumn);
+                String thisTitle = musicCursor.getString(titleColumn);
+                String thisArtist = musicCursor.getString(artistColumn);
+                if (thisArtist.equals("<unknown>")) {
+                    thisArtist = unknownArtist;
+                }
+                String thisAlbum = musicCursor.getString(albumColumn);
+                int thisTrack = musicCursor.getInt(songNumberColumn);
 //                int key = musicCursor.getInt(playlist);
+                String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
+                if (!data.startsWith("application")) {
                     Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, getUri());
                     songs.add(newSong);
                 }
-            } while (musicCursor.moveToNext());
+            }
+            while (musicCursor.moveToNext());
             musicCursor.close();
             Collections.sort(songs, new Comparator<Song>() {
                 public int compare(Song a, Song b) {
-                    return a.getTitle().compareToIgnoreCase(b.getTitle());
+                    return a.getTrack() - b.getTrack();
                 }
             });
         }

@@ -1,6 +1,7 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.List;
 
@@ -44,15 +45,18 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected void setListener(MyCategoryAdapter adapter) {
+    protected void setListener(final MyCategoryAdapter adapter) {
         adapter.setListener(new MyCategoryAdapter.ItemListener() {
             @Override
             public void onClick(int position) {
+//                Log.e("category", getItem(position).toString());
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.ARTIST,
-                                        data.get(position).getID(), null))
+                                        getItem(position).getID(),
+                                        getItem(position).getName(),
+                                        null))
                         .addToBackStack(null)
                         .commit();
             }
@@ -60,13 +64,14 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected MyCategoryAdapter getNewAdapter(List<Category> data) {
+    protected MyCategoryAdapter<Category> getNewAdapter(List<Category> data) {
         return new MyPrefixCategoryAdapter(null,
                 data,
-                R.layout.artist_item,
+                R.layout.list_item,
                 R.id.main,
                 R.id.secondary,
                 R.id.icon,
-                getResources().getString(R.string.album_count));
+                getResources().getString(R.string.album_count),
+                R.drawable.ic_action_artist);
     }
 }

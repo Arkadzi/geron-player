@@ -1,5 +1,6 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import java.util.List;
@@ -15,16 +16,16 @@ import me.arkadiy.geronplayer.plain.Category;
  * Created by Arkadiy on 10.11.2015.
  */
 public class AlbumListFragment extends AbstractListFragment<Category> {
-    public final static int ARTIST = 0;
-    public final static int GENRE = 1;
+    public final static int ARTIST = 10;
+    public final static int GENRE = 11;
     private int mode;
-    private String param;
+//    private String param;
     private long id;
 
-    public static AlbumListFragment newInstance(String param1, int mode, long id) {
+    public static AlbumListFragment newInstance(int mode, long id) {
         AlbumListFragment fragment = new AlbumListFragment();
         Bundle args = new Bundle();
-        args.putString("asd", param1);
+//        args.putString("asd", param1);
         args.putInt("mode", mode);
         args.putLong("id", id);
         fragment.setArguments(args);
@@ -35,7 +36,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            param = getArguments().getString("asd");
+//            param = getArguments().getString("asd");
             mode = getArguments().getInt("mode");
             id = getArguments().getLong("id");
             showScroller = false;
@@ -44,18 +45,34 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
 
     @Override
     public AbstractLoader<Category> getNewLoader() {
-        return AlbumLoader.getLoader(getActivity(), param, mode, id);
+        return AlbumLoader.getLoader(getActivity(), "", mode, id);
     }
 
 
     @Override
     protected int getColumnCount() {
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            return 2;
+        else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            return 4;
         return 2;
     }
 
     @Override
     protected void setListener(MyCategoryAdapter adapter) {
-
+        adapter.setListener(new MyCategoryAdapter.ItemListener() {
+            @Override
+            public void onClick(int position) {
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container,
+                                ToolbarFragment.newInstance(ToolbarFragment.ALBUM,
+                                        getItem(position).getID(),
+                                        getItem(position).getName(), null))
+                                        .addToBackStack(null)
+                                        .commit();
+            }
+        });
     }
 
     @Override
@@ -67,6 +84,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
                 R.id.main,
                 R.id.secondary,
                 R.id.item_image,
-                getResources().getString(R.string.song_count));
+                getResources().getString(R.string.song_count),
+                -1);
     }
 }

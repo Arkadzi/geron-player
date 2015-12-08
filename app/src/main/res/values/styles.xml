@@ -15,7 +15,9 @@
         <item name="android:windowTranslucentNavigation">false</item>
         <!--<item name="android:textColorPrimary">@color/textPrimary</item>-->
     </style>
-
+    <style name="TransparentText" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#00000000</item>
+    </style>
     <!--<style name = "fontstyle" parent="android:Widget.TextView">-->
     <!--<item name="fontFamily"></item>-->
     <!--</style>-->
