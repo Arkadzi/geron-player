@@ -26,6 +26,7 @@ public abstract class AbstractLoader<T>  extends AsyncTaskLoader<List<T>> {
 
     @Override
     public List<T> loadInBackground() {
+        Log.e("loadInBackground()", "yayaya");
         list = getList();
         return list;
     }
@@ -35,10 +36,13 @@ public abstract class AbstractLoader<T>  extends AsyncTaskLoader<List<T>> {
     @Override
     protected void onStartLoading() {
 
+        Log.e("onStartLoading", "list == null " + (list == null));
         if (list != null) {
             deliverResult(list);
         }
-        if (takeContentChanged() || list == null) {
+        boolean contentChanged = takeContentChanged();
+        Log.e("onStartLoading", "contentChanged " + contentChanged);
+        if (contentChanged || list == null) {
             forceLoad();
             Log.e("AbstractLoader", "forceLoad()");
         }
