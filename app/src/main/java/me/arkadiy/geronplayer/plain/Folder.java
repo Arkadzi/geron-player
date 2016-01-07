@@ -22,6 +22,16 @@ public class Folder implements Nameable {
         return name;
     }
 
+    @Override
+    public void setName(String name) {
+
+    }
+
+    @Override
+    public long getID() {
+        return 0;
+    }
+
     public String getPath() {
         return path;
     }

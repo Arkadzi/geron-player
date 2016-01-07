@@ -3,6 +3,7 @@ package me.arkadiy.geronplayer.loader;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
@@ -26,8 +27,8 @@ public abstract class AbstractLoader<T>  extends AsyncTaskLoader<List<T>> {
 
     @Override
     public List<T> loadInBackground() {
-        Log.e("loadInBackground()", "yayaya");
         list = getList();
+        Log.e("loadInBackground()", String.valueOf(list.size()));
         return list;
     }
 

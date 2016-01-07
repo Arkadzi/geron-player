@@ -1,0 +1,99 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollView">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="New Text"
+                    android:id="@+id/preset_name"
+                    android:textSize="20dp"
+                    android:gravity="center_vertical"
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:layout_weight="1" />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/equalizer_button"
+                    android:layout_marginLeft="16dp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/equalizer"
+                android:id="@+id/textView3"
+                android:textSize="20dp"
+                android:textColor="@color/primary_text_default_material_dark"
+                android:layout_gravity="center_vertical"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/layout"></LinearLayout>
+            <View android:layout_height="1dp"
+                android:layout_width="match_parent"
+                android:background="#ffa3a3a4" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/virtualizer"
+                android:id="@+id/textView"
+                android:textSize="20dp"
+                android:textColor="@color/primary_text_default_material_dark"
+                android:layout_marginTop="8dp" />
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/virtualize_seek_bar"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bass_boost"
+                android:id="@+id/textView2"
+                android:textSize="20dp"
+                android:textColor="@color/primary_text_default_material_dark" />
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/bass_seek_bar"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+
+
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

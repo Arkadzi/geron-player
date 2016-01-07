@@ -5,12 +5,17 @@ import android.os.Bundle;
 
 import java.util.List;
 
+import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
-import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
-import me.arkadiy.geronplayer.adapters.MyPrefixCategoryAdapter;
+import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
+import me.arkadiy.geronplayer.adapters.list_view.MyPrefixCategoryAdapter;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.AlbumLoader;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.DeleteUtils;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
+import me.arkadiy.geronplayer.statics.TagManager;
 
 /**
  * Created by Arkadiy on 10.11.2015.
@@ -19,7 +24,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     public final static int ARTIST = 10;
     public final static int GENRE = 11;
     private int mode;
-//    private String param;
+    //    private String param;
     private long id;
 
     public static AlbumListFragment newInstance(int mode, long id) {
@@ -51,7 +56,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
 
     @Override
     protected int getColumnCount() {
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             return 2;
         else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
             return 4;
@@ -60,7 +65,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
 
     @Override
     protected void setListener(MyCategoryAdapter adapter) {
-        adapter.setListener(new MyCategoryAdapter.ItemListener() {
+        adapter.setClickListener(new MyCategoryAdapter.ItemClickListener() {
             @Override
             public void onClick(int position) {
                 getActivity().getSupportFragmentManager()
@@ -69,15 +74,14 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
                                 ToolbarFragment.newInstance(ToolbarFragment.ALBUM,
                                         getItem(position).getID(),
                                         getItem(position).getName(), null))
-                                        .addToBackStack(null)
-                                        .commit();
+                        .addToBackStack(null)
+                        .commit();
             }
         });
     }
 
     @Override
-    protected MyCategoryAdapter getNewAdapter(List<Category> data) {
-//        return AlbumAdapter();
+    protected MyCategoryAdapter<Category> getNewAdapter(List<Category> data) {
         return new MyPrefixCategoryAdapter(getActivity(),
                 data,
                 R.layout.album_item,
@@ -86,5 +90,97 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
                 R.id.item_image,
                 getResources().getString(R.string.song_count),
                 -1);
+    }
+
+    @Override
+    protected void onRename(Category pojo) {
+        TagManager tagManager = new TagManager();
+        tagManager.renameAlbum(getActivity(), pojo);
+    }
+
+    @Override
+    protected List<Song> getSongs(int position) {
+        return MusicRetriever.getSongsByAlbum(getActivity(), data.get(position).getID());
+    }
+
+    @Override
+    protected String[] menuItems() {
+        return getResources().getStringArray(R.array.album_menu_items);
+    }
+
+    @Override
+    protected void onMenuItemClick(final int position, int which) {
+        switch (which) {
+            case 0: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        final List<Song> songs = getSongs(position);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((MainActivity) getActivity()).playQueue(songs, 0);
+                            }
+                        });
+                    }
+                }.start();
+
+            }
+            break;
+            case 1: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        final List<Song> songs = getSongs(position);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((MainActivity) getActivity()).addNext(songs);
+                            }
+                        });
+                    }
+                }.start();
+            }
+            break;
+            case 2: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        final List<Song> songs = getSongs(position);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((MainActivity) getActivity()).addToQueue(songs);
+                            }
+                        });
+                    }
+                }.start();
+            }
+            break;
+            case 3:
+                showPlaylistDialog(position);
+                break;
+            case 4:
+                break;
+            case 5:
+                showRenameDialog(getItem(position));
+                break;
+            case 6:
+                showProgressDialog();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        DeleteUtils deleteUtils = new DeleteUtils();
+                        deleteUtils.deleteAlbum(getActivity(), data.get(position).getID());
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dismissDialog();
+                            }
+                        });
+                    }
+                }.start();
+
+        }
     }
 }

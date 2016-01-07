@@ -24,6 +24,7 @@ public class Category implements Nameable {
         return name;
     }
 
+    @Override
     public long getID() {
         return id;
     }
@@ -36,6 +37,11 @@ public class Category implements Nameable {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getCount() {

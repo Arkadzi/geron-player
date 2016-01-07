@@ -4,12 +4,17 @@ import android.os.Bundle;
 
 import java.util.List;
 
+import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
-import me.arkadiy.geronplayer.adapters.MyCategoryAdapter;
-import me.arkadiy.geronplayer.adapters.MyPrefixCategoryAdapter;
+import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
+import me.arkadiy.geronplayer.adapters.list_view.MyPrefixCategoryAdapter;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.PlaylistLoader;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.DeleteUtils;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
+import me.arkadiy.geronplayer.statics.TagManager;
 
 /**
  * Created by Arkadiy on 06.11.2015.
@@ -45,7 +50,7 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
 
     @Override
     protected void setListener(MyCategoryAdapter adapter) {
-        adapter.setListener(new MyCategoryAdapter.ItemListener() {
+        adapter.setClickListener(new MyCategoryAdapter.ItemClickListener() {
             @Override
             public void onClick(int position) {
                 getActivity().getSupportFragmentManager()
@@ -71,5 +76,105 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
                 R.id.icon,
                 getResources().getString(R.string.song_count),
                 R.drawable.ic_grade_white_36dp);
+    }
+
+    @Override
+    protected String[] menuItems() {
+        return getResources().getStringArray(R.array.playlist_menu_items);
+    }
+
+    @Override
+    protected void onMenuItemClick(final int position, int which) {
+        switch (which) {
+            case 0: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        final List<Song> songs = getSongs(position);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((MainActivity) getActivity()).playQueue(songs, 0);
+                            }
+                        });
+                    }
+                }.start();
+            }
+            break;
+            case 1: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        final List<Song> songs = getSongs(position);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((MainActivity) getActivity()).addNext(songs);
+                            }
+                        });
+                    }
+                }.start();
+            }
+            break;
+            case 2: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        final List<Song> songs = getSongs(position);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((MainActivity) getActivity()).addToQueue(songs);
+                            }
+                        });
+                    }
+                }.start();
+            }
+            break;
+            case 3:
+                showPlaylistDialog(position);
+                break;
+            case 4:
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container,
+                                ToolbarFragment.newInstance(ToolbarFragment.PLAYLIST_EDIT,
+                                        getItem(position).getID(),
+                                        getItem(position).getName(),
+                                        null))
+                        .addToBackStack(null)
+                        .commit();
+                break;
+            case 5:
+                showRenameDialog(getItem(position));
+                break;
+            case 6:
+                showProgressDialog();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        DeleteUtils deleteUtils = new DeleteUtils();
+                        deleteUtils.deletePlaylist(getActivity(), data.get(position).getID());
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dismissDialog();
+                            }
+                        });
+                    }
+                }.start();
+                break;
+        }
+    }
+
+    @Override
+    protected void onRename(Category pojo) {
+        TagManager tagManager = new TagManager();
+        tagManager.renamePlaylist(getActivity(), pojo);
+    }
+
+    @Override
+    protected List<Song> getSongs(int position) {
+        return MusicRetriever.getSongsByPlaylist(getActivity(), data.get(position).getID());
     }
 }

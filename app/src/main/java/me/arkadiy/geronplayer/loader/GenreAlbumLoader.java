@@ -39,20 +39,22 @@ public class GenreAlbumLoader extends AbstractLoader<Category> {
                 int count = numberOfSongs(id);
                 albums.add(new Category(id, name, count));
             } while (albumCursor.moveToNext());
+        }
+        if (albumCursor != null) {
             albumCursor.close();
         }
+
         return albums;
     }
 
     private Cursor albumIds() {
-        Cursor cursor = musicResolver.query(
+        return musicResolver.query(
                 getUri(),
                 new String[]{"distinct " + MediaStore.Audio.Genres.Members.ALBUM_ID,
                         MediaStore.Audio.Genres.Members.ALBUM},
                 null,
                 null,
                 null);
-        return cursor;
     }
 
     private int numberOfSongs(long albumId) {
@@ -66,8 +68,11 @@ public class GenreAlbumLoader extends AbstractLoader<Category> {
         if (cursor != null && cursor.moveToFirst()) {
 
             number = cursor.getInt(0);
+        }
+        if (cursor != null) {
             cursor.close();
         }
+
         return number;
     }
 }

@@ -80,12 +80,14 @@ public class FolderLoader extends AbstractLoader<Folder> {
                 }
             }
             while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(folders, new Comparator<Folder>() {
                 public int compare(Folder a, Folder b) {
                     return a.getName().compareToIgnoreCase(b.getName());
                 }
             });
+        }
+        if (musicCursor != null) {
+            musicCursor.close();
         }
         return folders;
     }

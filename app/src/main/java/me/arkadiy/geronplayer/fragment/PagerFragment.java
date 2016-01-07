@@ -1,29 +1,20 @@
 package me.arkadiy.geronplayer.fragment;
 
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import me.arkadiy.geronplayer.Constants;
-import me.arkadiy.geronplayer.MainActivity;
-import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
-import me.arkadiy.geronplayer.adapters.ViewAdapter;
+import me.arkadiy.geronplayer.adapters.view_pager.ViewAdapter;
 
 public class PagerFragment extends Fragment {
     private Toolbar toolbar;
@@ -62,6 +53,13 @@ public class PagerFragment extends Fragment {
         adapter = new ViewAdapter(getChildFragmentManager());
         panel = (SlidingUpPanelLayout) getActivity().findViewById(R.id.sliding_layout);
         viewPager = (ViewPager) view.findViewById(R.id.pager);
+        viewPager.setPageTransformer(false, new ViewPager.PageTransformer() {
+            @Override
+            public void transformPage(View page, float position) {
+                /**ROATAION TRANSFORMATION**/
+                page.setRotationY(position * -15);
+            }
+        });
         viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(adapter);
         tabLayout = (TabLayout) view.findViewById(R.id.sliding_tabs);

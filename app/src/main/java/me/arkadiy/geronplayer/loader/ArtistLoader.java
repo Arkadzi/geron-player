@@ -48,18 +48,20 @@ public class ArtistLoader extends AbstractLoader<Category> {
                 long thisId = musicCursor.getLong(0);
                 String thisName = musicCursor.getString(1);
                 int thisAlbumCount = musicCursor.getInt(2);
-                if (thisName.equals("<unknown>")) {
+                if (thisName.equals(MediaStore.UNKNOWN_STRING)) {
                     thisName = unknown;
                 }
                 categories.add(new Category(thisId, thisName, thisAlbumCount));
 
             } while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(categories, new Comparator<Category>() {
                 public int compare(Category a, Category b) {
                     return a.getName().compareToIgnoreCase(b.getName());
                 }
             });
+        }
+        if (musicCursor != null) {
+            musicCursor.close();
         }
         return categories;
     }

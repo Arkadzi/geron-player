@@ -70,7 +70,8 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:src="@drawable/abc_ic_search_api_mtrl_alpha"
+        android:id="@+id/fab_shuffle"
+        android:src="@drawable/ic_shuffle_white_24dp"
         app:layout_anchor="@id/main.appbar"
         app:layout_anchorGravity="bottom|right|end"
         />

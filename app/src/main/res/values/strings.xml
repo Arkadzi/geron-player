@@ -2,12 +2,86 @@
     <string name="app_name">Geron Player</string>
     <string name="title_activity_artist_list">ArtistListActivity</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="unknown_artist" >Unknown name</string>
+    <string name="unknown_artist">Unknown name</string>
     <string name="album_count">albums:</string>
     <string name="song_count">songs:</string>
     <string name="action_search">search</string>
     <string name="load_error">Unable to load song</string>
+    <string name="user_preset">User</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="bass_boost">Bass Boost</string>
+    <string name="equalizer">Equalizer</string>
+    <string name="ringtone_set">Ringtone is set</string>
+    <string name="unable_to_delete">Can\'t delete while shuffle mode is ON</string>
+    <string name="unable_to_move">Can\'t move while shuffle mode is ON</string>
+    <string name="action_accept">Accept</string>
+    <string name="create_playlist">Create new playlist</string>
+    <string name="action_ok">OK</string>
+    <string name="playlist_name">Playlist name</string>
+    <string name="please_wait">Please, wait...</string>
+    <string name="new_name">New name</string>
+    <string name="title">Title</string>
+    <string name="artist">Artist</string>
+    <string name="album">Album</string>
+
+    <string-array name="menu_items">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="single_song_menu">
+        <item>Set as ringtone</item>
+        <item>Edit</item>
+    </string-array>
+
+    <string-array name="song_menu_items">
+        <item>Play</item>
+        <item>Add next</item>
+        <item>Add to queue</item>
+        <item>Add to playlist</item>
+        <item>Set as ringtone</item>
+        <item>Rename</item>
+        <item>Delete</item>
+    </string-array>
+
+    <string-array name="category_menu_items">
+        <item>Play</item>
+        <item>Add next</item>
+        <item>Add to queue</item>
+        <item>Add to playlist</item>
+        <item>Rename</item>
+        <item>Delete</item>
+    </string-array>
+
+    <string-array name="album_menu_items">
+        <item>Play</item>
+        <item>Add next</item>
+        <item>Add to queue</item>
+        <item>Add to playlist</item>
+        <item>Set cover art</item>
+        <item>Rename</item>
+        <item>Delete</item>
+    </string-array>
+
+    <string-array name="folder_menu_items">
+        <item>Play</item>
+        <item>Add next</item>
+        <item>Add to queue</item>
+        <item>Add to playlist</item>
+        <item>Delete</item>
+    </string-array>
+
+    <string-array name="playlist_menu_items">
+        <item>Play</item>
+        <item>Add next</item>
+        <item>Add to queue</item>
+        <item>Add to playlist</item>
+        <item>Edit</item>
+        <item>Rename</item>
+        <item>Delete</item>
+    </string-array>
 
 </resources>

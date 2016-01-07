@@ -8,43 +8,27 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true">
+        android:clickable="true"
+        android:background="#000000">
 
         <ImageView
             android:id="@+id/background_cover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:tint="#a3000000" />
+            android:background="@drawable/default_background"
+            android:alpha="0.6" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <LinearLayout
+            <android.support.v4.view.ViewPager
+                android:id="@+id/image_pager"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/album_art_shadow2">
-
-                    <me.arkadiy.geronplayer.views.SquareImageView
-                        android:id="@+id/cover_art"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:adjustViewBounds="false"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/default_album_art"
-                        android:visibility="visible"
-                        custom:direction="width" />
-                </FrameLayout>
-            </LinearLayout>
-
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -52,18 +36,27 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:id="@+id/song_settings">
+
+                    <me.arkadiy.geronplayer.views.SquareImageView
+                        android:id="@+id/repeat_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_repeat_white_24dp"
+                        android:scaleType="center" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center_horizontal"
+                        android:gravity="center_vertical|center_horizontal"
                         android:orientation="vertical"
-                        android:padding="@dimen/abc_action_bar_content_inset_material">
+                        android:padding="16dp"
+                        android:layout_weight="1">
 
                         <TextView
                             android:id="@+id/song_title"
@@ -76,14 +69,10 @@
                             android:freezesText="true"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:scrollHorizontally="true"
-                            android:shadowDx="1"
-                            android:shadowDy="1"
-                            android:shadowRadius="0.6"
-                            android:shadowColor="#000"
-                            android:singleLine="true"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
                             android:textColor="@color/abc_primary_text_material_dark"
-                            android:textSize="21sp" />
+                            android:singleLine="true"
+                            android:textSize="21sp"
+                            android:text="dasdasd" />
 
                         <TextView
                             android:id="@+id/artist_name"
@@ -96,15 +85,19 @@
                             android:freezesText="true"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:scrollHorizontally="true"
-                            android:shadowDx="1"
-                            android:shadowDy="1"
-                            android:shadowRadius="0.6"
-                            android:shadowColor="#000"
                             android:singleLine="true"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                            android:textColor="@color/abc_primary_text_material_dark"
-                            android:textSize="17sp" />
+                            android:textColor="@color/abc_secondary_text_material_dark"
+                            android:textSize="17sp"
+                            android:text="asdasdasd" />
                     </LinearLayout>
+
+                    <me.arkadiy.geronplayer.views.SquareImageView
+                        android:id="@+id/shuffle_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_shuffle_white_24dp"
+                        android:scaleType="center" />
 
                 </LinearLayout>
 
@@ -119,17 +112,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLength="6"
+                        android:paddingLeft="20dp"
+                        android:paddingStart="20dp"
                         android:shadowColor="#000000"
-                        android:shadowDx="1"
-                        android:shadowDy="1"
-                        android:shadowRadius="0.6"
-                        android:paddingLeft="10dp"
-                        android:paddingStart="10dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="asd"
-                        android:textSize="12dp" />
+                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textSize="12dp"
+                        android:paddingRight="5dp"
+                        android:paddingEnd="5dp" />
 
-                    <android.support.v7.widget.AppCompatSeekBar
+                    <SeekBar
                         android:id="@+id/progress_seek_bar"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -144,31 +135,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLength="6"
+                        android:paddingEnd="20dp"
+                        android:paddingRight="20dp"
                         android:shadowColor="#000000"
-                        android:shadowDx="1"
-                        android:shadowDy="1"
-                        android:shadowRadius="0.6"
-                        android:paddingRight="10dp"
-                        android:paddingEnd="10dp"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="asd"
-                        android:textSize="12dp" />
+                        android:textColor="@color/abc_secondary_text_material_dark"
+                        android:textSize="12dp"
+                        android:paddingStart="5dp"
+                        android:paddingLeft="5dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical|center_horizontal"
                     android:orientation="horizontal"
                     android:padding="8dp">
-
-                    <me.arkadiy.geronplayer.views.SquareImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/repeat"
-                        android:padding="5dp" />
 
                     <ImageButton
                         android:id="@+id/p_prev"
@@ -176,8 +157,8 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:background="#00ffffff"
-                        android:src="@drawable/ic_skip_previous_white_48dp"
-                        android:padding="10dp" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_skip_previous_white_48dp" />
 
                     <ImageButton
                         android:id="@+id/pp_button"
@@ -185,8 +166,8 @@
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:background="#00ffffff"
-                        android:src="@drawable/ic_play_arrow_white_48dp"
-                        android:padding="15dp" />
+                        android:padding="15dp"
+                        android:src="@drawable/ic_play_arrow_white_48dp" />
 
                     <ImageButton
                         android:id="@+id/p_next"
@@ -194,16 +175,8 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:background="#00ffffff"
-                        android:src="@drawable/ic_skip_next_white_48dp"
-                        android:padding="10dp" />
-
-                    <me.arkadiy.geronplayer.views.SquareImageView
-                        android:id="@+id/imageView2"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/shuffle"
-                        android:padding="5dp" />
+                        android:padding="10dp"
+                        android:src="@drawable/ic_skip_next_white_48dp" />
 
                 </LinearLayout>
             </LinearLayout>
@@ -213,7 +186,9 @@
         <FrameLayout
             android:id="@+id/slider"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:clickable="false">
 
             <me.arkadiy.geronplayer.views.SquareImageView
                 android:id="@+id/hide_arrow"
@@ -221,29 +196,40 @@
                 android:layout_height="68dp"
                 android:scaleType="center"
                 android:src="@drawable/ic_expand_more_white_24dp"
-                custom:direction="height" />
+                custom:direction="height"
+                android:visibility="invisible" />
 
             <ImageButton
                 android:id="@+id/queue_button"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
                 android:layout_width="68dp"
                 android:layout_height="68dp"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:background="#00ffffff"
                 android:src="@drawable/ic_queue_music_white_24dp" />
+            <ImageButton
+                android:id="@+id/equalizer_button"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:src="@drawable/ic_equalizer_white_24dp"
+                android:background="#00ffffff" />
 
             <LinearLayout
                 android:id="@+id/bottom_panel"
                 android:layout_width="match_parent"
                 android:layout_height="68dp"
                 android:background="@color/primary"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="visible"
+                android:clickable="false">
 
                 <me.arkadiy.geronplayer.views.SquareImageView
                     android:id="@+id/sub_cover_art"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
+                    android:clickable="true"
                     custom:direction="height" />
 
                 <LinearLayout
@@ -262,7 +248,7 @@
                         android:shadowColor="#000000"
                         android:shadowDx="1"
                         android:shadowDy="1"
-                        android:shadowRadius="0.6"
+                        android:shadowRadius="0.2"
                         android:singleLine="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                         android:textColor="@color/abc_primary_text_material_dark"
@@ -276,7 +262,7 @@
                         android:shadowColor="#000000"
                         android:shadowDx="1"
                         android:shadowDy="1"
-                        android:shadowRadius="0.6"
+                        android:shadowRadius="0.2"
                         android:singleLine="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                         android:textColor="@color/secondaryTextColor"

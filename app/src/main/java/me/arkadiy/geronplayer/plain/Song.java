@@ -33,10 +33,7 @@ public class Song implements Nameable {
         return artistID;
     }
 
-    public long getId() {
-        return id;
-    }
-
+    @Override
     public long getID() {
         return id;
     }
@@ -74,5 +71,18 @@ public class Song implements Nameable {
     @Override
     public String getName() {
         return title;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.title = name;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
     }
 }

@@ -81,8 +81,7 @@ public class PlaylistUtils {
         Uri uri = resolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cv);
         if (uri != null) {
             return Long.parseLong(uri.getLastPathSegment());
-        }
-        else {
+        } else {
             return -1;
         }
     }
@@ -90,7 +89,7 @@ public class PlaylistUtils {
     public static void addSongs(Context c, long id, List<Song> songs) {
         ContentResolver resolver = c.getContentResolver();
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", id);
-        String[] projection = new String[] {String.format("max(%s)",MediaStore.Audio.Playlists.Members.PLAY_ORDER)};
+        String[] projection = new String[]{String.format("max(%s)", MediaStore.Audio.Playlists.Members.PLAY_ORDER)};
         Cursor cursor = resolver.query(uri, projection, null, null, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -101,7 +100,7 @@ public class PlaylistUtils {
         }
     }
 
-    public static void insertSongs(ContentResolver contentResolver, long id,  List<Song> songs, int shift) {
+    public static void insertSongs(ContentResolver contentResolver, long id, List<Song> songs, int shift) {
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", id);
         ContentValues[] values = new ContentValues[songs.size()];
         for (int i = 0; i < songs.size(); i++) {
@@ -110,5 +109,6 @@ public class PlaylistUtils {
             values[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs.get(i).getID());
         }
         contentResolver.bulkInsert(uri, values);
+//        contentResolver.notifyChange(Uri.parse("content://media"), null);
     }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.statics.PlaylistUtils;
 
 /**
  * Created by Arkadiy on 06.11.2015.
@@ -29,38 +30,6 @@ public class PlaylistLoader extends AbstractLoader<Category> {
 
     @Override
     protected List<Category> getList() {
-        ArrayList<Category> playlists = new ArrayList<>();
-        String _id = MediaStore.Audio.Playlists._ID;
-        String name = MediaStore.Audio.Playlists.NAME;
-        String[] columns = {_id, name};
-        Cursor musicCursor = musicResolver.query(getUri(), columns, null, null, null);
-        if (musicCursor != null && musicCursor.moveToFirst()) {
-            do {
-                int thisId = musicCursor.getInt(0);
-                String thisPlaylist = musicCursor.getString(1);
-                int numberOfSongs = numberOfSongs(thisId);
-                Category playlist = new Category(thisId, thisPlaylist, numberOfSongs);
-                playlists.add(playlist);
-            } while (musicCursor.moveToNext());
-            Collections.sort(playlists, new Comparator<Category>() {
-                @Override
-                public int compare(Category a, Category b) {
-                    return a.getName().compareToIgnoreCase(b.getName());
-                }
-            });
-        }
-        return playlists;
-    }
-
-    private int numberOfSongs(int playlistId) {
-        String[] cols = new String[]{
-                "count(*)"
-        };
-        Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
-        Cursor cur = musicResolver.query(uri, cols, null, null, null);
-        if (cur != null && cur.moveToFirst()) {
-            return cur.getInt(0);
-        }
-        return 0;
+        return PlaylistUtils.getPlaylists(getContext());
     }
 }

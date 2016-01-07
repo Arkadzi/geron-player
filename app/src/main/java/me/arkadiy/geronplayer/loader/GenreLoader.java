@@ -45,7 +45,7 @@ public class GenreLoader extends AbstractLoader<Category> {
                 long thisId = musicCursor.getLong(0);
                 String thisName = musicCursor.getString(1);
 //                int thisAlbumCount = musicCursor.getInt(2);
-                if (thisName.equals("<unknown>")) {
+                if (thisName.equals(MediaStore.UNKNOWN_STRING)) {
                     thisName = unknown;
                 }
                 int numberOfAlbums = numberOfAlbums(thisId);
@@ -53,12 +53,14 @@ public class GenreLoader extends AbstractLoader<Category> {
                     categories.add(new Category(thisId, thisName, numberOfAlbums));
 
             } while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(categories, new Comparator<Category>() {
                 public int compare(Category a, Category b) {
                     return a.getName().compareToIgnoreCase(b.getName());
                 }
             });
+        }
+        if (musicCursor != null) {
+            musicCursor.close();
         }
         return categories;
     }
@@ -72,8 +74,9 @@ public class GenreLoader extends AbstractLoader<Category> {
                 null,
                 null);
         if (cursor != null && cursor.moveToFirst()) {
-
             number = cursor.getCount();
+        }
+        if (cursor != null) {
             cursor.close();
         }
         return number;

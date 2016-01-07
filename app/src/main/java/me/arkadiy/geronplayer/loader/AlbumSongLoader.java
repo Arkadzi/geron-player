@@ -35,7 +35,7 @@ public class AlbumSongLoader extends AbstractLoader<Song> {
     }
 
     @Override
-    protected List<Song> getList() {
+    public List<Song> getList() {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!=0 AND " + MediaStore.Audio.Media.ALBUM_ID + " = ?";
         String[] args = new String[] {Long.toString(id)};
         Cursor musicCursor = musicResolver.query(getUri(), null, selection, args, null);
@@ -66,7 +66,7 @@ public class AlbumSongLoader extends AbstractLoader<Song> {
                 long thisArtistID = musicCursor.getLong(artistIdColumn);
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
-                if (thisArtist.equals("<unknown>")) {
+                if (thisArtist.equals(MediaStore.UNKNOWN_STRING)) {
                     thisArtist = unknownArtist;
                 }
                 String thisAlbum = musicCursor.getString(albumColumn);
@@ -79,12 +79,14 @@ public class AlbumSongLoader extends AbstractLoader<Song> {
                 }
             }
             while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(songs, new Comparator<Song>() {
                 public int compare(Song a, Song b) {
                     return a.getTrack() - b.getTrack();
                 }
             });
+        }
+        if (musicCursor != null) {
+            musicCursor.close();
         }
         return songs;
     }

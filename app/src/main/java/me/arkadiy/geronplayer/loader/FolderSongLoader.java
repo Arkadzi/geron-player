@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,7 +23,7 @@ public class FolderSongLoader extends AbstractLoader<Song> {
 
     public FolderSongLoader(Context context, String param, String path) {
         super(context, param);
-        this.path = path;
+        this.path = path + File.separator;
         try {
             this.unknownArtist = context.getResources().getString(R.string.unknown_artist);
         } catch (Exception e) {
@@ -72,7 +73,7 @@ public class FolderSongLoader extends AbstractLoader<Song> {
                     String thisTitle = musicCursor.getString(titleColumn);
                     String thisArtist = musicCursor.getString(artistColumn);
 
-                    if (thisArtist.equals("<unknown>")) {
+                    if (thisArtist.equals(MediaStore.UNKNOWN_STRING)) {
                         thisArtist = unknownArtist;
                     }
                     String thisAlbum = musicCursor.getString(albumColumn);
@@ -82,13 +83,16 @@ public class FolderSongLoader extends AbstractLoader<Song> {
                     songs.add(newSong);
                 }
             } while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(songs, new Comparator<Song>() {
                 public int compare(Song a, Song b) {
                     return a.getTitle().compareToIgnoreCase(b.getTitle());
                 }
             });
         }
+        if (musicCursor != null) {
+            musicCursor.close();
+        }
+
         return songs;
     }
 }

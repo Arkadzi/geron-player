@@ -33,7 +33,7 @@ public class PlaylistSongLoader extends AbstractLoader<Song>{
 
     @Override
     protected Uri getUri() {
-        return MediaStore.Audio.Playlists.Members.getContentUri("external", Long.valueOf(playlistId));
+        return MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class PlaylistSongLoader extends AbstractLoader<Song>{
         if (musicCursor != null && musicCursor.moveToFirst()) {
             do {
                 String artist = musicCursor.getString(5);
-                if (artist.equals("<unknown>")) {
+                if (artist.equals(MediaStore.UNKNOWN_STRING)) {
                     artist = unknownArtist;
                 }
                 Song newSong = new Song(
@@ -71,13 +71,16 @@ public class PlaylistSongLoader extends AbstractLoader<Song>{
                         musicUri);
                 songs.add(newSong);
             } while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(songs, new Comparator<Song>() {
                 public int compare(Song a, Song b) {
                     return a.getTrack() - b.getTrack();
                 }
             });
         }
+        if (musicCursor != null) {
+            musicCursor.close();
+        }
+
         return songs;
     }
 }

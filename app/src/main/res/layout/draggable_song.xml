@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="@dimen/item_height"
+    android:background="@drawable/selected_element"
+    android:gravity="center_vertical"
+    android:padding="@dimen/list_padding">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@id/click_remove"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+            <ImageView
+                android:id="@+id/play_arrow"
+                android:layout_width="14dp"
+                android:src="@drawable/play_arrow"
+                android:layout_height="14dp"
+                android:tint="@color/accent"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:visibility="gone"
+                android:scaleType="fitStart"
+                android:adjustViewBounds="false" />
+            <TextView
+                android:id="@+id/song_item_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                android:textColor="@color/abc_primary_text_material_dark"
+                android:textSize="@dimen/main_text_size"
+                android:text="song" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/song_item_artist"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/secondaryTextColor"
+            android:textSize="@dimen/secondary_text_size"
+            android:text="artist" />
+    </LinearLayout>
+
+    <me.arkadiy.geronplayer.views.SquareImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@id/drag_handle"
+        android:src="@drawable/ic_reorder_white_36dp"
+        android:tint="@color/primaryLight"
+        android:layout_marginLeft="@dimen/list_padding"
+        android:layout_marginStart="@dimen/list_padding"/>
+
+    <!--android:textColor="#e39a9adf"-->
+
+</LinearLayout>

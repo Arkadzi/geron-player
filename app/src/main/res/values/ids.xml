@@ -2,4 +2,5 @@
 <resources>
     <item name="error" type="id">Ошибка</item>
     <item type="id" name="drag_handle"/>
+    <item type="id" name="click_remove"/>
 </resources>

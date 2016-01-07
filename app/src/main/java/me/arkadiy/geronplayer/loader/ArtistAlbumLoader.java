@@ -58,8 +58,10 @@ public class ArtistAlbumLoader extends AbstractLoader<Category> {
                         musicCursor.getString(1),
                         musicCursor.getInt(2)));
             } while (musicCursor.moveToNext());
-            musicCursor.close();
 
+        }
+        if (musicCursor != null) {
+            musicCursor.close();
         }
         return albums;
     }

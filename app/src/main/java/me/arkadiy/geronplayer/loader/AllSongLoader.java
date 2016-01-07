@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,16 +54,18 @@ public class AllSongLoader extends AbstractLoader<Song> {
                     (android.provider.MediaStore.Audio.Media.ARTIST);
             int songNumberColumn = musicCursor.getColumnIndex
                     (MediaStore.Audio.Media.TRACK);
+            int isRingtone = musicCursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE);
             int pathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
             int filenameColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             //add songList to list
             do {
+                int thisIsRingtone = musicCursor.getInt(isRingtone);
                 long thisId = musicCursor.getLong(idColumn);
                 long thisAlbumID = musicCursor.getLong(albumIdColumn);
                 long thisArtistID = musicCursor.getLong(artistIdColumn);
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
-                if (thisArtist.equals("<unknown>")) {
+                if (thisArtist.equals(MediaStore.UNKNOWN_STRING)) {
                     thisArtist = unknownArtist;
                 }
                 String thisAlbum = musicCursor.getString(albumColumn);
@@ -75,12 +78,14 @@ public class AllSongLoader extends AbstractLoader<Song> {
                 }
             }
             while (musicCursor.moveToNext());
-            musicCursor.close();
             Collections.sort(songs, new Comparator<Song>() {
                 public int compare(Song a, Song b) {
                     return a.getTitle().compareToIgnoreCase(b.getTitle());
                 }
             });
+        }
+        if (musicCursor != null) {
+            musicCursor.close();
         }
         return songs;
     }
