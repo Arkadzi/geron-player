@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorActivated">#fff</color>
-    <color name="primary">#1C2931</color>
-    <!--<color name="primary">#808080</color>-->
-    <color name="primaryDark">#19242A</color>
-    <!--<color name="primaryDark">#656565</color>-->
-    <color name="textPrimary">#fff</color>
-    <color name="primaryLight">#5F7580</color>
-    <!--<color name="primaryLight">#FAFAFA</color>-->
-    <!--<color name="accent">#D4B236</color>-->
-    <color name="accent">#d43e36</color>
-    <color name="dragColor">#e124333d</color>
-    <!--<color name="dragColor">#a1a1a1</color>-->
-    <color name="secondaryTextColor">#5F7580</color>
-    <!--<color name="secondaryTextColor">#FAFAFA</color>-->
-    <color name="colorHighlight1">#ffaaff</color>
+    <!--<color name="primary">#1C2931</color>-->
+    <!--<color name="primaryDark">#19242A</color>-->
+    <!--<color name="primaryDark">#19242A</color>-->
+    <color name="primaryLight">#546e7a</color>
+    <color name="accent">#41ccbe</color>
+    <color name="dragColor">#1a000000</color>
+    <color name="secondaryTextColor">#9c9c9c</color>
+    <color name="secondaryTextColorL">#546e7a</color>
+    <color name="colorHighlight">#1a000000</color>
+    <color name="colorHighlightL">#12000000</color>
+    <color name="colorActivated">#ffffff</color>
+    <color name="colorControlNormal">@color/secondaryTextColor</color>
+    <color name="colorControlNormalL">@color/secondaryTextColorL</color>
+
+    <color name="textDisplaySecondary">#b2ffffff</color>
+    <color name="textDisplayMain">#fff</color>
 </resources>

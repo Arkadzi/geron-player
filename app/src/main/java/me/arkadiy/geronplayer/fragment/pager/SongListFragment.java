@@ -18,7 +18,6 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MySongAdapter;
 import me.arkadiy.geronplayer.audio.ShuffleButtonListener;
-import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MyRingtoneManager;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
@@ -89,7 +88,7 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
     @Override
     protected MyCategoryAdapter getNewAdapter(List<Song> data) {
         return new MySongAdapter(data,
-                R.layout.song_item,
+                R.layout.list_item,
                 R.id.main,
                 R.id.secondary);
     }
@@ -179,6 +178,7 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
         mArtist.setText(pojo.getArtist());
         mAlbum.setText(pojo.getAlbum());
         builder.setView(view);
+        builder.setTitle(R.string.rename);
         builder.setPositiveButton(R.string.action_accept, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

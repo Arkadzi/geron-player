@@ -50,7 +50,7 @@ public class PagerFragment extends Fragment {
     private void initLayoutViews(View view) {
         toolbar = (Toolbar) view.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        adapter = new ViewAdapter(getChildFragmentManager());
+        adapter = new ViewAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.categories));
         panel = (SlidingUpPanelLayout) getActivity().findViewById(R.id.sliding_layout);
         viewPager = (ViewPager) view.findViewById(R.id.pager);
         viewPager.setPageTransformer(false, new ViewPager.PageTransformer() {

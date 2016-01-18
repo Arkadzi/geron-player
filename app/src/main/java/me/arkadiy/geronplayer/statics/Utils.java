@@ -1,17 +1,27 @@
 package me.arkadiy.geronplayer.statics;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.graphics.drawable.DrawableCompat;
+import android.os.Environment;
 import android.util.Log;
-import android.widget.ImageButton;
+import android.util.TypedValue;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import me.arkadiy.geronplayer.R;
 
@@ -178,7 +188,7 @@ public class Utils {
             stackpointer = radius;
             for (y = 0; y < h; y++) {
                 // Preserve alpha channel: ( 0xff000000 & pix[yi] )
-                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
+                pix[yi] = (0xff000000 & pix[yi]) | (dv[rsum] << 16) | (dv[gsum] << 8) | dv[bsum];
 
                 rsum -= routsum;
                 gsum -= goutsum;
@@ -251,6 +261,97 @@ public class Utils {
             return c.getResources().getColor(colorId);
         } else {
             return c.getResources().getColor(colorId, null);
+        }
+    }
+
+    public static int getColorAttribute(Context c, int resid) {
+        TypedValue typedValue = new TypedValue();
+        c.getTheme().resolveAttribute(resid, typedValue, true);
+        return typedValue.data;
+    }
+
+    public static void setArtwork(Context c, Uri uri, long id) {
+        Log.e("Utils", "setArtwork Uri " + uri + " " + id);
+        if (uri != null && id != 0) {
+            InputStream stream = null;
+            try {
+                stream = c.getContentResolver().openInputStream(uri);
+                Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                Utils.setArtwork(c, bitmap, id);
+            } catch (IOException e) {
+            } finally {
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    public static void setArtwork(Context c, Bitmap bitmap, long id) {
+        Log.e("Utils", "setArtwork Bitmap " + id);
+        if (id > 0) {
+            String file = saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()));
+            if (file != null) {
+                ContentResolver res = c.getContentResolver();
+
+                deleteArtwork(id, res);
+
+                ContentValues values = new ContentValues();
+                values.put("album_id", id);
+                values.put("_data", file);
+                res.insert(Uri.parse("content://media/external/audio/albumart"), values);
+            }
+        }
+    }
+
+    private static String saveImage(Context c, Bitmap image, String name) {
+        try {
+            int scale = getScale(image, 500);
+            Log.e("Utils", "scale " + scale);
+            File root = new File(Environment.getExternalStorageDirectory()
+                    + "/albumthumbs/");
+            root.mkdirs();
+
+            String filePath = root.toString() + File.separator + name;// + ".jpg";
+            OutputStream fOut = new FileOutputStream(filePath);
+            BufferedOutputStream bos = new BufferedOutputStream(fOut);
+
+            image.compress(Bitmap.CompressFormat.JPEG, scale, bos);
+
+            bos.flush();
+            bos.close();
+            image.recycle();
+
+            MediaScannerConnection.scanFile(c, new String[]{filePath}, null, null);
+            return filePath;
+        } catch (Exception e) {
+            Log.e("error", e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    public static int getScale(Bitmap image, float maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        if (Math.max(width, height) > (int) maxSize) {
+            return (int) (100f * maxSize / Math.max(width, height));
+        }
+        return 100;
+    }
+
+    private static void deleteArtwork(long id, ContentResolver res) {
+        Cursor cursor = res.query(getArtworks(id), null, null, null, null);
+        if (cursor != null) {
+            if (cursor.getCount() > 0) {
+                res.delete(
+                        getArtworks(id),
+                        null,
+                        null);
+            }
+            cursor.close();
         }
     }
 }

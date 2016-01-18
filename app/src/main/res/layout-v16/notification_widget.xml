@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    android:background="@color/primary"
+    android:background="#424242"
     android:orientation="horizontal">
 
     <ImageView
@@ -29,8 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                android:textColor="@color/abc_primary_text_material_dark"
+                android:textColor="@color/textDisplayMain"
                 android:textSize="@dimen/main_text_size"
                 android:id="@+id/notification_title"
                 android:text="fghj"
@@ -41,8 +40,7 @@
                 android:layout_height="wrap_content"
                 android:text="New Text"
                 android:id="@+id/notification_artist"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textColor="@color/secondaryTextColor"
+                android:textColor="@color/textDisplaySecondary"
                 android:textSize="@dimen/secondary_text_size"
                 android:singleLine="true" />
 
@@ -52,23 +50,23 @@
             android:id="@+id/notification_prev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
+            android:background="@drawable/ripple_effect"
             android:src="@drawable/ic_skip_previous_white_24dp"
             android:padding="5dp" />
 
         <ImageButton
             android:id="@+id/notification_pp"
             android:layout_width="wrap_content"
+            android:background="@drawable/ripple_effect"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
             android:src="@drawable/ic_pause_white_24dp"
             android:padding="5dp" />
 
         <ImageButton
             android:id="@+id/notification_next"
             android:layout_width="wrap_content"
+            android:background="@drawable/ripple_effect"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
             android:src="@drawable/ic_skip_next_white_24dp"
             android:padding="5dp" />
 
@@ -76,7 +74,7 @@
             android:id="@+id/notification_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
+            android:background="@drawable/ripple_effect"
             android:src="@drawable/ic_action_cancel"
             android:visibility="gone"
             android:padding="5dp" />

@@ -7,6 +7,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.statics.Utils;
 import me.arkadiy.geronplayer.plain.Category;
 
@@ -29,10 +30,11 @@ public class MyPrefixCategoryAdapter extends MyCategoryAdapter<Category> {
     @Override
     protected void setImage(Category element, ImageView image) {
         if (c != null)
-            Picasso.with(c)
-                    .load(Utils.getArtworks(element.getID()))
-                    .fit()
-                    .into(image);
+//            Picasso.with(c)
+//                    .load(Utils.getArtworks(element.getID()))
+//                    .fit()
+//                    .into(image);
+            MainActivity.imageLoader.displayImage(Utils.getArtworks(element.getID()).toString(), image);
         else {
             image.setImageResource(resourceId);
         }

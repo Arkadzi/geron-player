@@ -17,10 +17,11 @@ import me.arkadiy.geronplayer.fragment.pager.SongListFragment;
  */
 public class ViewAdapter extends FragmentPagerAdapter {
     final int PAGE_COUNT = 5;
-    private String tabTitles[] = new String[]{"Artists", "Songs", "Genres", "Playlists", "Folders", "Tab8", "Tab9", "Tab10"};
+    private String mTabTitles[] = new String[]{"Artists", "Songs", "Genres", "Playlists", "Folders"};
     private ArrayList<Fragment> fragments = new ArrayList<>(PAGE_COUNT);
-    public ViewAdapter(FragmentManager fm) {
+    public ViewAdapter(FragmentManager fm, String[] tabTitles) {
         super(fm);
+        mTabTitles = tabTitles;
         fragments.add(ArtistListFragment.newInstance("1"));
         fragments.add(SongListFragment.newInstance(SongListFragment.ALL, 0, true, null));
         fragments.add(GenreListFragment.newInstance("3"));
@@ -50,7 +51,7 @@ public class ViewAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return tabTitles[position];
+        return mTabTitles[position];
     }
 
 }

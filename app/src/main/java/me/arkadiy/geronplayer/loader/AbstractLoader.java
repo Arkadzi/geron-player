@@ -60,4 +60,8 @@ public abstract class AbstractLoader<T>  extends AsyncTaskLoader<List<T>> {
     }
 
     protected abstract List<T> getList();
+
+    public void notifyChanges() {
+        musicResolver.notifyChange(getUri(), null);
+    }
 }

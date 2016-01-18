@@ -20,6 +20,8 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.QueueAdapter;
 import me.arkadiy.geronplayer.audio.SongControlListener;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.MenuManager;
+import me.arkadiy.geronplayer.statics.TagManager;
 
 
 public class QueueFragment extends Fragment implements SongControlListener {
@@ -28,11 +30,13 @@ public class QueueFragment extends Fragment implements SongControlListener {
     private MusicService service;
     private DragSortListView listView;
     private List<Song> songList;
+    private MenuManager menuManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        menuManager = new MenuManager();
         service = ((MainActivity) getActivity()).getService();
         service.addSongListener(this);
     }
@@ -42,6 +46,12 @@ public class QueueFragment extends Fragment implements SongControlListener {
         service.removeSongListener(this);
         service = null;
         super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        menuManager.dismissMenu();
+        super.onPause();
     }
 
     public static QueueFragment newInstance() {
@@ -131,6 +141,13 @@ public class QueueFragment extends Fragment implements SongControlListener {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 ((MainActivity) getActivity()).playQueue(songList, i);
+            }
+        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                menuManager.showMenu(getActivity(), songList.get(position));
+                return false;
             }
         });
         return view;

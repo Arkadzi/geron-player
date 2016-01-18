@@ -12,7 +12,8 @@
         android:maxLength="5"
         android:minEms="3"
         android:text="New Text"
-        android:gravity="end" />
+        android:gravity="end"
+        android:textColor="?android:attr/textColorSecondary" />
 
     <SeekBar
         android:id="@+id/seek_bar"
@@ -27,5 +28,6 @@
         android:maxLength="5"
         android:minEms="3"
         android:gravity="end"
-        android:text="New Text" />
+        android:text="New Text"
+        android:textColor="?android:attr/textColorSecondary" />
 </LinearLayout>

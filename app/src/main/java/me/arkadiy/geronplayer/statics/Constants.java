@@ -8,6 +8,8 @@ import android.util.Log;
  * Created by Arkadiy on 25.07.2015.
  */
 public class Constants {
+    public static final String STACK = "me.gumenniy.stack";
+
     public interface ACTION {
         String PREV_ACTION = "me.gumenniy.foregroundservice.action.prev";
         String PAUSE_PLAY_ACTION = "me.gumenniy.foregroundservice.action.pause_play";
@@ -22,7 +24,7 @@ public class Constants {
     public interface WIDGET {
         String PREV_ACTION = "me.gumenniy.widget.action.prev";
         String NEXT_ACTION = "me.gumenniy.widget.action.next";
-        String STARTFOREGROUND_ACTION = "me.gumenniy.widget.action.start";
+        String PLAY_PAUSE_ACTION = "me.gumenniy.widget.action.start";
         String UPDATE_ACTION = "me.gumenniy.widget.action.update";
     }
 

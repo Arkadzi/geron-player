@@ -70,7 +70,7 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
     protected MyCategoryAdapter getNewAdapter(List<Category> data) {
         return new MyPrefixCategoryAdapter(null,
                 data,
-                R.layout.list_item,
+                R.layout.icon_list_item,
                 R.id.main,
                 R.id.secondary,
                 R.id.icon,

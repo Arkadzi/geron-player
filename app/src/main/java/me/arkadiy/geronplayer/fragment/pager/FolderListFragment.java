@@ -66,7 +66,7 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
     @Override
     protected MyCategoryAdapter getNewAdapter(List<Folder> data) {
         return new FolderAdapter(data,
-                R.layout.list_item,
+                R.layout.three_icon_list_item,
                 R.id.main,
                 R.id.secondary,
                 R.id.icon,

@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -15,6 +17,7 @@ import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
+import me.arkadiy.geronplayer.widget.PlaybackWidgetProvider;
 
 /**
  * Created by Arkadiy on 11.12.2015.
@@ -45,6 +48,15 @@ public class ForegroundManager {
         if (isForeground()) {
             NotificationManager manager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, getNotification(song, isPlaying));
+        }
+        updateWidget(song, isPlaying);
+    }
+
+    public void updateWidget(Song song, boolean isPlaying) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(c);
+        int ids[] = AppWidgetManager.getInstance(c.getApplication()).getAppWidgetIds(new ComponentName(c.getApplication(), PlaybackWidgetProvider.class));
+        for (int id : ids) {
+            PlaybackWidgetProvider.updateWidget(c, appWidgetManager, id, song, isPlaying);
         }
     }
 

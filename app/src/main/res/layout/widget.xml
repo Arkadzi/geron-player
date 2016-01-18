@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#424242"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/album_art"
+        android:background="@drawable/default_album_art"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:paddingLeft="5dp"
+        android:paddingStart="5dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_weight="1" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/textDisplayMain"
+                android:textSize="@dimen/main_text_size"
+                android:id="@+id/widget_title"
+                tools:text="fghj"
+                android:singleLine="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="New Text"
+                android:id="@+id/widget_artist"
+                android:textColor="@color/textDisplaySecondary"
+                android:textSize="@dimen/secondary_text_size"
+                android:singleLine="true" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/widget_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ripple_effect"
+            android:src="@drawable/ic_skip_previous_white_24dp"
+            android:padding="5dp" />
+
+        <ImageButton
+            android:id="@+id/widget_pp"
+            android:layout_width="wrap_content"
+            android:background="@drawable/ripple_effect"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_pause_white_24dp"
+            android:padding="5dp" />
+
+        <ImageButton
+            android:id="@+id/widget_next"
+            android:layout_width="wrap_content"
+            android:background="@drawable/ripple_effect"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_skip_next_white_24dp"
+            android:padding="5dp" />
+    </LinearLayout>
+
+</LinearLayout>

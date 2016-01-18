@@ -1,1 +1,1 @@
-include ':HeaderListView', ':app'
+include ':app'

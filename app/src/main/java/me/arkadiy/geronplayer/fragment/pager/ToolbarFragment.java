@@ -1,19 +1,27 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
+import java.util.List;
+
+import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.audio.ShuffleButtonListener;
 import me.arkadiy.geronplayer.statics.Utils;
@@ -24,6 +32,8 @@ import me.arkadiy.geronplayer.statics.Utils;
 public class ToolbarFragment extends Fragment {
     public final static int ARTIST = 0;
     public final static int GENRE = 1;
+
+
     public final static int PLAYLIST = 2;
     public final static int FOLDER = 3;
     public final static int ALBUM = 4;
@@ -33,6 +43,11 @@ public class ToolbarFragment extends Fragment {
     private String toolbarText;
     private String additional;
     private FloatingActionButton fab;
+    private DisplayImageOptions options;
+
+    public ToolbarFragment() {
+        // Required empty public constructor
+    }
 
     public static ToolbarFragment newInstance(int what, long id, String toolbarText, String additionalParam) {
         ToolbarFragment fragment = new ToolbarFragment();
@@ -45,17 +60,23 @@ public class ToolbarFragment extends Fragment {
         return fragment;
     }
 
-    public ToolbarFragment() {
-        // Required empty public constructor
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("Utils", "onCreate() Toolbar");
+
         what = getArguments().getInt("what");
         id = getArguments().getLong("id");
         toolbarText = getArguments().getString("toolbarText");
         additional = getArguments().getString("additional");
+        options = new DisplayImageOptions.Builder()
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                        .displayer(new FadeInBitmapDisplayer(1000))
+//                .resetViewBeforeLoading(true)
+//                .showImageOnFail(R.drawable.default_album_art)
+//                .cacheInMemory(true)
+                .build();
     }
 
     @Override
@@ -68,6 +89,7 @@ public class ToolbarFragment extends Fragment {
             actionBar.setTitle(toolbarText);
         }
         Fragment fragment = getChildFragmentManager().findFragmentById(R.id.child_fragment_container);
+        Log.e("Utils", "onViewCreated() Toolbar " + (fragment == null));
         if (fragment == null) {
             switch (what) {
                 case ARTIST:
@@ -112,12 +134,25 @@ public class ToolbarFragment extends Fragment {
                 }
             });
             ImageView coverArt = (ImageView) view.findViewById(R.id.large_cover_art);
-            Picasso.with(getActivity())
-                    .load(Utils.getArtworks(id)).placeholder(R.drawable.default_album_art).into(coverArt);
+//            Picasso.with(getActivity())
+//                    .load(Utils.getArtworks(id)).placeholder(R.drawable.default_album_art).into(coverArt);
+            MainActivity.imageLoader.displayImage(Utils.getArtworks(id).toString(), coverArt, options);
             return view;
         }
 
     }
 
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        List<Fragment> fragments = getChildFragmentManager().getFragments();
+        if (fragments != null) {
+            for (Fragment fragment : fragments) {
+                if (fragment instanceof AlbumListFragment) {
+                    fragment.onActivityResult(requestCode, resultCode, data);
+                }
+            }
+        }
+    }
 }

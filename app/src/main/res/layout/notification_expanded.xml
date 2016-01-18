@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/primary"
+    android:background="#424242"
     android:orientation="horizontal">
 
     <ImageView
@@ -32,8 +32,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                    android:textColor="@color/abc_primary_text_material_dark"
+                    android:textColor="@color/textDisplayMain"
                     android:textSize="@dimen/main_text_size"
                     android:id="@+id/notification_title"
                     android:text="fghj"
@@ -43,9 +42,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="New Textg"
+                    android:textColor="@color/textDisplaySecondary"
                     android:id="@+id/notification_artist"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textColor="@color/secondaryTextColor"
                     android:textSize="@dimen/secondary_text_size"
                     android:singleLine="true" />
 
@@ -54,8 +52,8 @@
             <ImageButton
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:background="@drawable/ripple_effect"
                 android:id="@+id/notification_stop"
-                style="?android:attr/borderlessButtonStyle"
                 android:src="@drawable/ic_action_cancel" />
 
         </LinearLayout>
@@ -70,23 +68,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/notification_prev"
-                style="?android:attr/borderlessButtonStyle"
+                android:background="@drawable/ripple_effect"
                 android:src="@drawable/ic_skip_previous_white_24dp"
                 android:layout_weight="1" />
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/ripple_effect"
                 android:id="@+id/notification_pp"
-                style="?android:attr/borderlessButtonStyle"
                 android:src="@drawable/ic_pause_white_24dp"
                 android:layout_weight="1" />
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/ripple_effect"
                 android:id="@+id/notification_next"
-                style="?android:attr/borderlessButtonStyle"
                 android:src="@drawable/ic_skip_next_white_24dp"
                 android:layout_weight="1" />
 

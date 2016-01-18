@@ -38,22 +38,21 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public final static int REPEAT_SINGLE = 2;
     public final static int REPEAT_ON = 1;
     public final static int REPEAT_OFF = 0;
-
+    /*
+        returns true if onStartCommand() has been called
+     */
+    private static boolean isStarted;
+    private final IBinder musicBind = new MusicBinder();
     private NoisyAudioReceiver noisyAudioReceiver;
     private int repeatState;
     private int shuffleState;
     private List<Integer> shuffleIds;
-    private final IBinder musicBind = new MusicBinder();
     private List<Song> queue;
     private MediaPlayer player;
     private Equalizer equalizer;
     private Virtualizer virtualizer;
     private BassBoost bassBoost;
     private AudioFocusHelper afHelper;
-    /*
-        returns true if onStartCommand() has been called
-     */
-    private static boolean isStarted;
     /*
         returns true if audio file was asynchronously prepared
      */
@@ -76,6 +75,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     private boolean isRegistered;
 
     public MusicService() {
+    }
+
+    public static boolean isStarted() {
+        return isStarted;
     }
 
     private void initMediaPlayer() {
@@ -123,18 +126,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         player.reset();
     }
 
-    public void setQueue(List<Song> queue) {
-        this.queue = queue;
-        if (shuffleState == SHUFFLE_ON) {
-            switchToShuffleState();
-        } else {
-            shuffleIds = null;
-        }
-        for (SongControlListener listener : displays) {
-            listener.onQueueChanged(getQueue(), currentSong);
-        }
-    }
-
     public void addToQueue(List<Song> queue) {
         int min = this.queue.size();
         int max = min + queue.size();
@@ -173,10 +164,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }
     }
 
-    public void setCurrentSong(int currentSong) {
-        this.currentSong = currentSong;
-    }
-
     /*
     Player listeners
      */
@@ -195,16 +182,15 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }
     }
 
-
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e("onError", "service");
         return false;
     }
 
-
     @Override
     public void onPrepared(MediaPlayer mp) {
+        Log.e("MusicService", "onPrepared()");
         isPrepared = true;
         afHelper.updateRemoteControl(getCurrentSong());
         if (isShouldStart()) {
@@ -212,6 +198,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         } else {
             foregroundManager.updateRemoteView(getCurrentSong(), false);
         }
+        notifyListenersOnPrepared();
+    }
+
+    private void notifyListenersOnPrepared() {
         for (SongControlListener display : displays) {
             display.onPreparedPlaying(getCurrentSong(), getCurrentSongPosition());
         }
@@ -223,6 +213,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.e("MusicService", "onCreate() " + isStarted);
         displays = new HashSet<>();
         initMediaPlayer();
         initEqualizer();
@@ -231,7 +222,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         noisyFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         Log.e("MusicService", "onCreate() " + isStarted);
     }
-
 
     private void initQueue() {
         queue = SQLiteHelper.getInstance(this).readSongs(this);
@@ -259,25 +249,34 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 }
             }
 
-            new AsyncTask<Void, Void, Void>() {
+            new AsyncTask<Void, Void, Boolean>() {
                 @Override
-                protected Void doInBackground(Void... params) {
+                protected Boolean doInBackground(Void... params) {
                     try {
                         playSongSync();
+                        int max = getDuration();
+                        int progress = preferences.getInt(Constants.PREFERENCES.SONG_PROGRESS, 0);
+                        if (progress < max) {
+                            seekTo(progress);
+                        }
+                        return true;
                     } catch (Exception e) {
                         Log.e("AsyncTask", "unable to load song");
                     }
-                    return null;
+                    return false;
                 }
 
                 @Override
-                protected void onPostExecute(Void aVoid) {
-                    int max = getDuration();
-                    int progress = preferences.getInt(Constants.PREFERENCES.SONG_PROGRESS, 0);
-                    if (progress < max) {
-                        seekTo(progress);
+                protected void onPostExecute(Boolean aVoid) {
+                    if (aVoid) {
+//                        int max = getDuration();
+//                        int progress = preferences.getInt(Constants.PREFERENCES.SONG_PROGRESS, 0);
+//                        if (progress < max) {
+//                            seekTo(progress);
+//                        }
+                        notifyListenersOnPrepared();
+//                        onPrepared(player);
                     }
-                    onPrepared(player);
                 }
             }.execute();
         }
@@ -299,20 +298,48 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("MusicService", "onStartCommand() isStarted " + isStarted);
-        isStarted = true;
         if (intent == null) return super.onStartCommand(intent, flags, startId);
+        if (intent.getAction().equals(Constants.WIDGET.UPDATE_ACTION)) {
+            if (hasSongs()) {
+                foregroundManager.updateWidget(getCurrentSong(), isPrepared() && isPlaying());
+            }
+        }
         if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
-            playPrev();
+            if (hasSongs()) {
+                playPrev();
+                if (!isStarted()) {
+                    foregroundManager.beginForeground(getCurrentSong(), false);
+                }
+            } else {
+                startMainActivity();
+            }
         } else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
-            playNext();
+            if (hasSongs()) {
+                playNext();
+                if (!isStarted()) {
+                    foregroundManager.beginForeground(getCurrentSong(), false);
+                }
+            } else {
+                startMainActivity();
+            }
         } else if (intent.getAction().equals(Constants.ACTION.STOP_SERVICE_ACTION)) {
             pause();
             stopSelf();
         } else if (intent.getAction().equals(Constants.ACTION.PAUSE_PLAY_ACTION)) {
-            if (isPlaying()) {
-                pause();
+            Log.e("MusicService", "pause play action");
+            if (hasSongs()) {
+                if (isStarted() || isPrepared()) {
+                    if (isPlaying()) {
+                        pause();
+                    } else {
+                        start();
+                    }
+                } else {
+                    setShouldStart(true);
+                    foregroundManager.beginForeground(getCurrentSong(), false);
+                }
             } else {
-                start();
+                startMainActivity();
             }
         } else if (intent.getAction().equals(Constants.ACTION.BEGIN_FOREGROUND_ACTION)) {
             if (hasSongs() && isPrepared())
@@ -324,20 +351,24 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 pause();
             }
         }
+        isStarted = true;
         return START_NOT_STICKY;
+    }
+
+    private void startMainActivity() {
+        Intent startIntent = new Intent(this, MainActivity.class);
+        startActivity(startIntent);
     }
 
     @Override
     public void onDestroy() {
-        Log.e("MusicService", "onDestroy() " + isStarted);
+        Log.e("MusicService", "onDestroy() " + isStarted + " " + getCurrentSong().getTitle());
         isStarted = false;
         displays.clear();
         afHelper.refuseFocusIfNecessary();
-        if (isPrepared()) {
+        if (hasSongs()) {
             player.pause();
-        }
-        saveState();
-        if (isPrepared()) {
+            saveState();
             player.stop();
         }
         player.reset();
@@ -399,6 +430,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public void start() {
+        Log.e("MusicService", "start()");
         player.start();
         if (!isRegistered) {
             registerReceiver(noisyAudioReceiver, noisyFilter);
@@ -414,6 +446,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public void pause() {
+        Log.e("MusicService", "pause()");
         setShouldStart(false);
         player.pause();
         if (isRegistered) {
@@ -553,17 +586,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         }
     }
 
-    public class MusicBinder extends Binder {
-
-        public MusicService getService() {
-            return MusicService.this;
-        }
-    }
-
-    public static boolean isStarted() {
-        return isStarted;
-    }
-
     public int getDuration() {
         return player.getDuration();
     }
@@ -608,6 +630,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return queue.get(getCurrentSongIndex());
     }
 
+    public void setCurrentSong(int currentSong) {
+        this.currentSong = currentSong;
+    }
+
     public int getRepeatState() {
         return repeatState;
     }
@@ -619,4 +645,25 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public List<Song> getQueue() {
         return queue;
     }
+
+    public void setQueue(List<Song> queue) {
+        this.queue = queue;
+        if (shuffleState == SHUFFLE_ON) {
+            switchToShuffleState();
+        } else {
+            shuffleIds = null;
+        }
+        for (SongControlListener listener : displays) {
+            listener.onQueueChanged(getQueue(), currentSong);
+        }
+    }
+
+    public class MusicBinder extends Binder {
+
+        public MusicService getService() {
+            return MusicService.this;
+        }
+    }
+
+
 }

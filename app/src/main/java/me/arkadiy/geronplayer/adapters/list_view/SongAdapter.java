@@ -43,7 +43,7 @@ public class SongAdapter extends BaseAdapter  implements RecyclerViewFastScrolle
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = inflater.inflate(R.layout.song_item, viewGroup, false);
+        View v = inflater.inflate(R.layout.list_item, viewGroup, false);
         TextView songView = (TextView) v.findViewById(R.id.main);
         TextView artistView = (TextView) v.findViewById(R.id.secondary);
         Song currSong = songs.get(i);

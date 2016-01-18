@@ -1,0 +1,113 @@
+<resources>
+    <string name="app_name">Geron Player</string>
+    <string name="title_activity_artist_list">ArtistListActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="unknown_artist">Неизвестный исполнитель</string>
+    <string name="album_count">альбомов:</string>
+    <string name="song_count">песен:</string>
+    <string name="action_search">Поиск</string>
+    <string name="load_error">Невозможно воспроизвести песню</string>
+    <string name="user_preset">Пользовательский</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="bass_boost">Bass Boost</string>
+    <string name="equalizer">Equalizer</string>
+    <string name="ringtone_set">Рингтон установлен</string>
+    <string name="unable_to_delete">Невозможно удалить, пока режим случайного воспроизведения включен</string>
+    <string name="unable_to_move">Невозможно переместить, пока режим случайного воспроизведения включен</string>
+    <string name="action_accept">Принять</string>
+    <string name="create_playlist">Создать новый плейлист</string>
+    <string name="action_ok">OK</string>
+    <string name="playlist_name">Имя плейлиста</string>
+    <string name="please_wait">Пожалуйста, подождите…</string>
+    <string name="new_name">Новое имя</string>
+    <string name="title">Название</string>
+    <string name="artist">Исполнитель</string>
+    <string name="album">Альбом</string>
+    <string name="rename">Переименовать</string>
+    <string name="choose_picture">Выберите изображение</string>
+    <string name="play">Воспроизвести</string>
+    <string name="add_next">Воспроизвести следующим</string>
+    <string name="add_to_playlist">Добавить в плейлист</string>
+    <string name="add_to_queue">Добавить в очередь</string>
+    <string name="set_ringtone">Установить рингтон</string>
+    <string name="delete">Удалить</string>
+    <string name="set_cover_art">Установить обложку</string>
+    <string name="edit">Редактировать</string>
+    <string name="go_to_artist">Перейти к исполнителю</string>
+    <string name="go_to_album">Перейти в альбом</string>
+    <string name="artists">Исполнители</string>
+    <string name="songs">Песни</string>
+    <string name="genres">Жанры</string>
+    <string name="playlists">Плейлисты</string>
+    <string name="folders">Папки</string>
+
+    <string-array name="menu_items">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="single_song_menu">
+        <item>@string/set_ringtone</item>
+        <item>@string/go_to_artist</item>
+        <item>@string/go_to_album</item>
+        <item>@string/add_to_playlist</item>
+    </string-array>
+
+    <string-array name="song_menu_items">
+        <item>@string/play</item>
+        <item>@string/add_next</item>
+        <item>@string/add_to_queue</item>
+        <item>@string/add_to_playlist</item>
+        <item>@string/set_ringtone</item>
+        <item>@string/rename</item>
+        <item>@string/delete</item>
+    </string-array>
+
+    <string-array name="category_menu_items">
+        <item>@string/play</item>
+        <item>@string/add_next</item>
+        <item>@string/add_to_queue</item>
+        <item>@string/add_to_playlist</item>
+        <item>@string/rename</item>
+        <item>@string/delete</item>
+    </string-array>
+
+    <string-array name="album_menu_items">
+        <item>@string/play</item>
+        <item>@string/add_next</item>
+        <item>@string/add_to_queue</item>
+        <item>@string/add_to_playlist</item>
+        <item>@string/set_cover_art</item>
+        <item>@string/rename</item>
+        <item>@string/delete</item>
+    </string-array>
+
+    <string-array name="folder_menu_items">
+        <item>@string/play</item>
+        <item>@string/add_next</item>
+        <item>@string/add_to_queue</item>
+        <item>@string/add_to_playlist</item>
+        <item>@string/delete</item>
+    </string-array>
+
+    <string-array name="playlist_menu_items">
+        <item>@string/play</item>
+        <item>@string/add_next</item>
+        <item>@string/add_to_queue</item>
+        <item>@string/add_to_playlist</item>
+        <item>@string/edit</item>
+        <item>@string/rename</item>
+        <item>@string/delete</item>
+    </string-array>
+
+    <string-array name="categories">
+        <item>@string/artists</item>
+        <item>@string/songs</item>
+        <item>@string/genres</item>
+        <item>@string/playlists</item>
+        <item>@string/folders</item>
+    </string-array>
+</resources>

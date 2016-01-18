@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -28,8 +27,6 @@ import android.widget.EditText;
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import me.arkadiy.geronplayer.MainActivity;
@@ -39,7 +36,7 @@ import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Nameable;
 import me.arkadiy.geronplayer.plain.Song;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
+import me.arkadiy.geronplayer.statics.MenuManager;
 import me.arkadiy.geronplayer.statics.PlaylistUtils;
 import me.arkadiy.geronplayer.statics.Utils;
 
@@ -90,7 +87,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public Loader<List<T>> onCreateLoader(int id, Bundle args) {
-        Log.e("AbstractList", "onCreateLoader()");
         loader = getNewLoader();
         loader.registerObserver();
         return loader;
@@ -100,7 +96,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onDestroy() {
-        Log.e("AbstractList", "onDestroy()");
         if (loader != null) {
             loader.unregisterObserver();
         }
@@ -112,7 +107,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
     public void onResume() {
         super.onResume();
         ((MainActivity) getActivity()).addListener(this);
-        Log.e("AbstractList", "onResume() " + loader);
 //        if (loader != null) {
 //            loader.registerObserver();
 //        }
@@ -192,7 +186,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getColumnCount(), GridLayoutManager.VERTICAL, false));
         RecyclerFastScroller fastScroller1 = (RecyclerFastScroller) view.findViewById(R.id.fast_scroller);
-        fastScroller1.setHandleNormalColor(Utils.getColor(getActivity(), R.color.primaryLight));
         fastScroller1.setRecyclerView(mRecyclerView);
         data = new ArrayList<>();
         adapter = getNewAdapter(data);
@@ -216,7 +209,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onLoaderReset(Loader<List<T>> loader) {
-        Log.e("AbstractList", "onLoaderReset() " + data.size());
         if (mRecyclerView != null && mRecyclerView.getAdapter() != null) {
             data = new ArrayList<T>();
             adapter.setData(data);
@@ -226,7 +218,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onLoadFinished(Loader<List<T>> loader, List<T> data) {
-        Log.e("AbstractList", "onLoaderFinished() " + data.size());
         this.data = data;
         if (mRecyclerView != null)
             if (mRecyclerView.getAdapter() == null) {
@@ -246,7 +237,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
     }
 
     private Dialog createMenuDialog(final int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()/*, R.style.AlertDialogCustom*/);
         builder.setItems(menuItems(), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -306,7 +297,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
     private void showCreateDialog(final List<Song> songs, final Context c, int position, final List<Category> playlists) {
         final Activity activity = getActivity();
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(menuTitle(position));
+        builder.setTitle(R.string.create_playlist);
         final View view = activity.getLayoutInflater().inflate(R.layout.create_dialog, null);
         builder.setView(view);
         builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
@@ -315,7 +306,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
                 EditText mPlaylistName = (EditText) view.findViewById(R.id.playlist_name);
                 String playlistName = mPlaylistName.getText().toString();
                 if (!playlistName.isEmpty()) {
-                    final String newName = handleName(playlistName, playlists);
+                    final String newName = MenuManager.handleName(playlistName, playlists);
                     new Thread() {
                         @Override
                         public void run() {
@@ -336,30 +327,8 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
     protected void showProgressDialog() {
         ProgressDialog dialog = new ProgressDialog(getActivity());
         dialog.setMessage(getString(R.string.please_wait));
-        dialog.setCancelable(false);
         menuDialog = dialog;
         menuDialog.show();
-    }
-
-
-    private String handleName(String playlistName, List<Category> playlists) {
-        int additionalNumber = 0;
-        int i;
-        do {
-            String name = (additionalNumber == 0) ?
-                    playlistName :
-                    String.format("%s %d", playlistName, additionalNumber);
-            for (i = 0; i < playlists.size(); i++) {
-                if (name.equals(playlists.get(i).getName())) {
-                    additionalNumber++;
-                    break;
-                }
-            }
-        } while (i < playlists.size());
-        if (additionalNumber != 0) {
-            playlistName = String.format("%s %d", playlistName, additionalNumber);
-        }
-        return playlistName;
     }
 
     protected void showRenameDialog(final T pojo) {
@@ -374,6 +343,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         mName.setHint(R.string.new_name);
         mName.setText(pojo.getName());
         builder.setView(view);
+        builder.setTitle(R.string.rename);
         builder.setPositiveButton(R.string.action_accept, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

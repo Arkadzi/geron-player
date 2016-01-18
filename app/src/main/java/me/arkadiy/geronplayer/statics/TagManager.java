@@ -36,6 +36,18 @@ public class TagManager {
         );
     }
 
+    public void renameAlbumArtist(Context c, String newName, long albumId) {
+        ContentValues cv = new ContentValues();
+        Log.e("Song id", String.valueOf(albumId));
+        cv.put(MediaStore.Audio.Media.ARTIST, newName);
+        c.getContentResolver().update(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                cv,
+                MediaStore.Audio.Media.ALBUM_ID + " = ?",
+                new String[]{String.valueOf(albumId)}
+        );
+    }
+
     public void renameSongAlbum(Context c, Song song) {
         ContentValues cv = new ContentValues();
         Log.e("Song id", String.valueOf(song.getID()));

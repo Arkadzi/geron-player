@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:divider="@null"
+        android:listSelector="?attr/selectableItemBackground"
         dslv:remove_enabled="true"
         dslv:remove_mode="flingRemove"
         dslv:fling_handle_id="@id/click_remove"

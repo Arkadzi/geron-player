@@ -73,9 +73,12 @@ public class QueueAdapter extends BaseAdapter {
         artistView.setText(currSong.getArtist());
         if (i == song) {
             songView.setTypeface(null, Typeface.BOLD);
+            artistView.setTypeface(null, Typeface.BOLD);
+//            songLay.setActivated(true);
+//            songLay.setSelected(true);
             songView.setTextColor(color);
-            View playArrow = songLay.findViewById(R.id.play_arrow);
-            playArrow.setVisibility(View.VISIBLE);
+//            View playArrow = songLay.findViewById(R.id.play_arrow);
+//            playArrow.setVisibility(View.VISIBLE);
 
         }
         songLay.setTag(i);

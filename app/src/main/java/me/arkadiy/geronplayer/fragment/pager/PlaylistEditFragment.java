@@ -1,6 +1,8 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,6 +27,7 @@ import me.arkadiy.geronplayer.adapters.list_view.QueueAdapter;
 import me.arkadiy.geronplayer.loader.PlaylistSongLoader;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.PlaylistUtils;
+import me.arkadiy.geronplayer.statics.Utils;
 
 /**
  * Created by Arkadiy on 02.01.2016.
@@ -58,6 +61,16 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.accept_menu, menu);
+        MenuItem item = menu.getItem(0);
+        if (item != null) {
+            Drawable drawable = item.getIcon();
+            if (drawable != null) {
+                // If we don't mutate the drawable, then all drawable's with this id will have a color
+                // filter applied to it.
+                drawable.mutate();
+                drawable.setColorFilter(Utils.getColorAttribute(getActivity(), R.attr.colorControlNormal), PorterDuff.Mode.SRC_ATOP);
+            }
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
