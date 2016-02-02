@@ -18,7 +18,7 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:background="@drawable/default_background"
-            android:alpha="0.4" />
+            android:alpha="0.5" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -27,14 +27,15 @@
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/image_pager"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
+                android:background="?attr/colorPrimary"
                 android:layout_weight="1"
                 android:gravity="bottom">
 
@@ -42,17 +43,19 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ripple_effect"
                     android:gravity="center_vertical"
-                    android:id="@+id/song_settings">
+                    android:id="@+id/song_settings"
+                    android:background="?attr/selectableItemBackground">
 
                     <me.arkadiy.geronplayer.views.SquareImageView
                         android:id="@+id/repeat_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="50dp"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless"
+                        android:layout_height="50dp"
                         android:padding="10dp"
                         android:src="@drawable/ic_repeat_white_24dp"
-                        android:scaleType="center" />
+                        android:scaleType="center"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -76,7 +79,8 @@
                             android:singleLine="true"
                             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                             android:textSize="21sp"
-                            tools:text="dasdasd" />
+                            android:text="dasdasd"
+                            android:textColor="?android:attr/textColorPrimary" />
 
                         <TextView
                             android:id="@+id/artist_name"
@@ -91,46 +95,46 @@
                             android:scrollHorizontally="true"
                             android:singleLine="true"
                             android:textSize="17sp"
-                            tools:text="asdasdasd" />
+                            tools:text="asdasdasd"
+                            android:textColor="?android:attr/textColorSecondary" />
                     </LinearLayout>
 
                     <me.arkadiy.geronplayer.views.SquareImageView
                         android:id="@+id/shuffle_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="50dp"
+                        style="@style/Base.Widget.AppCompat.Button.Borderless"
+                        android:layout_height="50dp"
                         android:padding="10dp"
                         android:src="@drawable/ic_shuffle_white_24dp"
-                        android:scaleType="center" />
+                        android:scaleType="center"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
 
                 </LinearLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical" >
+
+                    <SeekBar
+                        android:id="@+id/progress_seek_bar"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:progress="50" />
 
                     <TextView
                         android:id="@+id/position_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLength="6"
-                        android:paddingLeft="20dp"
-                        android:paddingStart="20dp"
-                        tools:text="asdasdasd"
-                        android:shadowColor="#000000"
-                        android:textSize="12sp"
-                        android:paddingRight="5dp"
-                        android:paddingEnd="5dp" />
-
-                    <SeekBar
-                        android:id="@+id/progress_seek_bar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-
-                        android:layout_weight="1"
-                        android:indeterminate="false"
-                        android:progress="50" />
+                        android:textSize="@dimen/small_text_size"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@id/progress_seek_bar"
+                        tools:text="ddd"
+                        android:layout_marginLeft="@dimen/list_padding"
+                        android:layout_marginStart="@dimen/list_padding"
+                        android:textColor="?android:attr/textColorSecondary" />
 
 
                     <TextView
@@ -138,14 +142,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLength="6"
-                        android:paddingEnd="20dp"
-                        android:paddingRight="20dp"
-                        android:shadowColor="#000000"
-                        android:textSize="12sp"
-                        tools:text="asdasdasd"
-                        android:paddingStart="5dp"
-                        android:paddingLeft="5dp" />
-                </LinearLayout>
+                        tools:text="ddd"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_below="@id/progress_seek_bar"
+                        android:layout_marginRight="@dimen/list_padding"
+                        android:layout_marginEnd="@dimen/list_padding"
+                        android:textSize="@dimen/small_text_size"
+                        android:textColor="?android:attr/textColorSecondary" />
+                </RelativeLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -156,30 +161,30 @@
 
                     <ImageButton
                         android:id="@+id/p_prev"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:background="#00ffffff"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_skip_previous_white_48dp" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="15dp"
+                        android:src="@drawable/ic_skip_previous_white_48dp"
+                        android:tint="?attr/colorControlNormal" />
 
                     <ImageButton
                         android:id="@+id/pp_button"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:background="#00ffffff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:padding="15dp"
-                        android:src="@drawable/ic_play_arrow_white_48dp" />
+                        android:src="@drawable/ic_play_arrow_white_48dp"
+                        android:tint="?attr/colorControlNormal" />
 
                     <ImageButton
                         android:id="@+id/p_next"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:background="#00ffffff"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_skip_next_white_48dp" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="15dp"
+                        android:src="@drawable/ic_skip_next_white_48dp"
+                        android:tint="?attr/colorControlNormal" />
 
                 </LinearLayout>
             </LinearLayout>
@@ -193,30 +198,38 @@
             android:visibility="visible"
             android:clickable="false">
 
-            <me.arkadiy.geronplayer.views.SquareImageView
-                android:id="@+id/hide_arrow"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="68dp"
-                android:scaleType="center"
-                android:src="@drawable/ic_expand_more_white_24dp"
-                custom:direction="height"
-                android:visibility="invisible" />
+                android:layout_height="match_parent"
+                android:id="@+id/top_panel" >
 
-            <ImageButton
-                android:id="@+id/queue_button"
-                style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:layout_width="68dp"
-                android:layout_height="68dp"
-                android:layout_gravity="end"
-                android:background="#00ffffff"
-                android:src="@drawable/ic_queue_music_white_24dp" />
-            <ImageButton
-                android:id="@+id/equalizer_button"
-                style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:layout_width="68dp"
-                android:layout_height="68dp"
-                android:src="@drawable/ic_equalizer_white_24dp"
-                android:background="#00ffffff" />
+                <me.arkadiy.geronplayer.views.SquareImageView
+                    android:id="@+id/hide_arrow"
+                    android:layout_width="match_parent"
+                    android:layout_height="68dp"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_expand_more_white_24dp"
+                    custom:direction="height"
+                    android:visibility="invisible" />
+
+                <ImageButton
+                    android:id="@+id/queue_button"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
+                    android:layout_gravity="end"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_queue_music_white_24dp" />
+
+                <ImageButton
+                    android:id="@+id/equalizer_button"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
+                    android:src="@drawable/ic_equalizer_white_24dp"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/bottom_panel"
@@ -248,11 +261,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:shadowColor="#000000"
-                        android:shadowDx="1"
-                        android:shadowDy="1"
-                        android:shadowRadius="0.2"
-                        tools:text="asdasdasd"
                         android:singleLine="true"
                         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                         android:textSize="@dimen/main_text_size" />
@@ -262,22 +270,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:shadowColor="#000000"
-                        android:shadowDx="1"
-                        android:shadowDy="1"
-                        tools:text="asdasdasd"
-                        android:shadowRadius="0.2"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                         android:singleLine="true"
+                        android:textColor="?android:attr/textColorSecondary"
                         android:textSize="@dimen/secondary_text_size" />
                 </LinearLayout>
 
                 <ImageButton
                     android:id="@+id/playback_button"
-                    style="@style/Base.Widget.AppCompat.Button.Borderless"
                     android:layout_width="68dp"
                     android:layout_height="68dp"
-                    android:background="#00ffffff"
+                    android:tint="?attr/colorControlNormal"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_play_arrow_white_24dp" />
 
             </LinearLayout>

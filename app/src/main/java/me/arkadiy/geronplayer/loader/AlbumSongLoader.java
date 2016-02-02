@@ -13,9 +13,6 @@ import java.util.List;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 
-/**
- * Created by Arkadiy on 11.11.2015.
- */
 public class AlbumSongLoader extends AbstractLoader<Song> {
 
     private final long id;
@@ -66,6 +63,7 @@ public class AlbumSongLoader extends AbstractLoader<Song> {
                 long thisArtistID = musicCursor.getLong(artistIdColumn);
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
+                String thisPath = musicCursor.getString(pathColumn);
                 if (thisArtist.equals(MediaStore.UNKNOWN_STRING)) {
                     thisArtist = unknownArtist;
                 }
@@ -75,6 +73,7 @@ public class AlbumSongLoader extends AbstractLoader<Song> {
                 String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
                 if (!data.startsWith("application")) {
                     Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, getUri());
+                    newSong.setPath(thisPath);
                     songs.add(newSong);
                 }
             }

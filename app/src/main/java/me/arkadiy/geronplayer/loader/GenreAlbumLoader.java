@@ -10,9 +10,6 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.plain.Category;
 
-/**
- * Created by Arkadiy on 10.11.2015.
- */
 public class GenreAlbumLoader extends AbstractLoader<Category> {
 
     private final long genreId;
@@ -25,7 +22,7 @@ public class GenreAlbumLoader extends AbstractLoader<Category> {
     @Override
     protected Uri getUri() {
 //        return MediaStore.Audio.Albums.getContentUri("external", genreId);
-        return MediaStore.Audio.Genres.Members.getContentUri("external", Long.valueOf(genreId));
+        return MediaStore.Audio.Genres.Members.getContentUri("external", genreId);
     }
 
     @Override

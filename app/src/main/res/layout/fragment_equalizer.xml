@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,8 +10,13 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:padding="@dimen/list_padding"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/list_padding"
+            android:paddingTop="@dimen/list_padding"
+            android:paddingRight="@dimen/list_padding"
+            android:paddingBottom="56dp"
+            android:paddingEnd="@dimen/list_padding"
+            android:paddingStart="@dimen/list_padding">
 
             <LinearLayout
                 android:orientation="horizontal"

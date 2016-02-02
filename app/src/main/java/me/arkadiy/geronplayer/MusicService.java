@@ -66,13 +66,15 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
      */
     private int currentSong;
     /*
-        used for audio focus. Return true if playing should be resumed
+        used for retaining audio focus. Return true if playing should be resumed
      */
     private boolean resumePlaying;
     private Set<SongControlListener> displays;
     private ForegroundManager foregroundManager;
     private IntentFilter noisyFilter;
     private boolean isRegistered;
+    private boolean isTimerEnabled;
+    private int songsLeft;
 
     public MusicService() {
     }
@@ -169,7 +171,17 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
      */
     @Override
     public void onCompletion(MediaPlayer mp) {
-        if (repeatState == REPEAT_ON ||
+        if (isTimerEnabled()) {
+            songsLeft--;
+            if (songsLeft < 0) {
+                isTimerEnabled = false;
+                pause();
+                setShouldStart(false);
+                playNext();
+                return;
+            }
+        }
+        if (repeatState == REPEAT_ON  || isTimerEnabled() ||
                 (repeatState == REPEAT_OFF && getCurrentSongPosition() < queue.size() - 1)) {
             playNext();
         } else if (repeatState == REPEAT_SINGLE) {
@@ -190,7 +202,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Log.e("MusicService", "onPrepared()");
+        Log.e("MusicService", "onPrepared() " + currentSong + " " + getCurrentSongIndex());
         isPrepared = true;
         afHelper.updateRemoteControl(getCurrentSong());
         if (isShouldStart()) {
@@ -269,13 +281,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 @Override
                 protected void onPostExecute(Boolean aVoid) {
                     if (aVoid) {
-//                        int max = getDuration();
-//                        int progress = preferences.getInt(Constants.PREFERENCES.SONG_PROGRESS, 0);
-//                        if (progress < max) {
-//                            seekTo(progress);
-//                        }
                         notifyListenersOnPrepared();
-//                        onPrepared(player);
                     }
                 }
             }.execute();
@@ -297,38 +303,40 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("MusicService", "onStartCommand() isStarted " + isStarted);
         if (intent == null) return super.onStartCommand(intent, flags, startId);
+        Log.e("MusicService", "onStartCommand() isStarted " + intent.getAction());
         if (intent.getAction().equals(Constants.WIDGET.UPDATE_ACTION)) {
             if (hasSongs()) {
                 foregroundManager.updateWidget(getCurrentSong(), isPrepared() && isPlaying());
             }
         }
-        if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
+        if (intent.getAction().equals(Constants.WIDGET.PREV_ACTION)) {
             if (hasSongs()) {
-                playPrev();
-                if (!isStarted()) {
+                if (!foregroundManager.isForeground()) {
                     foregroundManager.beginForeground(getCurrentSong(), false);
                 }
+                playPrev();
             } else {
                 startMainActivity();
             }
-        } else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
+        } else if (intent.getAction().equals(Constants.WIDGET.NEXT_ACTION)) {
             if (hasSongs()) {
-                playNext();
-                if (!isStarted()) {
+                if (!foregroundManager.isForeground()) {
                     foregroundManager.beginForeground(getCurrentSong(), false);
                 }
+                playNext();
             } else {
                 startMainActivity();
             }
         } else if (intent.getAction().equals(Constants.ACTION.STOP_SERVICE_ACTION)) {
-            pause();
-            stopSelf();
-        } else if (intent.getAction().equals(Constants.ACTION.PAUSE_PLAY_ACTION)) {
+            finishSelf();
+        } else if (intent.getAction().equals(Constants.WIDGET.PLAY_PAUSE_ACTION)) {
             Log.e("MusicService", "pause play action");
             if (hasSongs()) {
-                if (isStarted() || isPrepared()) {
+                if (!foregroundManager.isForeground()) {
+                    foregroundManager.beginForeground(getCurrentSong(), false);
+                }
+                if (isPrepared()) {
                     if (isPlaying()) {
                         pause();
                     } else {
@@ -336,10 +344,21 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                     }
                 } else {
                     setShouldStart(true);
-                    foregroundManager.beginForeground(getCurrentSong(), false);
                 }
             } else {
                 startMainActivity();
+            }
+        } else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
+            playPrev();
+        } else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
+            playNext();
+        } else if (intent.getAction().equals(Constants.ACTION.PAUSE_PLAY_ACTION)) {
+            if (isPrepared()) {
+                if (isPlaying()) {
+                    pause();
+                } else {
+                    start();
+                }
             }
         } else if (intent.getAction().equals(Constants.ACTION.BEGIN_FOREGROUND_ACTION)) {
             if (hasSongs() && isPrepared())
@@ -355,19 +374,25 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return START_NOT_STICKY;
     }
 
+    private void finishSelf() {
+        foregroundManager.endForeground();
+        stopSelf();
+    }
+
     private void startMainActivity() {
         Intent startIntent = new Intent(this, MainActivity.class);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(startIntent);
     }
 
     @Override
     public void onDestroy() {
-        Log.e("MusicService", "onDestroy() " + isStarted + " " + getCurrentSong().getTitle());
+        Log.e("MusicService", "onDestroy()");
         isStarted = false;
         displays.clear();
         afHelper.refuseFocusIfNecessary();
         if (hasSongs()) {
-            player.pause();
+            pause();
             saveState();
             player.stop();
         }
@@ -375,6 +400,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         player.release();
 
         super.onDestroy();
+    }
+
+    public List<Integer> getShuffleIds() {
+        return shuffleIds;
     }
 
     private void saveState() {
@@ -656,6 +685,17 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         for (SongControlListener listener : displays) {
             listener.onQueueChanged(getQueue(), currentSong);
         }
+    }
+
+    public void setTimer(boolean enabled, int value) {
+        isTimerEnabled = enabled;
+        if (isTimerEnabled) {
+            songsLeft = value;
+        }
+    }
+
+    public boolean isTimerEnabled() {
+        return isTimerEnabled;
     }
 
     public class MusicBinder extends Binder {

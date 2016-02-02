@@ -16,9 +16,6 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
 
-/**
- * Created by Arkadiy on 08.11.2015.
- */
 public class PlaylistSongLoader extends AbstractLoader<Song>{
     private final long playlistId;
     private String unknownArtist;
@@ -46,8 +43,8 @@ public class PlaylistSongLoader extends AbstractLoader<Song>{
                 MediaStore.Audio.Media.ALBUM,//3
                 MediaStore.Audio.Media.ARTIST_ID,//4
                 MediaStore.Audio.Media.ARTIST,//5
-                MediaStore.Audio.Playlists.Members.PLAY_ORDER//6
-
+                MediaStore.Audio.Playlists.Members.PLAY_ORDER,//6
+                MediaStore.Audio.Media.DATA
         };
 
         Uri uri = getUri();
@@ -69,6 +66,7 @@ public class PlaylistSongLoader extends AbstractLoader<Song>{
                         artist,
                         musicCursor.getInt(4),
                         musicUri);
+                newSong.setPath(musicCursor.getString(7));
                 songs.add(newSong);
             } while (musicCursor.moveToNext());
             Collections.sort(songs, new Comparator<Song>() {

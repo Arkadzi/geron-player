@@ -10,7 +10,7 @@
         android:layout_height="100dp"
         android:id="@+id/album_art"
         android:background="@drawable/default_album_art"
-        android:scaleType="fitXY" />
+        android:scaleType="centerCrop" />
 
     <LinearLayout
         android:orientation="vertical"

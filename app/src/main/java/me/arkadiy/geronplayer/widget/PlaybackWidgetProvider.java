@@ -15,15 +15,11 @@ import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
 import me.arkadiy.geronplayer.statics.Utils;
 
-/**
- * Created by Arkadiy on 01.08.2015.
- */
 public class PlaybackWidgetProvider extends AppWidgetProvider {
     private static PendingIntent getPendingIntent(Context context, String action) {
         Intent intent = new Intent(context, MusicService.class);
         intent.setAction(action);
-        PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, 0);
-        return pendingIntent;
+        return PendingIntent.getService(context, 0, intent, 0);
     }
 
     public static void updateWidget(Context context, AppWidgetManager appWidgetManager,
@@ -31,24 +27,24 @@ public class PlaybackWidgetProvider extends AppWidgetProvider {
 
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        Log.e("widget", "updateWidget isStarted " + MusicService.isStarted());
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
         views.setOnClickPendingIntent(R.id.album_art, pendingIntent);
+        Log.e("widget", "updateWidget isStarted " + MusicService.isStarted() + " " + context.getPackageName() + " " + song);
 
         if (MusicService.isStarted() && song == null) {
             Intent playIntent = new Intent(context, MusicService.class);
             playIntent.setAction(Constants.WIDGET.UPDATE_ACTION);
             context.startService(playIntent);
         }
-//        if (song == null) {
-            views.setOnClickPendingIntent(R.id.widget_prev, getPendingIntent(context, Constants.ACTION.PREV_ACTION));
-            views.setOnClickPendingIntent(R.id.widget_next, getPendingIntent(context, Constants.ACTION.NEXT_ACTION));
-            views.setOnClickPendingIntent(R.id.widget_pp, getPendingIntent(context, Constants.ACTION.PAUSE_PLAY_ACTION));
+//        if (song != null) {
+            views.setOnClickPendingIntent(R.id.widget_prev, getPendingIntent(context, Constants.WIDGET.PREV_ACTION));
+            views.setOnClickPendingIntent(R.id.widget_next, getPendingIntent(context, Constants.WIDGET.NEXT_ACTION));
+            views.setOnClickPendingIntent(R.id.widget_pp, getPendingIntent(context, Constants.WIDGET.PLAY_PAUSE_ACTION));
 //        }
-//        } else {
-//            views.setOnClickPendingIntent(R.id.widget_prev, getPendingIntent(context, Constants.WIDGET.PREV_ACTION));
-//            views.setOnClickPendingIntent(R.id.widget_next, getPendingIntent(context, Constants.WIDGET.NEXT_ACTION));
-//            views.setOnClickPendingIntent(R.id.widget_pp, getPendingIntent(context, Constants.WIDGET.PLAY_PAUSE_ACTION));
+//        else if (!MusicService.isStarted()) {
+//            views.setOnClickPendingIntent(R.id.widget_prev, pendingIntent);
+//            views.setOnClickPendingIntent(R.id.widget_next, pendingIntent);
+//            views.setOnClickPendingIntent(R.id.widget_pp, pendingIntent);
 //        }
 
         if (song == null) {

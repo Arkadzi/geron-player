@@ -13,9 +13,6 @@ import java.util.List;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
 
-/**
- * Created by Arkadiy on 03.11.2015.
- */
 public class ArtistLoader extends AbstractLoader<Category> {
     private String unknown;
 
@@ -32,6 +29,11 @@ public class ArtistLoader extends AbstractLoader<Category> {
     @Override
     protected Uri getUri() {
         return MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
+    }
+
+    @Override
+    public void notifyChanges() {
+        musicResolver.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null);
     }
 
     @Override

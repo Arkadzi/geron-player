@@ -1,10 +1,14 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
+
+import org.jaudiotagger.tag.FieldKey;
 
 import java.util.List;
 
-import me.arkadiy.geronplayer.MainActivity;
+import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyPrefixCategoryAdapter;
@@ -16,9 +20,6 @@ import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 import me.arkadiy.geronplayer.statics.TagManager;
 
-/**
- * Created by Arkadiy on 03.11.2015.
- */
 public class ArtistListFragment extends AbstractListFragment<Category> {
 
     private String param;
@@ -81,89 +82,30 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
     }
 
 
-    protected void onMenuItemClick(final int position, int which) {
-        switch (which) {
-            case 0: {
-                new Thread() {
+    @Override
+    protected void onRename(final Category pojo) {
+        final Activity c = getActivity();
+        showProgressDialog();
+        new Thread() {
+            @Override
+            public void run() {
+                TagManager tagManager = new TagManager();
+                final List<Song> songs = MusicRetriever.getSongsByArtist(c, pojo.getID());
+                for (Song song : songs) {
+                    tagManager.rename(c, song.getPath(), new FieldKey[]{FieldKey.ARTIST}, new String[]{pojo.getName()});
+                }
+                c.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).playQueue(songs, 0);
-                            }
-                        });
+                        dismissDialog();
                     }
-                }.start();
+                });
             }
-            break;
-            case 1: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).addNext(songs);
-                            }
-                        });
-                    }
-                }.start();
-            }
-            break;
-            case 2: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).addToQueue(songs);
-                            }
-                        });
-                    }
-                }.start();
-            }
-            break;
-            case 3:
-                showPlaylistDialog(position);
-                break;
-            case 4:
-                showRenameDialog(getItem(position));
-                break;
-            case 5:
-                showProgressDialog();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        DeleteUtils deleteUtils = new DeleteUtils();
-                        deleteUtils.deleteArtist(getActivity(), data.get(position).getID());
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismissDialog();
-                            }
-                        });
-                    }
-                }.start();
-                break;
-        }
+        }.start();
     }
 
     @Override
-    protected void onRename(Category pojo) {
-        TagManager tagManager = new TagManager();
-        tagManager.renameArtist(getActivity(), pojo);
-        if (loader != null) {
-            loader.notifyChanges();
-        }
-    }
-
-    @Override
-    protected List<Song> getSongs(int position) {
-        return MusicRetriever.getSongsByArtist(getActivity(), data.get(position).getID());
+    protected List<Song> getSongs(Context c, int position) {
+        return MusicRetriever.getSongsByArtist(c, data.get(position).getID());
     }
 }

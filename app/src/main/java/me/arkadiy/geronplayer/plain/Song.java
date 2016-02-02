@@ -2,9 +2,6 @@ package me.arkadiy.geronplayer.plain;
 
 import android.net.Uri;
 
-/**
- * Created by Arkadiy on 13.07.2015.
- */
 public class Song implements Nameable {
     private long albumID;
     private long artistID;
@@ -14,6 +11,7 @@ public class Song implements Nameable {
     private String album;
     private Uri uri;
     private String artist;
+    private String path;
 
     public Song(int track, long id, String title, String album, long albumID, String artist, long artistID, Uri uri) {
         this.track = track;
@@ -84,5 +82,13 @@ public class Song implements Nameable {
 
     public void setAlbum(String album) {
         this.album = album;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

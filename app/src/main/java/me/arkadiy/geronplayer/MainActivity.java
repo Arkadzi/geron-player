@@ -1,14 +1,12 @@
 package me.arkadiy.geronplayer;
 
-import android.app.Activity;
+import android.animation.TimeInterpolator;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +16,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -30,6 +32,9 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -40,21 +45,16 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import com.nostra13.universalimageloader.core.process.BitmapProcessor;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 
 import me.arkadiy.geronplayer.adapters.view_pager.ScreenSlidePagerAdapter;
 import me.arkadiy.geronplayer.audio.SongControlListener;
-import me.arkadiy.geronplayer.fragment.EqualizerFragment;
 import me.arkadiy.geronplayer.fragment.PagerFragment;
-import me.arkadiy.geronplayer.fragment.QueueFragment;
-import me.arkadiy.geronplayer.fragment.pager.AlbumListFragment;
+import me.arkadiy.geronplayer.fragment.pager.ToolbarFragment;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
-import me.arkadiy.geronplayer.statics.MenuManager;
+import me.arkadiy.geronplayer.statics.QueueMenuManager;
 import me.arkadiy.geronplayer.statics.Utils;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SongControlListener {
@@ -83,11 +83,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageButton nextButton;
     private MusicService mService;
     private View hideArrow;
-    private HashSet<BackPressListener> listeners;
+    private HashSet<ServiceListener> serviceListeners;
+    private HashSet<BackPressListener> backPressListeners;
     private SlidingUpPanelLayout panel;
     private boolean mBound;
     private Handler timeHandler;
-    private MenuManager menuManager;
+    private QueueMenuManager menuManager;
     private View container;
     private SeekBar songDurationView;
     private boolean isFingerSlide;
@@ -138,17 +139,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.e("MainActivity", "onServiceConnected() null " + (mService == null));
             MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+
             mService = binder.getService();
             mBound = true;
             mService.addSongListener(MainActivity.this);
+
+            notifyServiceListeners();
+
             updateRepeatButton(mService.getRepeatState());
             updateShuffleButton(mService.getShuffleState());
+
             if (mService.hasSongs()) {
                 mPagerAdapter.setService(mService);
                 mPagerAdapter.setSongs(mService.getQueue());
                 mPagerAdapter.notifyDataSetChanged();
+
                 if (mService.isPrepared()) {
                     onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition());
                     if (mService.isPlaying()) {
@@ -171,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mPagerAdapter.setService(null);
         }
     };
+
     private FragmentManager.OnBackStackChangedListener fragmentStackListener = new FragmentManager.OnBackStackChangedListener() {
         @Override
         public void onBackStackChanged() {
@@ -179,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     };
+    private DrawerLayout mDrawerLayout;
+    private View movingPanel;
+    private boolean isHighlighted;
 
     @Override
     public void onClick(View v) {
@@ -205,23 +215,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else if (v == shuffleView) {
                 mService.nextShuffleState();
             } else if (v == equalizerButton) {
-                FragmentManager fm = getSupportFragmentManager();
-                fm.popBackStack(Constants.STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                FragmentTransaction transaction = fm.beginTransaction();
-                transaction.replace(R.id.fragment_container, EqualizerFragment.newInstance(), "equalizer");
-                transaction.addToBackStack(Constants.STACK);
-                transaction.commit();
-
+                makeEqualizerFragment();
             } else if (v == queueButton) {
-                FragmentManager fm = getSupportFragmentManager();
-                fm.popBackStack(Constants.STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                FragmentTransaction transaction = fm.beginTransaction();
-                transaction.replace(R.id.fragment_container, QueueFragment.newInstance(), "queue");
-                transaction.addToBackStack(Constants.STACK);
-                transaction.commit();
+                makeQueueFragment();
             }
         }
     }
+
+    private void makeEqualizerFragment() {
+        makeFragment(ToolbarFragment.newInstance(
+                ToolbarFragment.EQUALIZER,
+                0,
+                getString(R.string.equalizer),
+                null), "equalizer");
+    }
+
+
+    private void makeQueueFragment() {
+        makeFragment(ToolbarFragment.newInstance(
+                ToolbarFragment.QUEUE,
+                0,
+                getString(R.string.queue),
+                null), "queue");
+    }
+
+    private void makeFragment(Fragment fragment, String tag) {
+        FragmentManager fm = getSupportFragmentManager();
+        fm.popBackStack(Constants.STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment, tag);
+        transaction.addToBackStack(Constants.STACK);
+        transaction.commit();
+    }
+
+    private void initNavigationDrawer() {
+//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+    }
+
+    public void updateActionBar(Toolbar toolbar) {
+//        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.action_ok, R.string.action_ok);
+//        mDrawerLayout.setDrawerListener(mDrawerToggle);
+//        mDrawerToggle.syncState();
+    }
+
 
     public MusicService getService() {
         return mService;
@@ -256,19 +292,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void setCurrentTheme() {
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        int theme = preferences.getInt(Constants.THEME.THEME, Constants.THEME.DARK);
+        if (theme == Constants.THEME.DARK) {
+            setTheme(R.style.AppTheme);
+        }
+        else if (theme == Constants.THEME.LIGHT) {
+            setTheme(R.style.AppThemeLight);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setCurrentTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        serviceListeners = new HashSet<>();
+        backPressListeners = new HashSet<>();
+        timeHandler = new Handler();
+        menuManager = new QueueMenuManager();
+        initNavigationDrawer();
         initLayoutViews();
         setColorArray();
-        timeHandler = new Handler();
-        menuManager = new MenuManager();
         initImageLoader();
+
         Intent startIntent = new Intent(this, MusicService.class);
         startIntent.setAction(Constants.ACTION.START_SERVICE_ACTION);
         startService(startIntent);
+
         getSupportFragmentManager().addOnBackStackChangedListener(fragmentStackListener);
+
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         if (fragment == null) {
             android.support.v4.app.FragmentTransaction fragmentTransaction =
@@ -291,17 +345,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("MainActivity", "onResume() null " + (mService == null));
-        Log.e("panel", panel.getPanelState().toString());
         Intent playIntent = new Intent(this, MusicService.class);
         playIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);
         startService(playIntent);
+
         Intent startIntent = new Intent(this, MusicService.class);
         getApplicationContext().bindService(startIntent, musicConnection, Context.BIND_AUTO_CREATE);
+
         if (panel.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
             bottomPanel.setVisibility(View.GONE);
         }
@@ -310,8 +363,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause() {
         menuManager.dismissMenu();
-        Log.e("MainActivity", "omPause() null " + (mService == null));
         timeHandler.removeCallbacks(runnable);
+
         if (mBound) {
             getApplicationContext().unbindService(musicConnection);
             mService.removeSongListener(this);
@@ -321,12 +374,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     playIntent.setAction(Constants.ACTION.BEGIN_FOREGROUND_ACTION);
                     startService(playIntent);
                 } else {
-                    Log.e("MainActivity", "onPause() stopService");
                     Intent playIntent = new Intent(this, MusicService.class);
                     stopService(playIntent);
                 }
             }
-            Log.e("condition", String.format("%b %b %b", !isChangingConfigurations(), mService.isPrepared(), mService.isPlaying()));
             mBound = false;
             mService = null;
             mPagerAdapter.setService(null);
@@ -349,10 +400,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         getSupportFragmentManager().removeOnBackStackChangedListener(fragmentStackListener);
         Log.e("MainActivity", "onDestroy()");
-        if (listeners != null) {
-            listeners.clear();
-            listeners = null;
-        }
+        backPressListeners.clear();
+        serviceListeners.clear();
         super.onDestroy();
     }
 
@@ -391,17 +440,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .build();
     }
 
-    public void addListener(BackPressListener newListener) {
-        if (listeners == null) {
-            listeners = new HashSet<>();
-        }
-        listeners.add(newListener);
+    public void addBackPressListener(BackPressListener newListener) {
+        backPressListeners.add(newListener);
     }
 
-    public void removeListener(BackPressListener listener) {
-        if (listeners != null) {
-            listeners.remove(listener);
+    public void removeBackPressListener(BackPressListener listener) {
+        backPressListeners.remove(listener);
+    }
+
+    public void addServiceListener(ServiceListener newListener) {
+        if (getService() == null) {
+            serviceListeners.add(newListener);
+        } else {
+            newListener.onServiceConnected(getService());
         }
+    }
+
+    private void notifyServiceListeners() {
+        for (ServiceListener listener : serviceListeners) {
+            listener.onServiceConnected(mService);
+        }
+        serviceListeners.clear();
     }
 
     private void initLayoutViews() {
@@ -434,7 +493,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             onError(mService.getCurrentSong());
                         }
                     }
-//                    onPreparedPlaying(mService.getQueue().get(position), position);
                 }
                 this.state = state;
             }
@@ -443,12 +501,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         panel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         View slider = findViewById(R.id.slider);
         bottomPanel = (ViewGroup) panel.findViewById(R.id.bottom_panel);
+        movingPanel = slider.findViewById(R.id.moving_view);
         if (Build.VERSION.SDK_INT >= 19) {
             View topPanel = slider.findViewById(R.id.top_panel);
-            topPanel.setPadding(0, getStatusBarHeight(), 0, 0);
+            int statusBarHeight = getStatusBarHeight();
+            topPanel.setPadding(0, statusBarHeight, 0, 0);
         }
         panel.setDragView(slider);
         View songSettings = findViewById(R.id.song_settings);
+
         songSettings.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -471,7 +532,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         hideArrow = slider.findViewById(R.id.hide_arrow);
         queueButton = (ImageButton) slider.findViewById(R.id.queue_button);
         equalizerButton = (ImageButton) slider.findViewById(R.id.equalizer_button);
-        backgroundCoverView = (ImageView) panel.findViewById(R.id.background_cover);
+        backgroundCoverView = (ImageView) findViewById(R.id.background_cover);
         positionView = (TextView) panel.findViewById(R.id.position_text);
         durationView = (TextView) panel.findViewById(R.id.duration_text);
         fadeImage = new AlphaAnimation(0, 1);
@@ -498,18 +559,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 timeHandler.post(runnable);
             }
         });
-//        TintChanger tintChanger = new TintChanger(getResources());
-//        ppButton.setOnTouchListener(tintChanger);
-//        prevButton.setOnTouchListener(tintChanger);
-//        nextButton.setOnTouchListener(tintChanger);
-//        equalizerButton.setOnTouchListener(tintChanger);
         subCoverArtView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 panel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
             }
         });
-//        queueButton.setOnTouchListener(tintChanger);
         equalizerButton.setOnClickListener(this);
         queueButton.setOnClickListener(this);
         playbackButton.setOnClickListener(this);
@@ -518,6 +573,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nextButton.setOnClickListener(this);
         shuffleView.setOnClickListener(this);
         repeatView.setOnClickListener(this);
+
         panel.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 
             @Override
@@ -526,13 +582,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (bottomPanel.getVisibility() == View.GONE) {
                     bottomPanel.setVisibility(View.VISIBLE);
                 }
-                Log.e("MainActivity", "slideOffset " + slideOffset);
-//                if (slideOffset >= 0.0f && slideOffset < 0.3f) {
-//                    container.setScaleY((float) Math.pow(1.0f - slideOffset, 1. / 3));
-//                    container.setScaleX((float) Math.pow(1.0f - slideOffset, 1. / 3));
-//                    container.setAlpha(1.0f - slideOffset);
-//                }
-//                hideArrow.setRotation((1.0f - slideOffset) * 180);
             }
 
             @Override
@@ -544,9 +593,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onPanelExpanded(View panel) {
                 bottomPanel.setVisibility(View.GONE);
                 songTitleView.setSelected(true);
-//                float scale = (float) Math.pow(0.7f, 1. / 3);
-//                container.setScaleY(scale);
-//                container.setScaleX(scale);
             }
 
             @Override
@@ -567,11 +613,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             panel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         } else {
             boolean pressBack = true;
-            if (listeners != null)
-                for (BackPressListener listener : listeners) {
-                    boolean b = listener.onBackPress();
-                    if (b) pressBack = false;
-                }
+            for (BackPressListener listener : backPressListeners) {
+                boolean b = listener.onBackPress();
+                if (b) pressBack = false;
+            }
             if (pressBack) {
                 super.onBackPressed();
             }
@@ -580,30 +625,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onPreparedPlaying(final Song song, final int position) {
-        Log.e("MainActivity", "onPreparedPlaying() " + String.valueOf(position) + " " + animateSlide);
         if (mService.isPrepared()) {
             if (!isFingerSlide) {
                 mPager.setCurrentItem(position, false);
                 this.position = position;
             }
+
             isFingerSlide = false;
             animateSlide = false;
+
             songTitleView.setText(song.getName());
             artistNameView.setText(song.getArtist());
             subSongTitleView.setText(song.getName());
             subArtistNameView.setText(song.getArtist());
+
             int seconds = mService.getDuration() / 1000;
             durationView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
             songDurationView.setMax(seconds);
+
             seconds = mService.getPosition() / 1000;
             positionView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
             songDurationView.setProgress(seconds);
+
             String uri = Utils.getArtworks(song.getAlbumID()).toString();
             imageLoader.displayImage(uri, subCoverArtView);
             boolean showAnimation = uri == null || !uri.equals(backgroundCoverView.getTag());
             if (showAnimation) {
                 imageLoader.loadImage(uri, imageSize, gaussOptions, imageListener);
             }
+
             if (panel.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN) {
                 panel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             }
@@ -614,7 +664,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onStartPlaying(Song song) {
         ppButton.setImageResource(R.drawable.ic_pause_white_48dp);
         playbackButton.setImageResource(R.drawable.ic_pause_white_24dp);
+
         timeHandler.removeCallbacks(runnable);
+
         if (mBound) {
             int seconds = mService.getDuration() / 1000;
             durationView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
@@ -633,6 +685,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onStopPlaying(Song song) {
         ppButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
         playbackButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+
         timeHandler.removeCallbacks(runnable);
     }
 
@@ -664,8 +717,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onShuffleStateChange(int state) {
         updateShuffleButton(state);
+
         mPager.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
+
         onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition());
     }
 
@@ -695,8 +750,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return result;
     }
 
+    public void animateHighlight() {
+        if (movingPanel != null) {
+            Log.e("MainActivity", "movingPanel " + movingPanel.getHeight());
+            movingPanel.animate().translationY(isHighlighted ? -movingPanel.getHeight() : 0)
+                    .setDuration(200)
+                    .setInterpolator(getInterpolator());
+            isHighlighted = !isHighlighted;
+        }
+    }
+
+    private TimeInterpolator getInterpolator() {
+        return isHighlighted ? new FastOutLinearInInterpolator() : new LinearOutSlowInInterpolator();
+    }
+
     public interface BackPressListener {
         boolean onBackPress();
+    }
+
+    public interface ServiceListener {
+        void onServiceConnected(MusicService service);
     }
 }
 

@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -17,9 +18,6 @@ import java.util.List;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 
-/**
- * Created by Arkadiy on 27.12.2015.
- */
 public class MusicRetriever {
 
     private static List<Song> getSongs(Context c, String selection, String[] args, Uri uri, String path, boolean forPlaylist) {
@@ -63,9 +61,11 @@ public class MusicRetriever {
                 String thisAlbum = musicCursor.getString(albumColumn);
                 int thisTrack = musicCursor.getInt(songNumberColumn);
 //                int key = musicCursor.getInt(playlist);
-                if (!data.startsWith("application") && ((path == null) || thisPath.startsWith(path))) {
+                String folderPath = thisPath.substring(0, thisPath.lastIndexOf(File.separatorChar) + 1);
+                if (!data.startsWith("application") && ((path == null) || folderPath.equals(path))) {
                     Log.e("artist", thisTitle + " " + thisAlbum + " " + thisTrack);
                     Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, musicUri);
+                    newSong.setPath(thisPath);
                     songs.add(newSong);
                 }
             }

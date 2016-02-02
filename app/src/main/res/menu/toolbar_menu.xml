@@ -5,6 +5,15 @@
     <item android:id="@+id/action_search"
         android:title="@string/action_search"
         app:actionViewClass="android.support.v7.widget.SearchView"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/action_theme"
+        android:title="@string/theme"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_timer"
+        android:title="@string/timer"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_license"
+        android:title="@string/license"
+        app:showAsAction="never" />
 
 </menu>

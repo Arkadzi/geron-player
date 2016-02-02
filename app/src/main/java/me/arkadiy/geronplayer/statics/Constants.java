@@ -4,11 +4,21 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.util.Log;
 
-/**
- * Created by Arkadiy on 25.07.2015.
- */
 public class Constants {
     public static final String STACK = "me.gumenniy.stack";
+
+    public interface MENU {
+        int PLAY = 1;
+        int PLAY_NEXT = 2;
+        int ADD_TO_QUEUE = 3;
+        int ADD_TO_PLAYLIST = 4;
+        int DELETE = 5;
+        int RENAME = 6;
+        int EDIT = 7;
+        int SET_RINGTONE = 8;
+        int SET_ARTWORK = 9;
+
+    }
 
     public interface ACTION {
         String PREV_ACTION = "me.gumenniy.foregroundservice.action.prev";
@@ -51,5 +61,11 @@ public class Constants {
         Uri uri = ContentUris.withAppendedId(artworkUri, album_id);
         Log.e("uri", uri.toString());
         return uri;
+    }
+
+    public interface THEME {
+        String THEME = "theme";
+        int LIGHT = 0;
+        int DARK = 1;
     }
 }

@@ -1,6 +1,7 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -9,8 +10,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import org.jaudiotagger.tag.FieldKey;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.MusicService;
@@ -18,11 +22,12 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MySongAdapter;
 import me.arkadiy.geronplayer.audio.ShuffleButtonListener;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
-import me.arkadiy.geronplayer.statics.MyRingtoneManager;
 import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.SongLoader;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.Constants;
+import me.arkadiy.geronplayer.statics.DeleteUtils;
+import me.arkadiy.geronplayer.statics.MyRingtoneManager;
 import me.arkadiy.geronplayer.statics.TagManager;
 
 public class SongListFragment extends AbstractListFragment<Song> implements ShuffleButtonListener {
@@ -86,7 +91,7 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
     }
 
     @Override
-    protected MyCategoryAdapter getNewAdapter(List<Song> data) {
+    protected MyCategoryAdapter<Song> getNewAdapter(List<Song> data) {
         return new MySongAdapter(data,
                 R.layout.list_item,
                 R.id.main,
@@ -97,10 +102,11 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
     public void onShuffleButtonClick() {
         MainActivity activity = ((MainActivity) getActivity());
         MusicService service = activity.getService();
+        int song = new Random().nextInt(data.size());
+        activity.playQueue(data, song);
         if (service.getShuffleState() == MusicService.SHUFFLE_OFF) {
             service.nextShuffleState();
         }
-        activity.playQueue(data, 0);
     }
 
     @Override
@@ -108,7 +114,18 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
         return getResources().getStringArray(R.array.song_menu_items);
     }
 
-
+    @Override
+    protected int[] menuCodes() {
+        return new int[]{
+                Constants.MENU.PLAY,
+                Constants.MENU.PLAY_NEXT,
+                Constants.MENU.ADD_TO_QUEUE,
+                Constants.MENU.ADD_TO_PLAYLIST,
+                Constants.MENU.SET_RINGTONE,
+                Constants.MENU.RENAME,
+                Constants.MENU.DELETE
+        };
+    }
 
     @Override
     protected String menuTitle(int position) {
@@ -116,50 +133,16 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
     }
 
     @Override
-    protected void onMenuItemClick(final int position, int which) {
-        switch (which) {
-            case 0: {
-                List<Song> queue = getSongs(position);
-                ((MainActivity) getActivity()).playQueue(queue, 0);
-            }
-            break;
-            case 1: {
-                List<Song> queue = getSongs(position);
-                ((MainActivity) getActivity()).addNext(queue);
-            }
-            break;
-            case 2: {
-                List<Song> queue = getSongs(position);
-                ((MainActivity) getActivity()).addToQueue(queue);
-            }
-            break;
-            case 3:
-                showPlaylistDialog(position);
-                break;
-            case 4:
+    protected boolean onMenuItemClick(final int position, int code) {
+        boolean isHandled = super.onMenuItemClick(position, code);
+        if (!isHandled) {
+            if (code == Constants.MENU.SET_RINGTONE) {
                 MyRingtoneManager.setRingtone(getActivity(), data.get(position));
-                Snackbar.make(getView(), R.string.ringtone_set, Snackbar.LENGTH_SHORT).show();
-                break;
-            case 5:
-                showRenameDialog(getItem(position));
-                break;
-            case 6:
-                showProgressDialog();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        DeleteUtils deleteUtils = new DeleteUtils();
-                        deleteUtils.deleteSong(getActivity(), data.get(position).getID());
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismissDialog();
-                            }
-                        });
-                    }
-                }.start();
-
+                if (getView() != null)
+                    Snackbar.make(getView(), R.string.ringtone_set, Snackbar.LENGTH_SHORT).show();
+            }
         }
+        return isHandled;
     }
 
     @Override
@@ -186,17 +169,14 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
                 String newArtist = mArtist.getText().toString();
                 String newAlbum = mAlbum.getText().toString();
                 TagManager tagManager = new TagManager();
-                if (!newTitle.isEmpty() && !newTitle.equals(pojo.getName())) {
+                if (!newTitle.isEmpty() && !newArtist.isEmpty() && !newAlbum.isEmpty()) {
                     pojo.setName(newTitle);
-                    tagManager.renameSong(getActivity(), pojo);
-                }
-                if (!newArtist.isEmpty() && !newArtist.equals(pojo.getArtist())) {
-                    pojo.setArtist(newArtist);
-                    tagManager.renameSongArtist(getActivity(), pojo);
-                }
-                if (!newAlbum.isEmpty() && !newAlbum.equals(pojo.getAlbum())) {
                     pojo.setAlbum(newAlbum);
-                    tagManager.renameSongAlbum(getActivity(), pojo);
+                    pojo.setArtist(newArtist);
+                    tagManager.rename(getActivity(),
+                            pojo.getPath(),
+                            new FieldKey[]{FieldKey.TITLE, FieldKey.ARTIST, FieldKey.ALBUM},
+                            new String[]{pojo.getTitle(), pojo.getArtist(), pojo.getAlbum()});
                 }
             }
         });
@@ -204,7 +184,7 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
     }
 
     @Override
-    protected List<Song> getSongs(int position) {
+    protected List<Song> getSongs(Context c, int position) {
         List<Song> queue = new ArrayList<>();
         queue.add(data.get(position));
         return queue;

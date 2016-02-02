@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import me.arkadiy.geronplayer.MainActivity;
@@ -19,9 +20,6 @@ import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
 import me.arkadiy.geronplayer.widget.PlaybackWidgetProvider;
 
-/**
- * Created by Arkadiy on 11.12.2015.
- */
 public class ForegroundManager {
     private final Service c;
     private boolean isForeground;
@@ -31,6 +29,7 @@ public class ForegroundManager {
     }
 
     public void beginForeground(Song song, boolean isPlaying) {
+        Log.e("ForegroundManager", "foreground " + isForeground);
         if (!isForeground()) {
             c.startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, getNotification(song, isPlaying));
             isForeground = true;
@@ -118,8 +117,7 @@ public class ForegroundManager {
     private PendingIntent getPendingIntent(String action) {
         Intent intent = new Intent(c, MusicService.class);
         intent.setAction(action);
-        PendingIntent pendingIntent = PendingIntent.getService(c, 0, intent, 0);
-        return pendingIntent;
+        return PendingIntent.getService(c, 0, intent, 0);
     }
 
     public boolean isForeground() {

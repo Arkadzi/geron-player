@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,9 +15,6 @@ import java.util.List;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 
-/**
- * Created by Arkadiy on 08.11.2015.
- */
 public class FolderSongLoader extends AbstractLoader<Song> {
     private final String path;
     private String unknownArtist;
@@ -66,7 +64,9 @@ public class FolderSongLoader extends AbstractLoader<Song> {
             do {
                 String thisPath = musicCursor.getString(pathColumn);
                 String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
-                if (thisPath.startsWith(path) && !data.startsWith("application")) {
+                String folderPath = thisPath.substring(0, thisPath.lastIndexOf(File.separatorChar) + 1);
+                Log.e("FolderSongLoader", thisPath + " " + path);
+                if (folderPath.equals(path) && !data.startsWith("application")) {
                     long thisId = musicCursor.getLong(idColumn);
                     long thisAlbumID = musicCursor.getLong(albumIdColumn);
                     long thisArtistID = musicCursor.getLong(artistIdColumn);
@@ -80,6 +80,7 @@ public class FolderSongLoader extends AbstractLoader<Song> {
                     int thisTrack = musicCursor.getInt(songNumberColumn);
 //                int key = musicCursor.getInt(playlist);
                     Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, getUri());
+                    newSong.setPath(thisPath);
                     songs.add(newSong);
                 }
             } while (musicCursor.moveToNext());

@@ -13,6 +13,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -23,11 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
 
-/**
- * Created by Arkadiy on 28.11.2015.
- */
 public class Utils {
     public static Bitmap fastblur(Bitmap sentBitmap, int radius) {
 
@@ -295,19 +294,27 @@ public class Utils {
         if (id > 0) {
             String file = saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()));
             if (file != null) {
-                ContentResolver res = c.getContentResolver();
-
-                deleteArtwork(id, res);
-
-                ContentValues values = new ContentValues();
-                values.put("album_id", id);
-                values.put("_data", file);
-                res.insert(Uri.parse("content://media/external/audio/albumart"), values);
+                setArtwork(c, id, file);
             }
         }
     }
 
-    private static String saveImage(Context c, Bitmap image, String name) {
+    public static void setArtwork(Context c, long id, String file) {
+        ContentResolver res = c.getContentResolver();
+
+        deleteArtwork(id, res);
+
+        ContentValues values = new ContentValues();
+        values.put("album_id", id);
+        values.put("_data", file);
+        res.insert(Uri.parse("content://media/external/audio/albumart"), values);
+    }
+
+    public static Bitmap getBitmap(Uri uri) {
+        return MainActivity.imageLoader.loadImageSync(uri.toString());
+    }
+
+    public static String saveImage(Context c, Bitmap image, String name) {
         try {
             int scale = getScale(image, 500);
             Log.e("Utils", "scale " + scale);
@@ -325,7 +332,11 @@ public class Utils {
             bos.close();
             image.recycle();
 
-            MediaScannerConnection.scanFile(c, new String[]{filePath}, null, null);
+            ContentValues cv = new ContentValues();
+            cv.put(MediaStore.Images.Media.DATA, filePath);
+            cv.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            c.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
+//            MediaScannerConnection.scanFile(c, new String[]{filePath}, null, null);
             return filePath;
         } catch (Exception e) {
             Log.e("error", e.getLocalizedMessage());
@@ -342,7 +353,7 @@ public class Utils {
         return 100;
     }
 
-    private static void deleteArtwork(long id, ContentResolver res) {
+    public static void deleteArtwork(long id, ContentResolver res) {
         Cursor cursor = res.query(getArtworks(id), null, null, null, null);
         if (cursor != null) {
             if (cursor.getCount() > 0) {

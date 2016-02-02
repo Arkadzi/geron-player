@@ -3,16 +3,39 @@
     <!--<color name="primary">#1C2931</color>-->
     <!--<color name="primaryDark">#19242A</color>-->
     <!--<color name="primaryDark">#19242A</color>-->
-    <color name="primaryLight">#546e7a</color>
+    <!--<color name="primaryLight">#546e7a</color>-->
+    <color name="primary">#212121</color>
+    <color name="primaryL">#f5f5f5</color>
+    <color name="primaryO">#fb8c00</color>
+
+    <color name="background">@color/primary</color>
+    <color name="backgroundL">@color/primaryL</color>
+    <color name="backgroundO">#212121</color>
+
+    <color name="primaryDark">#212121</color>
+    <color name="primaryDarkL">#f5f5f5</color>
+    <color name="primaryDarkO">#ff7043</color>
+
     <color name="accent">#41ccbe</color>
+    <color name="accentO">#fb8c00</color>
+
     <color name="dragColor">#1a000000</color>
+
     <color name="secondaryTextColor">#9c9c9c</color>
     <color name="secondaryTextColorL">#546e7a</color>
+    <color name="secondaryTextColorO">#e0e0e0</color>
+
     <color name="colorHighlight">#1a000000</color>
     <color name="colorHighlightL">#12000000</color>
+
     <color name="colorActivated">#ffffff</color>
+
     <color name="colorControlNormal">@color/secondaryTextColor</color>
+    <color name="colorControlNormalO">@color/secondaryTextColorO</color>
     <color name="colorControlNormalL">@color/secondaryTextColorL</color>
+
+    <color name="textPrimary">#fff</color>
+    <color name="textPrimaryL">#000</color>
 
     <color name="textDisplaySecondary">#b2ffffff</color>
     <color name="textDisplayMain">#fff</color>

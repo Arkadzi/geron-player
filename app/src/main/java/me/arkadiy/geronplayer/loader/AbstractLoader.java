@@ -9,9 +9,6 @@ import android.util.Log;
 
 import java.util.List;
 
-/**
- * Created by Arkadiy on 03.11.2015.
- */
 public abstract class AbstractLoader<T>  extends AsyncTaskLoader<List<T>> {
     protected String param;
     protected ContentResolver musicResolver;
@@ -62,6 +59,7 @@ public abstract class AbstractLoader<T>  extends AsyncTaskLoader<List<T>> {
     protected abstract List<T> getList();
 
     public void notifyChanges() {
+
         musicResolver.notifyChange(getUri(), null);
     }
 }

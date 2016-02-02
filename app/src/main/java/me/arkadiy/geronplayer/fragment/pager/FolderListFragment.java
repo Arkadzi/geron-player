@@ -1,10 +1,11 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import java.util.List;
 
-import me.arkadiy.geronplayer.MainActivity;
+import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.FolderAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
@@ -12,12 +13,10 @@ import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.FolderLoader;
 import me.arkadiy.geronplayer.plain.Folder;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.Constants;
 import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 
-/**
- * Created by Arkadiy on 06.11.2015.
- */
 public class FolderListFragment extends AbstractListFragment<Folder> {
     private String param;
 
@@ -64,7 +63,7 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
     }
 
     @Override
-    protected MyCategoryAdapter getNewAdapter(List<Folder> data) {
+    protected MyCategoryAdapter<Folder> getNewAdapter(List<Folder> data) {
         return new FolderAdapter(data,
                 R.layout.three_icon_list_item,
                 R.id.main,
@@ -79,79 +78,18 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
     }
 
     @Override
-    protected void onMenuItemClick(final int position, int which) {
-        switch (which) {
-            case 0: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).playQueue(songs, 0);
-                            }
-                        });
-                    }
-                }.start();
-
-            }
-            break;
-            case 1: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).addNext(songs);
-                            }
-                        });
-                    }
-                }.start();
-            }
-            break;
-            case 2: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).addToQueue(songs);
-                            }
-                        });
-                    }
-                }.start();
-            }
-            break;
-            case 3:
-                showPlaylistDialog(position);
-                break;
-            case 4:
-                final String path = data.get(position).getPath();
-                showProgressDialog();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        DeleteUtils deleteUtils = new DeleteUtils();
-                        deleteUtils.deleteFolder(getActivity(), path);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismissDialog();
-                            }
-                        });
-                    }
-                }.start();
-
-        }
+    protected int[] menuCodes() {
+        return new int[]{
+                Constants.MENU.PLAY,
+                Constants.MENU.PLAY_NEXT,
+                Constants.MENU.ADD_TO_QUEUE,
+                Constants.MENU.ADD_TO_PLAYLIST,
+                Constants.MENU.DELETE
+        };
     }
 
     @Override
-    protected List<Song> getSongs(int position) {
-        return MusicRetriever.getSongsByFolder(getActivity(), data.get(position).getPath());
+    protected List<Song> getSongs(Context c, int position) {
+        return MusicRetriever.getSongsByFolder(c, data.get(position).getPath());
     }
 }

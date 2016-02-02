@@ -13,9 +13,6 @@ import java.util.Comparator;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 
-/**
- * Created by Arkadiy on 30.10.2015.
- */
 public class AllSongLoader extends AbstractLoader<Song> {
     private String unknownArtist;
 
@@ -54,17 +51,16 @@ public class AllSongLoader extends AbstractLoader<Song> {
                     (android.provider.MediaStore.Audio.Media.ARTIST);
             int songNumberColumn = musicCursor.getColumnIndex
                     (MediaStore.Audio.Media.TRACK);
-            int isRingtone = musicCursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE);
             int pathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
             int filenameColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             //add songList to list
             do {
-                int thisIsRingtone = musicCursor.getInt(isRingtone);
                 long thisId = musicCursor.getLong(idColumn);
                 long thisAlbumID = musicCursor.getLong(albumIdColumn);
                 long thisArtistID = musicCursor.getLong(artistIdColumn);
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
+                String thisPath = musicCursor.getString(pathColumn);
                 if (thisArtist.equals(MediaStore.UNKNOWN_STRING)) {
                     thisArtist = unknownArtist;
                 }
@@ -74,6 +70,7 @@ public class AllSongLoader extends AbstractLoader<Song> {
                 String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
                 if (!data.startsWith("application")) {
                     Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, getUri());
+                    newSong.setPath(thisPath);
                     songs.add(newSong);
                 }
             }

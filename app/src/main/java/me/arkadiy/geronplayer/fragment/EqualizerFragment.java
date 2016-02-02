@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -23,7 +24,7 @@ import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 
-public class EqualizerFragment extends Fragment {
+public class EqualizerFragment extends Fragment implements MainActivity.ServiceListener {
     private Equalizer equalizer;
     private Virtualizer virtualizer;
     private BassBoost bassBoost;
@@ -34,13 +35,22 @@ public class EqualizerFragment extends Fragment {
     private LinearLayout layout;
     private SeekBar bassSeekBar;
     private SeekBar virtSeekBar;
+    private LayoutInflater inflater;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        initEqualizer(((MainActivity) getActivity()).getService());
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            getActivity().onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initEqualizer(MusicService mService) {
@@ -53,12 +63,6 @@ public class EqualizerFragment extends Fragment {
         }
         presetNames = new String[equalizerPresetNames.size()];
         equalizerPresetNames.toArray(presetNames);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        updatePresetText();
     }
 
     public Dialog createDialog() {
@@ -93,6 +97,7 @@ public class EqualizerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        this.inflater = inflater;
         View view = inflater.inflate(R.layout.fragment_equalizer, container, false);
         layout = (LinearLayout) view.findViewById(R.id.layout);
         preset = ((TextView) view.findViewById(R.id.preset_name));
@@ -115,13 +120,59 @@ public class EqualizerFragment extends Fragment {
                 enableDisableAllView(enable);
             }
         });
+
+
+        bassSeekBar = ((SeekBar) view.findViewById(R.id.bass_seek_bar));
+        bassSeekBar.setMax(10);
+        bassSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (b) {
+                    bassBoost.setStrength((short) (i * 100));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        virtSeekBar = ((SeekBar) view.findViewById(R.id.virtualize_seek_bar));
+        virtSeekBar.setMax(10);
+        virtSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (b) {
+                    virtualizer.setStrength((short) (i * 100));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        return view;
+    }
+
+    private void inflateEqualizer(LayoutInflater inflater) {
         short numberFrequencyBands = equalizer.getNumberOfBands();
         final short lowerLevel = equalizer.getBandLevelRange()[0];
         final short upperLevel = equalizer.getBandLevelRange()[1];
 
         for (short i = 0; i < numberFrequencyBands; i++) {
             final short ii = i;
-            LinearLayout seekBarLayout = (LinearLayout) inflater.inflate(R.layout.seekbar_layout, null);
+            ViewGroup seekBarLayout = (ViewGroup) inflater.inflate(R.layout.seekbar_layout, layout, false);
             final TextView freqInfo = ((TextView) seekBarLayout.findViewById(R.id.frequency_text));
             final TextView currDb = ((TextView) seekBarLayout.findViewById(R.id.current_db));
             SeekBar seekBar = ((SeekBar) seekBarLayout.findViewById(R.id.seek_bar));
@@ -159,51 +210,8 @@ public class EqualizerFragment extends Fragment {
             seekBarLayout.setTag("" + i);
             layout.addView(seekBarLayout);
         }
-
-        bassSeekBar = ((SeekBar) view.findViewById(R.id.bass_seek_bar));
-        bassSeekBar.setMax(10);
         bassSeekBar.setProgress(bassBoost.getRoundedStrength() / 100);
-        bassSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (b) {
-                    bassBoost.setStrength((short) (i * 100));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-        virtSeekBar = ((SeekBar) view.findViewById(R.id.virtualize_seek_bar));
-        virtSeekBar.setMax(10);
         virtSeekBar.setProgress(virtualizer.getRoundedStrength() / 100);
-        virtSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (b) {
-                    virtualizer.setStrength((short) (i * 100));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        return view;
     }
 
     public void updatePresetText() {
@@ -214,11 +222,22 @@ public class EqualizerFragment extends Fragment {
         if (presetName.length() == 0)
             preset.setText(R.string.user_preset);
         else preset.setText(presetName);
-        for (short i = 0; i < equalizer.getNumberOfBands(); i++) {
-            View view = getView().findViewWithTag(String.valueOf(i));
-            ((TextView) view.findViewById(R.id.current_db)).setText(String.format("%3d%s", (equalizer.getBandLevel(i) / 100), "dB"));
-            ((SeekBar) view.findViewById(R.id.seek_bar)).setProgress((equalizer.getBandLevel(i) - lowerLevel) / 100);
+        if (getView() != null) {
+            for (short i = 0; i < equalizer.getNumberOfBands(); i++) {
+                View view = getView().findViewWithTag(String.valueOf(i));
+                if (view != null) {
+                    ((TextView) view.findViewById(R.id.current_db)).setText(String.format("%3d%s", (equalizer.getBandLevel(i) / 100), "dB"));
+                    ((SeekBar) view.findViewById(R.id.seek_bar)).setProgress((equalizer.getBandLevel(i) - lowerLevel) / 100);
+                }
+            }
         }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ((MainActivity) getActivity()).addServiceListener(this);
+
     }
 
     @Override
@@ -243,5 +262,12 @@ public class EqualizerFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    @Override
+    public void onServiceConnected(MusicService service) {
+        initEqualizer(service);
+        inflateEqualizer(inflater);
+        updatePresetText();
     }
 }

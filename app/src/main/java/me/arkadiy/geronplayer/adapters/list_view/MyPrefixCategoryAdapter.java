@@ -3,17 +3,12 @@ package me.arkadiy.geronplayer.adapters.list_view;
 import android.content.Context;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
-
 import java.util.List;
 
 import me.arkadiy.geronplayer.MainActivity;
-import me.arkadiy.geronplayer.statics.Utils;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.statics.Utils;
 
-/**
- * Created by Arkadiy on 10.11.2015.
- */
 public class MyPrefixCategoryAdapter extends MyCategoryAdapter<Category> {
     private final String prefix;
     private final Context c;

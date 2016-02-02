@@ -42,7 +42,15 @@
     <string name="genres">Жанры</string>
     <string name="playlists">Плейлисты</string>
     <string name="folders">Папки</string>
-
+    <string name="library">Библиотека</string>
+    <string name="timer">Таймер</string>
+    <string name="settings">Настройки</string>
+    <string name="navigation">Навигация</string>
+    <string name="other">Другое</string>
+    <string name="queue">Текущий список</string>
+    <string name="choose_theme">Выберите тему</string>
+    <string name="theme">Выбор темы</string>
+    <string name="license">Лицензии</string>
     <string-array name="menu_items">
         <item>1</item>
         <item>2</item>

@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -17,6 +16,8 @@
         dslv:remove_mode="flingRemove"
         dslv:fling_handle_id="@id/click_remove"
         dslv:drag_handle_id="@id/drag_handle"
+        android:paddingBottom="56dp"
+        android:clipToPadding="false"
         dslv:float_background_color="@color/dragColor"/>
 
 </LinearLayout>

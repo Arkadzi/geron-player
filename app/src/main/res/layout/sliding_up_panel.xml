@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
+    <!--<com.google.android.gms.ads.AdView-->
+        <!--android:id="@+id/adView"-->
+        <!--xmlns:ads="http://schemas.android.com/apk/res-auto"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--ads:adSize="BANNER"-->
+        <!--android:background="#f00"-->
+        <!--ads:adUnitId="@string/banner_ad_unit_id">-->
+    <!--</com.google.android.gms.ads.AdView>-->
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -189,6 +199,8 @@
 
         </LinearLayout>
 
+
+
         <FrameLayout
             android:id="@+id/slider"
             android:layout_width="match_parent"
@@ -200,6 +212,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/top_panel" >
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="68dp"
+                    android:background="@drawable/gradient"
+                    android:id="@+id/moving_view" />
 
                 <me.arkadiy.geronplayer.views.SquareImageView
                     android:id="@+id/hide_arrow"
@@ -226,6 +245,7 @@
                     android:layout_height="68dp"
                     android:src="@drawable/ic_equalizer_white_24dp"
                     android:background="?attr/selectableItemBackgroundBorderless" />
+
             </FrameLayout>
 
             <LinearLayout
@@ -283,6 +303,7 @@
             </LinearLayout>
 
         </FrameLayout>
+
 
     </FrameLayout>
 

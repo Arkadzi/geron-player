@@ -6,12 +6,14 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.mobeta.android.dslv.DragSortListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import me.arkadiy.geronplayer.MainActivity;
@@ -20,25 +22,23 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.QueueAdapter;
 import me.arkadiy.geronplayer.audio.SongControlListener;
 import me.arkadiy.geronplayer.plain.Song;
-import me.arkadiy.geronplayer.statics.MenuManager;
-import me.arkadiy.geronplayer.statics.TagManager;
+import me.arkadiy.geronplayer.statics.QueueMenuManager;
 
 
-public class QueueFragment extends Fragment implements SongControlListener {
+public class QueueFragment extends Fragment implements SongControlListener, MainActivity.ServiceListener {
 
     private QueueAdapter songAdapter;
     private MusicService service;
     private DragSortListView listView;
     private List<Song> songList;
-    private MenuManager menuManager;
+    private QueueMenuManager menuManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        menuManager = new MenuManager();
-        service = ((MainActivity) getActivity()).getService();
-        service.addSongListener(this);
+//        setRetainInstance(true);
+        setHasOptionsMenu(true);
+        menuManager = new QueueMenuManager();
     }
 
     @Override
@@ -67,18 +67,7 @@ public class QueueFragment extends Fragment implements SongControlListener {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_draggable_list, container, false);
         listView = (DragSortListView) view.findViewById(R.id.list);
-        songList = service.getQueue();
-        songAdapter = new QueueAdapter(getActivity(), songList);
-        songAdapter.setSong(service.getCurrentSongIndex());
-        listView.setAdapter(songAdapter);
-        Log.e("QueueFragment", "onCreateView() ");
-        if (songList == null || songList.size() == 1) {
-            listView.setDragEnabled(false);
-        }
-        if (listView.getFirstVisiblePosition() > songAdapter.getSong() ||
-                listView.getLastVisiblePosition() < songAdapter.getSong()) {
-            listView.setSelectionFromTop(songAdapter.getSong() - 2, 0);
-        }
+        ((MainActivity) getActivity()).addServiceListener(this);
         listView.setRemoveListener(new DragSortListView.RemoveListener() {
             @Override
             public void remove(int i) {
@@ -154,12 +143,24 @@ public class QueueFragment extends Fragment implements SongControlListener {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            getActivity().onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onPreparedPlaying(Song song, int position) {
         songAdapter.setSong(song);
         songAdapter.notifyDataSetChanged();
         if (listView.getFirstVisiblePosition() > songAdapter.getSong() ||
                 listView.getLastVisiblePosition() < songAdapter.getSong()) {
-            listView.setSelectionFromTop(songAdapter.getSong() - 2, 0);
+//            listView.setSelectionFromTop(songAdapter.getSong() - 2, 0);
+            int selectionFromTop = (songAdapter.getSong() - 2);
+            if (selectionFromTop < 0) selectionFromTop = 0;
+            listView.setSelectionFromTop(selectionFromTop , 0);
         }
     }
 
@@ -195,5 +196,27 @@ public class QueueFragment extends Fragment implements SongControlListener {
         songAdapter.setSong(service.getCurrentSong());
         songAdapter.notifyDataSetChanged();
         Log.e("onQueueChanged()", queue.size() + " " + songAdapter.getCount());
+    }
+
+    @Override
+    public void onServiceConnected(MusicService service) {
+        this.service = service;
+        this.service.addSongListener(this);
+
+        songList = service.getQueue();
+        if (songList == null) songList = new ArrayList<>();
+        songAdapter = new QueueAdapter(getActivity(), songList);
+        songAdapter.setSong(service.getCurrentSongIndex());
+        listView.setAdapter(songAdapter);
+        Log.e("QueueFragment", "onCreateView() ");
+        if (songList == null || songList.size() == 1) {
+            listView.setDragEnabled(false);
+        }
+        if (listView.getFirstVisiblePosition() > songAdapter.getSong() ||
+                listView.getLastVisiblePosition() < songAdapter.getSong()) {
+            int selectionFromTop = (songAdapter.getSong() - 2);
+            if (selectionFromTop < 0) selectionFromTop = 0;
+            listView.setSelectionFromTop(selectionFromTop , 0);
+        }
     }
 }

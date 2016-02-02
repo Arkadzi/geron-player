@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -24,6 +25,9 @@ import java.util.List;
 import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.audio.ShuffleButtonListener;
+import me.arkadiy.geronplayer.fragment.EqualizerFragment;
+import me.arkadiy.geronplayer.fragment.QueueFragment;
+import me.arkadiy.geronplayer.fragment.SettingsFragment;
 import me.arkadiy.geronplayer.statics.Utils;
 
 /**
@@ -38,11 +42,13 @@ public class ToolbarFragment extends Fragment {
     public final static int FOLDER = 3;
     public final static int ALBUM = 4;
     public final static int PLAYLIST_EDIT = 5;
+    public final static int QUEUE = 6;
+    public final static int EQUALIZER = 7;
+    public final static int SETTINGS = 8;
     private int what;
     private long id;
     private String toolbarText;
     private String additional;
-    private FloatingActionButton fab;
     private DisplayImageOptions options;
 
     public ToolbarFragment() {
@@ -84,9 +90,12 @@ public class ToolbarFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(toolbarText);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            ((MainActivity) getActivity()).updateActionBar(toolbar);
         }
         Fragment fragment = getChildFragmentManager().findFragmentById(R.id.child_fragment_container);
         Log.e("Utils", "onViewCreated() Toolbar " + (fragment == null));
@@ -109,6 +118,15 @@ public class ToolbarFragment extends Fragment {
                     break;
                 case PLAYLIST_EDIT:
                     fragment = PlaylistEditFragment.newInstance(id);
+                    break;
+                case QUEUE:
+                    fragment = QueueFragment.newInstance();
+                    break;
+                case EQUALIZER:
+                    fragment = EqualizerFragment.newInstance();
+                    break;
+                case SETTINGS:
+                    fragment = SettingsFragment.newInstance();
             }
             getChildFragmentManager().beginTransaction()
                     .replace(R.id.child_fragment_container, fragment).commit();
@@ -123,7 +141,7 @@ public class ToolbarFragment extends Fragment {
             return inflater.inflate(R.layout.fragment_toolbar, container, false);
         else {
             View view = inflater.inflate(R.layout.fragment_coordinator, container, false);
-            fab = (FloatingActionButton) view.findViewById(R.id.fab_shuffle);
+            FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab_shuffle);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

@@ -1,12 +1,16 @@
 package me.arkadiy.geronplayer.fragment.pager;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+
+import org.jaudiotagger.tag.FieldKey;
 
 import java.util.List;
 
@@ -19,14 +23,12 @@ import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.AlbumLoader;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.Constants;
 import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 import me.arkadiy.geronplayer.statics.TagManager;
 import me.arkadiy.geronplayer.statics.Utils;
 
-/**
- * Created by Arkadiy on 10.11.2015.
- */
 public class AlbumListFragment extends AbstractListFragment<Category> {
     public final static int ARTIST = 10;
     public final static int GENRE = 11;
@@ -109,17 +111,32 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected void onRename(Category pojo) {
-        TagManager tagManager = new TagManager();
-        tagManager.renameAlbum(getActivity(), pojo);
-        if (loader != null) {
-            loader.notifyChanges();
-        }
+    protected void onRename(final Category pojo) {
+        final Activity c = getActivity();
+        showProgressDialog();
+        new Thread() {
+            @Override
+            public void run() {
+                TagManager tagManager = new TagManager();
+                final List<Song> songs = MusicRetriever.getSongsByAlbum(c, pojo.getID());
+                for (Song song : songs) {
+                    tagManager.rename(c, song.getPath(), new FieldKey[]{FieldKey.ALBUM}, new String[]{pojo.getName()});
+                }
+                c.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dismissDialog();
+                    }
+                });
+//                loader.notifyChanges();
+//                c.getContentResolver().notifyChange(MediaStore.Audio.Artists.Albums.getContentUri("external", id), null);
+            }
+        }.start();
     }
 
     @Override
-    protected List<Song> getSongs(int position) {
-        return MusicRetriever.getSongsByAlbum(getActivity(), data.get(position).getID());
+    protected List<Song> getSongs(Context c, int position) {
+        return MusicRetriever.getSongsByAlbum(c, data.get(position).getID());
     }
 
     @Override
@@ -128,82 +145,28 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected void onMenuItemClick(final int position, int which) {
-        switch (which) {
-            case 0: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).playQueue(songs, 0);
-                            }
-                        });
-                    }
-                }.start();
-
-            }
-            break;
-            case 1: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).addNext(songs);
-                            }
-                        });
-                    }
-                }.start();
-            }
-            break;
-            case 2: {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        final List<Song> songs = getSongs(position);
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((MainActivity) getActivity()).addToQueue(songs);
-                            }
-                        });
-                    }
-                }.start();
-            }
-            break;
-            case 3:
-                showPlaylistDialog(position);
-                break;
-            case 4:
+    protected boolean onMenuItemClick(final int position, int code) {
+        boolean isHandled = super.onMenuItemClick(position, code);
+        if (!isHandled) {
+            if (code == Constants.MENU.SET_ARTWORK) {
                 setAlbumId(getItem(position).getID());
-                Log.e("Utils", "setAlbumId() " + albumId);
                 chooseImage();
-                break;
-            case 5:
-                showRenameDialog(getItem(position));
-                break;
-            case 6:
-                showProgressDialog();
-                new Thread() {
-                    @Override
-                    public void run() {
-                        DeleteUtils deleteUtils = new DeleteUtils();
-                        deleteUtils.deleteAlbum(getActivity(), getItem(position).getID());
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dismissDialog();
-                            }
-                        });
-                    }
-                }.start();
-
+            }
         }
+        return isHandled;
+    }
+
+    @Override
+    protected int[] menuCodes() {
+        return new int[]{
+                Constants.MENU.PLAY,
+                Constants.MENU.PLAY_NEXT,
+                Constants.MENU.ADD_TO_QUEUE,
+                Constants.MENU.ADD_TO_PLAYLIST,
+                Constants.MENU.SET_ARTWORK,
+                Constants.MENU.RENAME,
+                Constants.MENU.DELETE
+        };
     }
 
     private void chooseImage() {
@@ -213,14 +176,10 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
             galleryIntent.setType("image/*");
             galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
 
-//                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
             Intent chooser = new Intent(Intent.ACTION_CHOOSER);
             chooser.putExtra(Intent.EXTRA_INTENT, galleryIntent);
             chooser.putExtra(Intent.EXTRA_TITLE, getString(R.string.choose_picture));
 
-//                Intent[] intentArray =  {cameraIntent};
-//                chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
             fragment.startActivityForResult(chooser, REQUEST_CODE);
         }
 
@@ -236,14 +195,20 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         if (resultCode == Activity.RESULT_OK && requestCode == AlbumListFragment.REQUEST_CODE) {
             Log.e("Utils", "onActivityResult OK" + data.getData());
+            final Context c = getActivity();
             new Thread() {
                 final Uri uri = data.getData();
 
                 @Override
                 public void run() {
                     Log.e("Utils", "Thread " + albumId);
-                    Utils.setArtwork(getActivity(), uri, albumId);
+                    Bitmap bitmap = Utils.getBitmap(uri);
+                    String path = Utils.saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()) + ".jpg");
+//                    List<Song> songs = MusicRetriever.getSongsByAlbum(c, albumId);
+//                    new TagManager().setArtwork(c, songs, path);
                     MainActivity.imageLoader.clearMemoryCache();
+                    Utils.setArtwork(c, albumId, path);
+//                    MainActivity.imageLoader.clearMemoryCache();
                 }
             }.start();
 
