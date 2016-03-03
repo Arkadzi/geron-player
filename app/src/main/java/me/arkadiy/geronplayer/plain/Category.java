@@ -7,6 +7,7 @@ public class Category implements Nameable {
     private long id;
     private String name;
     private int count;
+    private long length;
 
     public Category(long id, String name, int count) {
         this.id = id;
@@ -24,7 +25,6 @@ public class Category implements Nameable {
         return name;
     }
 
-    @Override
     public long getID() {
         return id;
     }
@@ -42,6 +42,14 @@ public class Category implements Nameable {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setLength(long length) {
+        this.length = length;
+    }
+
+    public long getLength() {
+        return length;
     }
 
     public int getCount() {

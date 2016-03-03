@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
 
@@ -50,13 +51,16 @@ import me.arkadiy.geronplayer.statics.PlaylistUtils;
 import me.arkadiy.geronplayer.statics.QueueMenuManager;
 
 public abstract class AbstractListFragment<T extends Nameable> extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<T>>, SearchView.OnQueryTextListener, MainActivity.BackPressListener {
+        implements LoaderManager.LoaderCallbacks<List<T>>, SearchView.OnQueryTextListener, MainActivity.BackPressListener, MyCategoryAdapter.DataChangedListener {
     protected boolean showScroller = true;
     protected RecyclerView mRecyclerView;
     protected AbstractLoader<T> loader;
     protected List<T> data;
     private MyCategoryAdapter<T> adapter;
     private Dialog menuDialog;
+    private SearchView searchView;
+    private View mEmptyView;
+
     View.OnClickListener themePickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -80,7 +84,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
             }
         }
     };
-    private SearchView searchView;
 
     @Override
     public boolean onBackPress() {
@@ -115,8 +118,11 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public Loader<List<T>> onCreateLoader(int id, Bundle args) {
-        loader = getNewLoader();
-        loader.registerObserver();
+        Log.e("myloader", "create loader");
+        if (loader == null) {
+            loader = getNewLoader();
+            loader.registerObserver();
+        }
         return loader;
     }
 
@@ -124,6 +130,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onDestroy() {
+        Log.e("myloader", "onDestroy() " + loader);
         if (loader != null) {
             loader.unregisterObserver();
         }
@@ -145,8 +152,9 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (loader == null)
-            getLoaderManager().restartLoader(0, null, this);
+        Log.e("myloader", "init loader");
+//        if (loader == null)
+        getLoaderManager().initLoader(0, null, this);
 
     }
 
@@ -207,7 +215,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = View.inflate(getActivity(), R.layout.timer_picker_dialog, null);
         builder.setView(view);
-
+        builder.setTitle(R.string.choose_number);
         final NumberPicker picker = (NumberPicker) view.findViewById(R.id.number_picker);
         picker.setMinValue(1);
         picker.setMaxValue(30);
@@ -271,13 +279,20 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_item_list, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
+        mEmptyView = view.findViewById(R.id.empty);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getColumnCount(), GridLayoutManager.VERTICAL, false));
         RecyclerFastScroller fastScroller1 = (RecyclerFastScroller) view.findViewById(R.id.fast_scroller);
         fastScroller1.setRecyclerView(mRecyclerView);
         data = new ArrayList<>();
+        setAdapter();
+        return view;
+    }
+
+    private void setAdapter() {
         adapter = getNewAdapter(data);
         mRecyclerView.setAdapter(adapter);
         setListener(adapter);
+        adapter.setDataChangedListener(this);
         adapter.setLongClickListener(new MyCategoryAdapter.ItemLongClickListener() {
             @Override
             public void onLongClick(int position) {
@@ -285,7 +300,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
                 menuDialog.show();
             }
         });
-        return view;
+
     }
 
     protected abstract int getColumnCount();
@@ -305,22 +320,27 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onLoadFinished(Loader<List<T>> loader, List<T> data) {
+        Log.e("myloader", "onLoadFinished()");
+        if (this.loader == null) {
+            this.loader = (AbstractLoader<T>) loader;
+            this.loader.registerObserver();
+        }
         this.data = data;
         if (mRecyclerView != null)
             if (mRecyclerView.getAdapter() == null) {
-                adapter = getNewAdapter(data);
-                mRecyclerView.setAdapter(adapter);
-                setListener(adapter);
-                adapter.setLongClickListener(new MyCategoryAdapter.ItemLongClickListener() {
-                    @Override
-                    public void onLongClick(int position) {
-                        menuDialog = createMenuDialog(position);
-                        menuDialog.show();
-                    }
-                });
+                animateList();
+                setAdapter();
             } else {
+                if (adapter.getData() == null || adapter.getData().isEmpty()) {
+                    animateList();
+                }
                 adapter.setData(data);
             }
+    }
+
+    private void animateList() {
+        mRecyclerView.setAlpha(0);
+        mRecyclerView.animate().alpha(1);
     }
 
     private Dialog createMenuDialog(final int position) {
@@ -345,7 +365,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
             @Override
             protected Context doInBackground(Context... params) {
                 playlists = PlaylistUtils.getPlaylists(getActivity());
-                songs = getSongs(params[0], position);
+                songs = getSongs(params[0], getItem(position));
                 return params[0];
             }
 
@@ -468,22 +488,24 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     protected boolean onMenuItemClick(final int position, final int code) {
         final MainActivity activity = (MainActivity) getActivity();
+        T item = getItem(position);
         final int shuffle = activity.getService().getShuffleState();
         switch (code) {
             case Constants.MENU.PLAY:
-                playQueue(position, activity, shuffle);
+                playQueue(item, activity, shuffle);
                 break;
             case Constants.MENU.PLAY_NEXT:
-                playNext(position, activity);
+                playNext(item, activity);
                 break;
             case Constants.MENU.ADD_TO_QUEUE:
-                addToQueue(position, activity);
+                addToQueue(item, activity);
                 break;
             case Constants.MENU.ADD_TO_PLAYLIST:
                 showPlaylistDialog(activity, position);
                 break;
             case Constants.MENU.DELETE:
-                delete(position, activity);
+                showDeleteDialog(position, activity);
+//                delete(position, activity);
                 break;
             case Constants.MENU.RENAME:
                 showRenameDialog(getItem(position));
@@ -494,32 +516,55 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         return true;
     }
 
-    private void delete(final int position, final MainActivity activity) {
+    private void showDeleteDialog(int position, final MainActivity activity) {
+        final T item = getItem(position);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//        View view = getActivity().getLayoutInflater().inflate(R.layout.create_dialog, null);
+
+//        builder.setView(view);
+        builder.setTitle(item.getName());
+        builder.setMessage(R.string.delete_message);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                delete(item, activity);
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        menuDialog =  builder.create();
+        menuDialog.show();
+    }
+
+    private void delete(final T item, final MainActivity activity) {
         showProgressDialog();
         new Thread() {
             @Override
             public void run() {
 //                List<Song> songs = activity.getService().getQueue();
 //                int currentSong = activity.getService().getCurrentSongPosition();
-                final boolean changed = delete(activity.getService(), position);
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (changed) {
-                            activity.getService().notifyQueueChanges();
+                final MusicService service = activity.getService();
+                if (service != null) {
+                    final boolean changed = delete(service, item);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (changed) {
+                                service.notifyQueueChanges();
+                            }
+                            dismissDialog();
                         }
-                        dismissDialog();
-                    }
-                });
+                    });
+                }
             }
         }.start();
     }
 
-    private void addToQueue(final int position, final MainActivity activity) {
+    private void addToQueue(final T item, final MainActivity activity) {
         new Thread() {
             @Override
             public void run() {
-                final List<Song> songs = getSongs(activity, position);
+                final List<Song> songs = getSongs(activity, item);
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -530,11 +575,11 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         }.start();
     }
 
-    private void playNext(final int position, final MainActivity activity) {
+    private void playNext(final T item, final MainActivity activity) {
         new Thread() {
             @Override
             public void run() {
-                final List<Song> songs = getSongs(activity, position);
+                final List<Song> songs = getSongs(activity, item);
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -545,27 +590,31 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         }.start();
     }
 
-    private void playQueue(final int position, final MainActivity activity, final int shuffle) {
+    private void playQueue(final T item, final MainActivity activity, final int shuffle) {
         new Thread() {
             @Override
             public void run() {
-                final List<Song> songs = getSongs(activity, position);
+                final List<Song> songs = getSongs(activity, item);
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        int song = 0;
-                        if (shuffle == MusicService.SHUFFLE_ON) {
-                            song = new Random().nextInt(songs.size());
+                        if (!songs.isEmpty()) {
+                            int song = 0;
+                            if (shuffle == MusicService.SHUFFLE_ON) {
+                                song = new Random().nextInt(songs.size());
+                            }
+                            activity.playQueue(songs, song);
+                        } else {
+                            Toast.makeText(activity.getApplicationContext(), R.string.no_songs, Toast.LENGTH_SHORT).show();
                         }
-                        activity.playQueue(songs, song);
                     }
                 });
             }
         }.start();
     }
 
-    protected boolean delete(MusicService c, int pos) {
-        List<Song> songsForDelete = getSongs(c, pos);
+    protected boolean delete(MusicService c, T item) {
+        List<Song> songsForDelete = getSongs(c, item);
         List<Song> songs = c.getQueue();
         List<Song> absoluteDelete = new ArrayList<>(songsForDelete);
         absoluteDelete.removeAll(songs);
@@ -575,5 +624,16 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         return DeleteUtils.deleteSongs(c, songsForDelete, songs);
     }
 
-    protected abstract List<Song> getSongs(Context c, int position);
+    @Override
+    public void onDataChanged(boolean hasData) {
+        if (hasData) {
+            mEmptyView.setVisibility(View.GONE);
+        } else {
+            mEmptyView.setAlpha(0);
+            mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.animate().alpha(1);
+        }
+    }
+
+    protected abstract List<Song> getSongs(Context c, T item);
 }

@@ -52,11 +52,12 @@ public class GenreListFragment extends AbstractListFragment<Category> {
             public void onClick(int position) {
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
-                                ToolbarFragment.newInstance(ToolbarFragment.GENRE,
-                                        getItem(position).getID(),
-                                        getItem(position).getName(),
-                                        null))
+                 ToolbarFragment.newInstance(ToolbarFragment.GENRE,
+                         getItem(position).getID(),
+                         getItem(position).getName(),
+                         null))
                         .addToBackStack(null)
                         .commit();
             }
@@ -70,6 +71,7 @@ public class GenreListFragment extends AbstractListFragment<Category> {
                 R.layout.icon_list_item,
                 R.id.main,
                 R.id.secondary,
+                R.id.third,
                 R.id.icon,
                 getResources().getString(R.string.album_count),
                 R.drawable.ic_music_note_white_36dp);
@@ -82,7 +84,7 @@ public class GenreListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected List<Song> getSongs(Context c, int position) {
-        return MusicRetriever.getSongsByGenre(c, data.get(position).getID());
+    protected List<Song> getSongs(Context c, Category category) {
+        return MusicRetriever.getSongsByGenre(c, category.getID());
     }
 }

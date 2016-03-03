@@ -1,12 +1,19 @@
 package me.arkadiy.geronplayer;
 
 import android.animation.TimeInterpolator;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,23 +25,21 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -55,6 +60,7 @@ import me.arkadiy.geronplayer.fragment.pager.ToolbarFragment;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
 import me.arkadiy.geronplayer.statics.QueueMenuManager;
+import me.arkadiy.geronplayer.statics.TagManager;
 import me.arkadiy.geronplayer.statics.Utils;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SongControlListener {
@@ -78,12 +84,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView backgroundCoverView;
     private ImageView repeatView;
     private ImageView shuffleView;
-    private ImageButton ppButton;
+    private ImageView ppButton;
+    private ImageView pPrevButton;
+    private ImageView pNextButton;
     private ImageButton prevButton;
     private ImageButton nextButton;
     private MusicService mService;
-    private View hideArrow;
-    private HashSet<ServiceListener> serviceListeners;
     private HashSet<BackPressListener> backPressListeners;
     private SlidingUpPanelLayout panel;
     private boolean mBound;
@@ -92,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View container;
     private SeekBar songDurationView;
     private boolean isFingerSlide;
-    private boolean animateSlide;
     private DisplayImageOptions gaussOptions;
     private ImageSize imageSize;
     private AlphaAnimation fadeImage;
@@ -111,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-            Log.e("complete", String.format("uri %s tag %s", imageUri, backgroundCoverView.getTag()));
             backgroundCoverView.clearAnimation();
             if (backgroundCoverView.getTag() != null) {
                 backgroundCoverView.startAnimation(fadeImage);
@@ -127,9 +131,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (mBound && mService.isPrepared()) {
                 int seconds = mService.getPosition() / 1000;
                 post = 1000 - mService.getPosition() % 1000;
-                String time = String.format("%02d:%02d", seconds / 60, seconds % 60);
-                positionView.setText(time);
 
+                positionView.setText(Utils.formatMillis(seconds * 1000));
                 songDurationView.setProgress(seconds);
             }
             timeHandler.postDelayed(this, post);
@@ -145,24 +148,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mBound = true;
             mService.addSongListener(MainActivity.this);
 
-            notifyServiceListeners();
-
             updateRepeatButton(mService.getRepeatState());
             updateShuffleButton(mService.getShuffleState());
-
+            Log.e("MusicService", mService.hasSongs() + " " + mService.isPrepared());
             if (mService.hasSongs()) {
                 mPagerAdapter.setService(mService);
                 mPagerAdapter.setSongs(mService.getQueue());
                 mPagerAdapter.notifyDataSetChanged();
 
-                if (mService.isPrepared()) {
-                    onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition());
-                    if (mService.isPlaying()) {
+//                if (mService.isPrepared()) {
+                    onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition(), mService.getCurrentSongIndex());
+                    if (mService.isPrepared() && mService.isPlaying()) {
                         onStartPlaying(mService.getCurrentSong());
                     } else {
                         onStopPlaying(mService.getCurrentSong());
                     }
-                }
+//                }
             } else {
                 panel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
             }
@@ -182,13 +183,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onBackStackChanged() {
             if (panel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                panel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                panel.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        panel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    }
+                }, 300);
             }
         }
     };
-    private DrawerLayout mDrawerLayout;
     private View movingPanel;
     private boolean isHighlighted;
+    private Dialog dialog;
+    private Button lyricsButton;
+    private View lyricsBackground;
+    private TextView lyricsView;
+    private Button lyricsEditButton;
 
     @Override
     public void onClick(View v) {
@@ -206,9 +216,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     mService.start();
                 }
-            } else if (v == prevButton) {
+            } else if (v == pPrevButton || v == prevButton) {
                 mService.playPrev();
-            } else if (v == nextButton) {
+            } else if (v == pNextButton || v == nextButton) {
                 mService.playNext();
             } else if (v == repeatView) {
                 mService.nextRepeatState();
@@ -218,7 +228,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 makeEqualizerFragment();
             } else if (v == queueButton) {
                 makeQueueFragment();
+            } else if (v == lyricsButton) {
+                showLyricsView();
+            } else if (v == lyricsEditButton) {
+                showLyricsEditDialog();
             }
+        }
+    }
+
+    private void showLyricsEditDialog() {
+        menuManager.showLyricsEditMenu(this, getService().getCurrentSong());
+    }
+
+    private void showLyricsView() {
+        if (lyricsBackground.getVisibility() == View.GONE) {
+            lyricsBackground.setVisibility(View.VISIBLE);
+//            Log.e("Lyrics", lyricsView.getText().toString());
+            setLyrics(getService().getCurrentSong());
+        } else {
+            lyricsBackground.setVisibility(View.GONE);
+        }
+    }
+
+    public void setLyrics(Song song) {
+        if (lyricsBackground.getVisibility() == View.VISIBLE) {
+            String lyrics = new TagManager().getLyrics(song);
+            if (TextUtils.isEmpty(lyrics)) {
+                lyrics = getString(R.string.no_lyrics);
+            }
+            lyricsView.setText(lyrics);
         }
     }
 
@@ -243,13 +281,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack(Constants.STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         FragmentTransaction transaction = fm.beginTransaction();
+        transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out);
         transaction.replace(R.id.fragment_container, fragment, tag);
         transaction.addToBackStack(Constants.STACK);
         transaction.commit();
-    }
-
-    private void initNavigationDrawer() {
-//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
     }
 
     public void updateActionBar(Toolbar toolbar) {
@@ -264,7 +299,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void playQueue(List<Song> queue, int position) {
-        Log.e("MainActivity", "play queue null " + (mService == null));
         if (mBound) {
             mService.setCurrentSong(position);
             mPagerAdapter.setService(mService);
@@ -297,10 +331,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int theme = preferences.getInt(Constants.THEME.THEME, Constants.THEME.DARK);
         if (theme == Constants.THEME.DARK) {
             setTheme(R.style.AppTheme);
-        }
-        else if (theme == Constants.THEME.LIGHT) {
+        } else if (theme == Constants.THEME.LIGHT) {
             setTheme(R.style.AppThemeLight);
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        playFromFileBrowser(intent);
+        Log.e("NEW INTENT", intent.getAction() + " " + intent.getData());
     }
 
     @Override
@@ -308,11 +348,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setCurrentTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        serviceListeners = new HashSet<>();
+        Log.e("CREATE INTENT", getIntent().getAction() + " " + getIntent().getData());
         backPressListeners = new HashSet<>();
         timeHandler = new Handler();
         menuManager = new QueueMenuManager();
-        initNavigationDrawer();
         initLayoutViews();
         setColorArray();
         initImageLoader();
@@ -331,15 +370,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
-
+        playFromFileBrowser(getIntent());
 //        getWindow().getDecorView().setSystemUiVisibility(
 //                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+    }
+
+    private void playFromFileBrowser(Intent intent) {
+        if (intent != null) {
+            String action = intent.getAction();
+            Uri uri = intent.getData();
+            if (Intent.ACTION_VIEW.equals(action) && uri != null) {
+                Log.e("INTENT", "playFromFileBrowser");
+                Intent newIntent = new Intent(this, MusicService.class);
+                newIntent.setAction(Intent.ACTION_VIEW);
+                newIntent.setData(uri);
+                startService(newIntent);
+            }
+        }
     }
 
     private void setColorArray() {
         if (colors == null) {
             colors = new int[2];
-            colors[0] = Utils.getColorAttribute(this, R.attr.colorControlNormal);
+//            colors[0] = Utils.getColorAttribute(this, R.attr.colorControlNormal);
+            colors[0] = Color.WHITE;
             colors[1] = Utils.getColorAttribute(this, R.attr.colorAccent);
         }
     }
@@ -348,6 +402,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
+        if (BuildConfig.FLAVOR.equals("free")) {
+            checkTrial();
+        }
+//        Log.e("RESUME INTENT", getIntent().getAction() + " " + getIntent().getData());
         Intent playIntent = new Intent(this, MusicService.class);
         playIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);
         startService(playIntent);
@@ -356,13 +414,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getApplicationContext().bindService(startIntent, musicConnection, Context.BIND_AUTO_CREATE);
 
         if (panel.getPanelState().equals(SlidingUpPanelLayout.PanelState.EXPANDED)) {
-            bottomPanel.setVisibility(View.GONE);
+            bottomPanel.setVisibility(View.INVISIBLE);
+            setClickableButtons(true);
+
+        } else {
+            setClickableButtons(false);
         }
+    }
+
+    private void setClickableButtons(boolean state) {
+        int clickable = state ? View.VISIBLE : View.GONE;
+        lyricsButton.setVisibility(clickable);
+        equalizerButton.setVisibility(clickable);
+        queueButton.setVisibility(clickable);
     }
 
     @Override
     protected void onPause() {
-        menuManager.dismissMenu();
+
+        dismissTrialDialog();
+//        menuManager.dismissMenu();
         timeHandler.removeCallbacks(runnable);
 
         if (mBound) {
@@ -387,21 +458,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onUserLeaveHint() {
-        if (mBound && mService.isPrepared() && mService.isPlaying()) {
+        if (mBound)/*mService.isPrepared() && mService.isPlaying())*/ {
             Intent playIntent = new Intent(this, MusicService.class);
             playIntent.setAction(Constants.ACTION.BEGIN_FOREGROUND_ACTION);
             startService(playIntent);
         }
         super.onUserLeaveHint();
-        Log.e("MainActivity", "onUserLeaveHint()");
     }
 
     @Override
     protected void onDestroy() {
+        menuManager.dismissMenu();
         getSupportFragmentManager().removeOnBackStackChangedListener(fragmentStackListener);
-        Log.e("MainActivity", "onDestroy()");
         backPressListeners.clear();
-        serviceListeners.clear();
         super.onDestroy();
     }
 
@@ -448,25 +517,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         backPressListeners.remove(listener);
     }
 
-    public void addServiceListener(ServiceListener newListener) {
-        if (getService() == null) {
-            serviceListeners.add(newListener);
-        } else {
-            newListener.onServiceConnected(getService());
-        }
-    }
-
-    private void notifyServiceListeners() {
-        for (ServiceListener listener : serviceListeners) {
-            listener.onServiceConnected(mService);
-        }
-        serviceListeners.clear();
-    }
-
     private void initLayoutViews() {
+        fadeImage = new AlphaAnimation(0, 1);
+        fadeImage.setDuration(500);
+        fadeImage.setInterpolator(new DecelerateInterpolator());
+
+        panel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        View slider = findViewById(R.id.slider);
+        lyricsBackground = findViewById(R.id.lyrics_background);
+        lyricsView = (TextView) lyricsBackground.findViewById(R.id.lyrics_view);
+        songTitleView = (TextView) panel.findViewById(R.id.song_title);
+        artistNameView = (TextView) panel.findViewById(R.id.artist_name);
+        repeatView = (ImageView) panel.findViewById(R.id.repeat_view);
+        shuffleView = (ImageView) panel.findViewById(R.id.shuffle_view);
+        subSongTitleView = (TextView) panel.findViewById(R.id.sub_song_title);
+        subArtistNameView = (TextView) panel.findViewById(R.id.sub_artist_name);
+        playbackButton = (ImageButton) slider.findViewById(R.id.playback_button);
+        prevButton = (ImageButton) slider.findViewById(R.id.prev_button);
+        nextButton = (ImageButton) slider.findViewById(R.id.next_button);
+        ppButton = (ImageView) panel.findViewById(R.id.pp_button);
+        pPrevButton = (ImageView) panel.findViewById(R.id.p_prev);
+        pNextButton = (ImageView) panel.findViewById(R.id.p_next);
+        queueButton = (ImageButton) findViewById(R.id.queue_button);
+        equalizerButton = (ImageButton) findViewById(R.id.equalizer_button);
+        lyricsButton = (Button) findViewById(R.id.show_lyrics_button);
+        lyricsEditButton = (Button) findViewById(R.id.edit_lyrics_button);
+        backgroundCoverView = (ImageView) findViewById(R.id.background_cover);
+        positionView = (TextView) panel.findViewById(R.id.position_text);
+        durationView = (TextView) panel.findViewById(R.id.duration_text);
+        subCoverArtView = (ImageView) panel.findViewById(R.id.sub_cover_art);
+        songDurationView = (SeekBar) panel.findViewById(R.id.progress_seek_bar);
         mPager = (ViewPager) findViewById(R.id.image_pager);
-        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
-        mPager.setAdapter(mPagerAdapter);
+        container = findViewById(R.id.fragment_container);
+        bottomPanel = (ViewGroup) panel.findViewById(R.id.bottom_panel);
+        movingPanel = slider.findViewById(R.id.moving_view);
+        View songSettings = findViewById(R.id.song_settings);
+
+        equalizerButton.setOnClickListener(this);
+        lyricsButton.setOnClickListener(this);
+        queueButton.setOnClickListener(this);
+        playbackButton.setOnClickListener(this);
+        prevButton.setOnClickListener(this);
+        nextButton.setOnClickListener(this);
+        ppButton.setOnClickListener(this);
+        pPrevButton.setOnClickListener(this);
+        pNextButton.setOnClickListener(this);
+        shuffleView.setOnClickListener(this);
+        repeatView.setOnClickListener(this);
+        lyricsEditButton.setOnClickListener(this);
+
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             public int state;
 
@@ -477,7 +576,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onPageSelected(int position) {
-                Log.e("pager", "onPageSelected()" + String.valueOf(position));
                 MainActivity.this.position = position;
             }
 
@@ -497,18 +595,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 this.state = state;
             }
         });
-        container = findViewById(R.id.fragment_container);
-        panel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        View slider = findViewById(R.id.slider);
-        bottomPanel = (ViewGroup) panel.findViewById(R.id.bottom_panel);
-        movingPanel = slider.findViewById(R.id.moving_view);
-        if (Build.VERSION.SDK_INT >= 19) {
-            View topPanel = slider.findViewById(R.id.top_panel);
-            int statusBarHeight = getStatusBarHeight();
-            topPanel.setPadding(0, statusBarHeight, 0, 0);
-        }
-        panel.setDragView(slider);
-        View songSettings = findViewById(R.id.song_settings);
 
         songSettings.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -519,33 +605,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             }
         });
-        songTitleView = (TextView) panel.findViewById(R.id.song_title);
-        artistNameView = (TextView) panel.findViewById(R.id.artist_name);
-        repeatView = (ImageView) panel.findViewById(R.id.repeat_view);
-        shuffleView = (ImageView) panel.findViewById(R.id.shuffle_view);
-        subSongTitleView = (TextView) panel.findViewById(R.id.sub_song_title);
-        subArtistNameView = (TextView) panel.findViewById(R.id.sub_artist_name);
-        playbackButton = (ImageButton) slider.findViewById(R.id.playback_button);
-        ppButton = (ImageButton) panel.findViewById(R.id.pp_button);
-        prevButton = (ImageButton) panel.findViewById(R.id.p_prev);
-        nextButton = (ImageButton) panel.findViewById(R.id.p_next);
-        hideArrow = slider.findViewById(R.id.hide_arrow);
-        queueButton = (ImageButton) slider.findViewById(R.id.queue_button);
-        equalizerButton = (ImageButton) slider.findViewById(R.id.equalizer_button);
-        backgroundCoverView = (ImageView) findViewById(R.id.background_cover);
-        positionView = (TextView) panel.findViewById(R.id.position_text);
-        durationView = (TextView) panel.findViewById(R.id.duration_text);
-        fadeImage = new AlphaAnimation(0, 1);
-        fadeImage.setDuration(500);
-        fadeImage.setInterpolator(new DecelerateInterpolator());
-        subCoverArtView = (ImageView) panel.findViewById(R.id.sub_cover_art);
-        songDurationView = (SeekBar) panel.findViewById(R.id.progress_seek_bar);
+
         songDurationView.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && mService != null && mService.isPrepared()) {
                     mService.seekTo(progress * 1000);
-                    positionView.setText(String.format("%02d:%02d", progress / 60, progress % 60));
+                    positionView.setText(Utils.formatMillis(progress * 1000));
                 }
             }
 
@@ -559,52 +625,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 timeHandler.post(runnable);
             }
         });
-        subCoverArtView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                panel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-            }
-        });
-        equalizerButton.setOnClickListener(this);
-        queueButton.setOnClickListener(this);
-        playbackButton.setOnClickListener(this);
-        ppButton.setOnClickListener(this);
-        prevButton.setOnClickListener(this);
-        nextButton.setOnClickListener(this);
-        shuffleView.setOnClickListener(this);
-        repeatView.setOnClickListener(this);
-
-        panel.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        panel.setPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
 
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
                 bottomPanel.setAlpha(1.0f - slideOffset);
-                if (bottomPanel.getVisibility() == View.GONE) {
+                if (bottomPanel.getVisibility() == View.INVISIBLE) {
                     bottomPanel.setVisibility(View.VISIBLE);
                 }
             }
 
             @Override
             public void onPanelCollapsed(View panel) {
-
+                setClickableButtons(false);
             }
 
             @Override
             public void onPanelExpanded(View panel) {
-                bottomPanel.setVisibility(View.GONE);
+                setClickableButtons(true);
+                bottomPanel.setVisibility(View.INVISIBLE);
                 songTitleView.setSelected(true);
             }
+        });
 
+        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        mPager.setAdapter(mPagerAdapter);
+        movingPanel.post(new Runnable() {
             @Override
-            public void onPanelAnchored(View panel) {
-
-            }
-
-            @Override
-            public void onPanelHidden(View panel) {
+            public void run() {
+                movingPanel.setTranslationY(-movingPanel.getHeight());
 
             }
         });
+        if (Build.VERSION.SDK_INT >= 19) {
+            View topPanel = findViewById(R.id.top_panel);
+            int statusBarHeight = getStatusBarHeight();
+            topPanel.setPadding(0, statusBarHeight, 0, 0);
+            mPager.setPadding(0, statusBarHeight, 0, 0);
+        }
+        panel.setDragView(slider);
     }
 
     @Override
@@ -624,7 +683,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onPreparedPlaying(final Song song, final int position) {
+    public void onPreparedPlaying(final Song song, final int position, final int index) {
         if (mService.isPrepared()) {
             if (!isFingerSlide) {
                 mPager.setCurrentItem(position, false);
@@ -632,20 +691,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             isFingerSlide = false;
-            animateSlide = false;
-
-            songTitleView.setText(song.getName());
-            artistNameView.setText(song.getArtist());
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                songTitleView.setText(song.getName());
+                artistNameView.setText(song.getArtist());
+            } else  {
+                songTitleView.setText(String.format("%s - %s", song.getName(), song.getArtist()));
+            }
             subSongTitleView.setText(song.getName());
             subArtistNameView.setText(song.getArtist());
 
-            int seconds = mService.getDuration() / 1000;
-            durationView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
-            songDurationView.setMax(seconds);
+            int duration = mService.getDuration();
+            durationView.setText(Utils.formatMillis(duration));
+            songDurationView.setMax(duration / 1000);
 
-            seconds = mService.getPosition() / 1000;
-            positionView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
-            songDurationView.setProgress(seconds);
+            int songPosition = mService.getPosition();
+            positionView.setText(Utils.formatMillis(songPosition));
+            songDurationView.setProgress(songPosition / 1000);
 
             String uri = Utils.getArtworks(song.getAlbumID()).toString();
             imageLoader.displayImage(uri, subCoverArtView);
@@ -657,6 +718,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (panel.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN) {
                 panel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             }
+            setLyrics(song);
         }
     }
 
@@ -668,16 +730,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         timeHandler.removeCallbacks(runnable);
 
         if (mBound) {
-            int seconds = mService.getDuration() / 1000;
-            durationView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
-            songDurationView.setMax(seconds);
+            int duration = mService.getDuration();
+            durationView.setText(Utils.formatMillis(duration));
+            songDurationView.setMax(duration / 1000);
 
-            seconds = mService.getPosition() / 1000;
-            positionView.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
-            songDurationView.setProgress(seconds);
+            int position = mService.getPosition();
+            positionView.setText(Utils.formatMillis(position));
+            songDurationView.setProgress(position / 1000);
 
             timeHandler.postDelayed(runnable, 1000 - mService.getPosition() % 1000);
-            Log.e("MainActivity", String.format("runnable %d", 1000 - mService.getPosition() % 1000));
         }
     }
 
@@ -693,6 +754,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onError(Song song) {
         Snackbar.make(container, R.string.load_error, Snackbar.LENGTH_SHORT).show();
         isFingerSlide = false;
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            songTitleView.setText(song.getName());
+            artistNameView.setText(song.getArtist());
+        } else  {
+            songTitleView.setText(String.format("%s - %s", song.getName(), song.getArtist()));
+        }
+        subSongTitleView.setText(song.getName());
+        subArtistNameView.setText(song.getArtist());
+        durationView.setText("-");
+        positionView.setText("-");
+        subCoverArtView.setImageBitmap(null);
+        songDurationView.setProgress(0);
+        songDurationView.setMax(0);
         onStopPlaying(song);
     }
 
@@ -717,20 +791,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onShuffleStateChange(int state) {
         updateShuffleButton(state);
-
-        mPager.setAdapter(mPagerAdapter);
+        //TODO return setAdapter
+//        mPager.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
 
-        onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition());
+        onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition(), mService.getCurrentSongIndex());
     }
 
     @Override
-    public void onQueueChanged(List<Song> songs, int i) {
+    public void onQueueChanged(List<Song> songs, int position, int index) {
         mPagerAdapter.setSongs(songs);
-        mPager.setAdapter(mPagerAdapter);
+        //TODO return setAdapter
+//        mPager.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
-        mPager.setCurrentItem(i, false);
-        position = i;
+        mPager.setCurrentItem(position, false);
+        this.position = position;
     }
 
     private void updateShuffleButton(int state) {
@@ -752,7 +827,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void animateHighlight() {
         if (movingPanel != null) {
-            Log.e("MainActivity", "movingPanel " + movingPanel.getHeight());
             movingPanel.animate().translationY(isHighlighted ? -movingPanel.getHeight() : 0)
                     .setDuration(200)
                     .setInterpolator(getInterpolator());
@@ -764,12 +838,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return isHighlighted ? new FastOutLinearInInterpolator() : new LinearOutSlowInInterpolator();
     }
 
-    public interface BackPressListener {
-        boolean onBackPress();
+    private void checkTrial() {
+        try {
+            if (Utils.trialTimeLeft(this) < 0) {
+                showTrialDialog();
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
-    public interface ServiceListener {
-        void onServiceConnected(MusicService service);
+    private void showTrialDialog() {
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("market://details?id=ru.alexanderklimov.crib"));
+                    startActivity(intent);
+                }
+                finish();
+            }
+        };
+        dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.trial_dialog_title)
+                .setMessage(R.string.trial_dialog_message)
+                .setPositiveButton(R.string.buy, listener)
+                .setCancelable(false)
+                .setNegativeButton(R.string.cancel, listener)
+                .show();
+    }
+
+    private void dismissTrialDialog() {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+            dialog = null;
+        }
+    }
+
+    public interface BackPressListener {
+        boolean onBackPress();
     }
 }
 

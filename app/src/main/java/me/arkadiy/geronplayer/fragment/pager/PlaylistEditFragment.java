@@ -79,11 +79,14 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
         int id = item.getItemId();
         if (id == R.id.action_ok) {
             final Context c = getActivity();
+            final List<Song> songs = songList;
+            final long playlistId = this.playlistId;
+            Log.e("PlaylistEditFragment", "size " + songs.size());
             if (wasChanged) {
                 new Thread() {
                     @Override
                     public void run() {
-                        PlaylistUtils.rewritePlaylist(c, playlistId, songList);
+                        PlaylistUtils.rewritePlaylist(c, playlistId, songs);
                     }
                 }.start();
             }
@@ -158,7 +161,9 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
     public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
         this.songList = data;
         Log.e("PlaylistEditFragment", String.valueOf(songList.size()));
-        if (listView != null)
+        if (listView != null) {
+            listView.setAlpha(0);
+            listView.animate().alpha(1);
             if (listView.getAdapter() == null) {
                 adapter = new DraggableAdapter(getActivity(), songList);
                 listView.setAdapter(adapter);
@@ -166,6 +171,7 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
             } else {
                 adapter.changeList(songList);
             }
+        }
     }
 
     @Override

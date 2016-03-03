@@ -12,6 +12,7 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 import me.arkadiy.geronplayer.statics.PlaylistUtils;
 
 /**
@@ -30,6 +31,6 @@ public class PlaylistLoader extends AbstractLoader<Category> {
 
     @Override
     protected List<Category> getList() {
-        return PlaylistUtils.getPlaylists(getContext());
+        return  PlaylistUtils.getPlaylists(getContext());
     }
 }

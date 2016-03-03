@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,6 +30,31 @@ import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
 
 public class Utils {
+
+    public static long trialTimeLeft(Context c) throws PackageManager.NameNotFoundException {
+            PackageInfo info = c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
+            long currentTimeDifference = System.currentTimeMillis() - info.firstInstallTime;
+            int days = 15;
+            long trialTime = days * 24 * 60 * 60 * 1000;
+            return trialTime - currentTimeDifference;
+    }
+
+    public static String formatMillis(long millis) {
+        long seconds = millis/1000;
+        long minutes = seconds / 60 ;
+        long hours = minutes/60;
+        seconds %= 60;
+        minutes %= 60;
+
+        StringBuilder builder = new StringBuilder();
+        if (hours > 0) {
+            builder.append(String.format("%d:", hours));
+        }
+        builder.append(String.format("%02d:", minutes));
+        builder.append(String.format("%02d", seconds));
+        return builder.toString();
+    }
+
     public static Bitmap fastblur(Bitmap sentBitmap, int radius) {
 
 //        int width = Math.round(50);
@@ -308,6 +335,7 @@ public class Utils {
         values.put("album_id", id);
         values.put("_data", file);
         res.insert(Uri.parse("content://media/external/audio/albumart"), values);
+        res.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null);
     }
 
     public static Bitmap getBitmap(Uri uri) {
@@ -317,19 +345,32 @@ public class Utils {
     public static String saveImage(Context c, Bitmap image, String name) {
         try {
             int scale = getScale(image, 500);
-            Log.e("Utils", "scale " + scale);
             File root = new File(Environment.getExternalStorageDirectory()
                     + "/albumthumbs/");
             root.mkdirs();
-
+//            int width = image.getWidth();
+//            int height = image.getHeight();
+//            int max = 800;
+//            if (width > max) {
+//                float scale = (1f * max) / width;
+//                width = max;
+//                height = (int)(max * scale);
+//            }
+//            if (height > max) {
+//                float scale = (1f * max) / height;
+//                height = max;
+//                width = (int)(max * scale);
+//            }
+//            Bitmap scaledBitmap = Bitmap.createScaledBitmap(image, width, height, false);
             String filePath = root.toString() + File.separator + name;// + ".jpg";
             OutputStream fOut = new FileOutputStream(filePath);
             BufferedOutputStream bos = new BufferedOutputStream(fOut);
 
-            image.compress(Bitmap.CompressFormat.JPEG, scale, bos);
+            image.compress(Bitmap.CompressFormat.JPEG, 2 * scale / 3, bos);
 
             bos.flush();
             bos.close();
+//            scaledBitmap.recycle();
             image.recycle();
 
             ContentValues cv = new ContentValues();

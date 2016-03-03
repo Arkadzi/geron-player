@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 public class GenreAlbumLoader extends AbstractLoader<Category> {
 
@@ -34,7 +35,11 @@ public class GenreAlbumLoader extends AbstractLoader<Category> {
                 long id = albumCursor.getLong(0);
                 String name = albumCursor.getString(1);
                 int count = numberOfSongs(id);
-                albums.add(new Category(id, name, count));
+                Category newAlbum = new Category(id, name, count);
+                long length = MusicRetriever.getLengthByAlbum(getContext(), newAlbum.getID());
+                newAlbum.setLength(length);
+
+                albums.add(newAlbum);
             } while (albumCursor.moveToNext());
         }
         if (albumCursor != null) {

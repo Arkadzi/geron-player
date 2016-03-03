@@ -9,6 +9,7 @@ import java.util.List;
 public class Folder implements Nameable {
     private String name;
     private String path;
+    private long length;
 //    private List<Song> songs;
 
     public Folder(String name, String path) {
@@ -27,9 +28,12 @@ public class Folder implements Nameable {
 
     }
 
-    @Override
-    public long getID() {
-        return 0;
+    public void setLength(long length) {
+        this.length = length;
+    }
+
+    public long getLength() {
+        return length;
     }
 
     public String getPath() {

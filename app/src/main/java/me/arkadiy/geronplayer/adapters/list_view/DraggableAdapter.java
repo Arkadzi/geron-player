@@ -48,9 +48,11 @@ public class DraggableAdapter extends BaseAdapter {
                 (R.layout.draggable_song, viewGroup, false);
         TextView songView = (TextView) songLay.findViewById(R.id.song_item_name);
         TextView artistView = (TextView) songLay.findViewById(R.id.song_item_artist);
+        TextView timeView = (TextView) songLay.findViewById(R.id.third);
         Song currSong = songs.get(i);
         songView.setText(currSong.getTitle());
         artistView.setText(currSong.getArtist());
+        timeView.setText(Utils.formatMillis(currSong.getLength()));
         songLay.setTag(i);
         return songLay;
     }

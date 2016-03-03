@@ -1,57 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:clickable="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/grid_padding"
-    card_view:cardBackgroundColor="?attr/colorPrimary"
+    android:clickable="true"
     android:foreground="?attr/selectableItemBackground"
-    card_view:cardPreventCornerOverlap="false"
-    card_view:cardCornerRadius="4dp" >
-
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    card_view:cardBackgroundColor="?attr/colorPrimary"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardPreventCornerOverlap="false">
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <me.arkadiy.geronplayer.views.SquareImageView
             android:id="@+id/item_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/default_album_art"
             android:scaleType="centerCrop"
-            custom:direction="width"
-            android:background="@drawable/default_album_art" />
+            custom:direction="width" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/grid_text_padding">
+            android:layout_height="match_parent"
+            android:padding="@dimen/grid_padding"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/main"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="@dimen/secondary_text_size"
+                    tools:text="asd" />
+
+                <TextView
+                    android:id="@+id/secondary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="@dimen/secondary_text_size"
+                    tools:text="dsdg" />
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/main"
+                android:id="@+id/third"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/list_padding"
+                android:layout_marginStart="@dimen/list_padding"
                 android:singleLine="true"
-                tools:text="asd"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="@dimen/secondary_text_size" />
-
-            <TextView
-                android:id="@+id/secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="dsdg"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="@dimen/secondary_text_size" />
-
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="@dimen/small_text_size"
+                tools:text="00:00" />
         </LinearLayout>
+
     </LinearLayout>
 </android.support.v7.widget.CardView>

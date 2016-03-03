@@ -1,7 +1,12 @@
 package me.arkadiy.geronplayer.fragment;
 
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -25,13 +30,32 @@ import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.QueueMenuManager;
 
 
-public class QueueFragment extends Fragment implements SongControlListener, MainActivity.ServiceListener {
+public class QueueFragment extends Fragment implements SongControlListener {
 
     private QueueAdapter songAdapter;
     private MusicService service;
     private DragSortListView listView;
     private List<Song> songList;
     private QueueMenuManager menuManager;
+    private boolean mBound;
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) serviceBinder;
+
+            service = binder.getService();
+            service.addSongListener(QueueFragment.this);
+
+            mBound = true;
+            Log.e("QueueFragment", "onServiceConnected()");
+            QueueFragment.this.onServiceConnected(binder.getService());
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            onUnbind();
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,22 +66,37 @@ public class QueueFragment extends Fragment implements SongControlListener, Main
     }
 
     @Override
-    public void onDestroy() {
-        service.removeSongListener(this);
-        service = null;
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+
+        Intent intent = new Intent(getActivity(), MusicService.class);
+        getActivity().getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        Log.e("QueueFragment", "onResume()");
     }
 
     @Override
     public void onPause() {
         menuManager.dismissMenu();
+        if (mBound) {
+            getActivity().getApplicationContext().unbindService(connection);
+            onUnbind();
+            Log.e("QueueFragment", "onPause()");
+        }
         super.onPause();
+    }
+
+    private void onUnbind() {
+        service.removeSongListener(this);
+        service = null;
+        mBound = false;
     }
 
     public static QueueFragment newInstance() {
         QueueFragment fragment = new QueueFragment();
+
         Bundle args = new Bundle();
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -67,34 +106,39 @@ public class QueueFragment extends Fragment implements SongControlListener, Main
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_draggable_list, container, false);
         listView = (DragSortListView) view.findViewById(R.id.list);
-        ((MainActivity) getActivity()).addServiceListener(this);
+        songAdapter = new QueueAdapter(getActivity());
+        songAdapter.setSongs(new ArrayList<Song>());
+
+        listView.setAdapter(songAdapter);
         listView.setRemoveListener(new DragSortListView.RemoveListener() {
             @Override
             public void remove(int i) {
-                if (service.getShuffleState() == MusicService.SHUFFLE_OFF) {
-                    List<Song> queue = service.getQueue();
-                    if (service.hasSongs() && queue.size() > 1/* && i >= 0 && i < queue.size()*/) {
-                        int currentSong = service.getCurrentSongPosition();
-                        queue.remove(i);
-                        if (i < currentSong) {
-                            currentSong--;
-                            service.setCurrentSong(currentSong);
-                        } else if (i == currentSong) {
-                            currentSong--;
-                            service.setCurrentSong(currentSong);
-                            service.playNext();
-                        }
+                if (mBound) {
+                    if (service.getShuffleState() == MusicService.SHUFFLE_OFF) {
+                        List<Song> queue = service.getQueue();
+                        if (service.hasSongs() && queue.size() > 1/* && i >= 0 && i < queue.size()*/) {
+                            int currentSong = service.getCurrentSongPosition();
+                            queue.remove(i);
+                            if (i < currentSong) {
+                                currentSong--;
+                                service.setCurrentSong(currentSong);
+                            } else if (i == currentSong) {
+                                currentSong--;
+                                service.setCurrentSong(currentSong);
+                                service.playNext();
+                            }
 
-                        service.notifyQueueChanges();
-                    }
-                    if (queue == null || queue.size() == 1) {
-                        listView.setDragEnabled(false);
-                    }
-                } else {
-                    songAdapter.notifyDataSetChanged();
-                    View view = getView();
-                    if (view != null) {
-                        Snackbar.make(getView(), R.string.unable_to_delete, Snackbar.LENGTH_SHORT).show();
+                            service.notifyQueueChanges();
+                        }
+                        if (queue == null || queue.size() == 1) {
+                            listView.setDragEnabled(false);
+                        }
+                    } else {
+                        songAdapter.notifyDataSetChanged();
+                        View view = getView();
+                        if (view != null) {
+                            Snackbar.make(getView(), R.string.unable_to_delete, Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                 }
             }
@@ -102,26 +146,28 @@ public class QueueFragment extends Fragment implements SongControlListener, Main
         listView.setDropListener(new DragSortListView.DropListener() {
             @Override
             public void drop(int from, int to) {
-                if (service.getShuffleState() == MusicService.SHUFFLE_OFF) {
-                    int currSong = service.getCurrentSongPosition();
-                    if (from > currSong && to <= currSong) {
-                        currSong++;
-                    } else if (from < currSong && to >= currSong) {
-                        currSong--;
-                    } else if (from == currSong) {
-                        currSong = to;
-                    }
-                    Song movedItem = songList.get(from);
-                    songList.remove(from);
+                if (mBound) {
+                    if (service.getShuffleState() == MusicService.SHUFFLE_OFF) {
+                        int currSong = service.getCurrentSongPosition();
+                        if (from > currSong && to <= currSong) {
+                            currSong++;
+                        } else if (from < currSong && to >= currSong) {
+                            currSong--;
+                        } else if (from == currSong) {
+                            currSong = to;
+                        }
+                        Song movedItem = songList.get(from);
+                        songList.remove(from);
 //                if (from > to) --from;
-                    songList.add(to, movedItem);
-                    service.setCurrentSong(currSong);
-                    service.notifyQueueChanges();
-                } else {
-                    songAdapter.notifyDataSetChanged();
-                    View view = getView();
-                    if (view != null) {
-                        Snackbar.make(getView(), R.string.unable_to_move, Snackbar.LENGTH_SHORT).show();
+                        songList.add(to, movedItem);
+                        service.setCurrentSong(currSong);
+                        service.notifyQueueChanges();
+                    } else {
+                        songAdapter.notifyDataSetChanged();
+                        View view = getView();
+                        if (view != null) {
+                            Snackbar.make(getView(), R.string.unable_to_move, Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                 }
             }
@@ -152,8 +198,8 @@ public class QueueFragment extends Fragment implements SongControlListener, Main
     }
 
     @Override
-    public void onPreparedPlaying(Song song, int position) {
-        songAdapter.setSong(song);
+    public void onPreparedPlaying(Song song, int position, int index) {
+        songAdapter.setSong(index);
         songAdapter.notifyDataSetChanged();
         if (listView.getFirstVisiblePosition() > songAdapter.getSong() ||
                 listView.getLastVisiblePosition() < songAdapter.getSong()) {
@@ -190,26 +236,22 @@ public class QueueFragment extends Fragment implements SongControlListener, Main
     }
 
     @Override
-    public void onQueueChanged(List<Song> queue, int i) {
-        songAdapter.setSongs(queue);
+    public void onQueueChanged(List<Song> queue, int position, int index) {
         songList = queue;
-        songAdapter.setSong(service.getCurrentSong());
+        songAdapter.setSongs(songList);
+        songAdapter.setSong(index);
         songAdapter.notifyDataSetChanged();
-        Log.e("onQueueChanged()", queue.size() + " " + songAdapter.getCount());
+        Log.e("QueueFragment", "onQueueChanged() " + queue.size() + " " + songAdapter.getCount());
     }
 
-    @Override
     public void onServiceConnected(MusicService service) {
-        this.service = service;
-        this.service.addSongListener(this);
-
         songList = service.getQueue();
         if (songList == null) songList = new ArrayList<>();
-        songAdapter = new QueueAdapter(getActivity(), songList);
+        songAdapter.setSongs(songList);
         songAdapter.setSong(service.getCurrentSongIndex());
-        listView.setAdapter(songAdapter);
-        Log.e("QueueFragment", "onCreateView() ");
-        if (songList == null || songList.size() == 1) {
+        animateList();
+        songAdapter.notifyDataSetChanged();
+        if (songList.size() == 1) {
             listView.setDragEnabled(false);
         }
         if (listView.getFirstVisiblePosition() > songAdapter.getSong() ||
@@ -218,5 +260,10 @@ public class QueueFragment extends Fragment implements SongControlListener, Main
             if (selectionFromTop < 0) selectionFromTop = 0;
             listView.setSelectionFromTop(selectionFromTop , 0);
         }
+    }
+
+    private void animateList() {
+        listView.setAlpha(0);
+        listView.animate().alpha(1);
     }
 }

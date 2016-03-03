@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 public class ArtistLoader extends AbstractLoader<Category> {
     private String unknown;
@@ -28,7 +30,7 @@ public class ArtistLoader extends AbstractLoader<Category> {
 
     @Override
     protected Uri getUri() {
-        return MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
+        return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     }
 
     @Override
@@ -38,13 +40,14 @@ public class ArtistLoader extends AbstractLoader<Category> {
 
     @Override
     protected List<Category> getList() {
+        Log.e("myloader", "ArtistLoader");
         ArrayList<Category> categories = new ArrayList<>();
 
         String[] columns = {MediaStore.Audio.Artists._ID,
                 MediaStore.Audio.Artists.ARTIST,
                 MediaStore.Audio.Artists.NUMBER_OF_ALBUMS};
-
-        Cursor musicCursor = musicResolver.query(getUri(), columns, null, null, null);
+        Uri uri = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
+        Cursor musicCursor = musicResolver.query(uri, columns, null, null, null);
         if (musicCursor != null && musicCursor.moveToFirst()) {
             do {
                 long thisId = musicCursor.getLong(0);
@@ -53,7 +56,11 @@ public class ArtistLoader extends AbstractLoader<Category> {
                 if (thisName.equals(MediaStore.UNKNOWN_STRING)) {
                     thisName = unknown;
                 }
-                categories.add(new Category(thisId, thisName, thisAlbumCount));
+                Category newArtist = new Category(thisId, thisName, thisAlbumCount);
+                long length = MusicRetriever.getLengthByArtist(getContext(), newArtist.getID());
+                newArtist.setLength(length);
+
+                categories.add(newArtist);
 
             } while (musicCursor.moveToNext());
             Collections.sort(categories, new Comparator<Category>() {

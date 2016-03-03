@@ -3,10 +3,12 @@
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:fitsSystemWindows="true"
+    android:layout_marginTop="@dimen/status_bar_padding"
     android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/id_appbar"
+        android:layout_marginTop="@dimen/mstatus_bar_padding"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -20,6 +22,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/mstatus_bar_padding"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_height="match_parent" >
 
@@ -32,7 +35,7 @@
     <!--app:layout_behavior="@string/appbar_scrolling_view_behavior" />-->
         <View
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="@dimen/shadow_height"
             android:background="@drawable/below_shadow" />
     </FrameLayout>
 

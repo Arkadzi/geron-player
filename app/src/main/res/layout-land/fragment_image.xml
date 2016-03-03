@@ -3,20 +3,22 @@
     android:layout_height="match_parent"
     android:layout_weight="1"
     android:orientation="horizontal"
+    android:background="#6000"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:gravity="center_horizontal">
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <ImageView
+        <me.arkadiy.geronplayer.views.SquareImageView
             android:id="@+id/cover_art"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="false"
             android:scaleType="centerCrop"
+            custom:direction="height"
             android:visibility="visible"
             android:src="@drawable/default_album_art" />
     </FrameLayout>

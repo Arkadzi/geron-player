@@ -24,24 +24,21 @@ import me.arkadiy.geronplayer.statics.Utils;
  */
 public class QueueAdapter extends BaseAdapter {
     private List<Song> songs;
+
     private LayoutInflater songInf;
     private int song;
     private int color;
 
-    public QueueAdapter(Context c, List<Song> songs) {
-        this.songs = songs;
+    public QueueAdapter(Context c) {
         songInf = LayoutInflater.from(c);
         color = Utils.getColor(c, R.color.accent);
     }
 
-    public void setSong(Song song) {
-        for (int i = 0; i < songs.size(); i++) {
-            if (songs.get(i).equals(song)) {
-                this.song = i;
-                break;
-            }
-        }
+    public List<Song> getSongs() {
+        return songs;
     }
+
+
 
     public void setSong(int song) {
         this.song = song;
@@ -68,18 +65,15 @@ public class QueueAdapter extends BaseAdapter {
                 (R.layout.draggable_song, viewGroup, false);
         TextView songView = (TextView) songLay.findViewById(R.id.song_item_name);
         TextView artistView = (TextView) songLay.findViewById(R.id.song_item_artist);
+        TextView timeView = (TextView) songLay.findViewById(R.id.third);
         Song currSong = songs.get(i);
         songView.setText(currSong.getTitle());
         artistView.setText(currSong.getArtist());
+        timeView.setText(Utils.formatMillis(currSong.getLength()));
         if (i == song) {
             songView.setTypeface(null, Typeface.BOLD);
             artistView.setTypeface(null, Typeface.BOLD);
-//            songLay.setActivated(true);
-//            songLay.setSelected(true);
             songView.setTextColor(color);
-//            View playArrow = songLay.findViewById(R.id.play_arrow);
-//            playArrow.setVisibility(View.VISIBLE);
-
         }
         songLay.setTag(i);
         return songLay;

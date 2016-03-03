@@ -8,7 +8,6 @@ import org.jaudiotagger.tag.FieldKey;
 
 import java.util.List;
 
-import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyPrefixCategoryAdapter;
@@ -16,7 +15,6 @@ import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.ArtistLoader;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 import me.arkadiy.geronplayer.statics.TagManager;
 
@@ -58,6 +56,7 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
 
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.ARTIST,
                                         getItem(position).getID(),
@@ -76,6 +75,7 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
                 R.layout.icon_list_item,
                 R.id.main,
                 R.id.secondary,
+                R.id.third,
                 R.id.icon,
                 getResources().getString(R.string.album_count),
                 R.drawable.ic_action_artist);
@@ -105,7 +105,7 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected List<Song> getSongs(Context c, int position) {
-        return MusicRetriever.getSongsByArtist(c, data.get(position).getID());
+    protected List<Song> getSongs(Context c, Category category) {
+        return MusicRetriever.getSongsByArtist(c, category.getID());
     }
 }

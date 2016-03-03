@@ -15,7 +15,6 @@ import org.jaudiotagger.tag.FieldKey;
 import java.util.List;
 
 import me.arkadiy.geronplayer.MainActivity;
-import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyPrefixCategoryAdapter;
@@ -24,7 +23,6 @@ import me.arkadiy.geronplayer.loader.AlbumLoader;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 import me.arkadiy.geronplayer.statics.TagManager;
 import me.arkadiy.geronplayer.statics.Utils;
@@ -73,11 +71,18 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
 
     @Override
     protected int getColumnCount() {
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            return 2;
-        else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-            return 4;
-        return 2;
+        int value = 2;
+        int screenSize = getResources().getConfiguration().screenLayout &
+                Configuration.SCREENLAYOUT_SIZE_MASK;
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            value = 2;
+        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            value = 4;
+        }
+        if (screenSize > Configuration.SCREENLAYOUT_SIZE_NORMAL) {
+            value *= 2;
+        }
+        return value;
     }
 
     @Override
@@ -87,6 +92,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
             public void onClick(int position) {
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.ALBUM,
                                         getItem(position).getID(),
@@ -105,6 +111,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
                 R.layout.album_item,
                 R.id.main,
                 R.id.secondary,
+                R.id.third,
                 R.id.item_image,
                 getResources().getString(R.string.song_count),
                 -1);
@@ -135,8 +142,8 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected List<Song> getSongs(Context c, int position) {
-        return MusicRetriever.getSongsByAlbum(c, data.get(position).getID());
+    protected List<Song> getSongs(Context c, Category category) {
+        return MusicRetriever.getSongsByAlbum(c, category.getID());
     }
 
     @Override
@@ -203,7 +210,7 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
                 public void run() {
                     Log.e("Utils", "Thread " + albumId);
                     Bitmap bitmap = Utils.getBitmap(uri);
-                    String path = Utils.saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()) + ".jpg");
+                    String path = Utils.saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()));
 //                    List<Song> songs = MusicRetriever.getSongsByAlbum(c, albumId);
 //                    new TagManager().setArtwork(c, songs, path);
                     MainActivity.imageLoader.clearMemoryCache();

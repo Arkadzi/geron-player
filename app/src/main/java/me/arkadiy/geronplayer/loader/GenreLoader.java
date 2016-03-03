@@ -12,6 +12,7 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 /**
  * Created by Arkadiy on 06.11.2015.
@@ -44,13 +45,18 @@ public class GenreLoader extends AbstractLoader<Category> {
             do {
                 long thisId = musicCursor.getLong(0);
                 String thisName = musicCursor.getString(1);
-//                int thisAlbumCount = musicCursor.getInt(2);
                 if (thisName.equals(MediaStore.UNKNOWN_STRING)) {
                     thisName = unknown;
                 }
                 int numberOfAlbums = numberOfAlbums(thisId);
-                if (numberOfAlbums > 0)
-                    categories.add(new Category(thisId, thisName, numberOfAlbums));
+//                int numberOfAlbums = 1;
+                if (numberOfAlbums > 0) {
+                    Category newGenre = new Category(thisId, thisName, numberOfAlbums);
+                    long length = MusicRetriever.getLengthByGenre(getContext(), newGenre.getID());
+                    newGenre.setLength(length);
+
+                    categories.add(newGenre);
+                }
 
             } while (musicCursor.moveToNext());
             Collections.sort(categories, new Comparator<Category>() {
@@ -68,7 +74,7 @@ public class GenreLoader extends AbstractLoader<Category> {
     private int numberOfAlbums(long genreId) {
         int number = 0;
         Cursor cursor = musicResolver.query(
-                MediaStore.Audio.Genres.Members.getContentUri("external", Long.valueOf(genreId)),
+                MediaStore.Audio.Genres.Members.getContentUri("external", genreId),
                 new String[]{"distinct " + MediaStore.Audio.Genres.Members.ALBUM_ID},
                 null,
                 null,

@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!--<com.google.android.gms.ads.AdView-->
+    <!--android:id="@+id/adView"-->
+    <!--xmlns:ads="http://schemas.android.com/apk/res-auto"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--ads:adSize="BANNER"-->
+    <!--android:background="#f00"-->
+    <!--ads:adUnitId="@string/banner_ad_unit_id">-->
+    <!--</com.google.android.gms.ads.AdView>-->
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,11 +33,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1">
 
                 <android.support.v4.view.ViewPager
@@ -37,18 +47,18 @@
 
                 <LinearLayout
                     android:id="@+id/lyrics_background"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:background="#8000"
                     android:gravity="center_vertical|center_horizontal"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone"
+                    android:clickable="true"
+                    android:layout_gravity="center_horizontal">
 
                     <ScrollView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="visible">
-
+                        android:layout_height="wrap_content" >
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -62,61 +72,47 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center_horizontal"
                                 android:textColor="@color/textPrimary"
-                                android:padding="15dp"
+                                android:padding="50dp"
                                 android:scrollbars="vertical" />
 
                             <Button
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="35dp"
                                 android:text="@string/edit"
                                 android:id="@+id/edit_lyrics_button" />
                         </LinearLayout>
                     </ScrollView>
+
                 </LinearLayout>
 
             </FrameLayout>
 
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="?attr/colorPrimary"
-                android:orientation="vertical"
-                android:gravity="bottom">
-
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:id="@+id/song_settings"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:background="?attr/selectableItemBackground"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
-
-                    <me.arkadiy.geronplayer.views.SquareImageView
-                        android:id="@+id/repeat_view"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="10dp"
-                        android:scaleType="center"
-                        android:src="@drawable/ic_repeat_white_24dp" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:orientation="horizontal"
+                        android:padding="8dp"
+                        android:layout_marginLeft="@dimen/list_padding"
+                        android:layout_marginStart="@dimen/list_padding">
 
                         <TextView
                             android:id="@+id/song_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
                             android:ellipsize="marquee"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
@@ -126,117 +122,130 @@
                             android:singleLine="true"
                             tools:text="dasdasd"
                             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                            android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="21sp" />
+                            android:textColor="@color/textPrimary"
+                            android:textSize="20sp" />
 
-                        <TextView
-                            android:id="@+id/artist_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:ellipsize="marquee"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            android:freezesText="true"
-                            android:marqueeRepeatLimit="marquee_forever"
-                            android:scrollHorizontally="true"
-                            android:singleLine="true"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="17sp"
-                            tools:text="asdasdasd" />
                     </LinearLayout>
 
                     <me.arkadiy.geronplayer.views.SquareImageView
+                        android:id="@+id/repeat_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
+                        android:layout_marginLeft="@dimen/list_padding"
+                        android:layout_marginStart="@dimen/list_padding"
+                        android:scaleType="center"
+                        android:src="@drawable/ic_repeat_white_24dp" />
+
+                    <me.arkadiy.geronplayer.views.SquareImageView
                         android:id="@+id/shuffle_view"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:padding="10dp"
                         android:scaleType="center"
-                        android:src="@drawable/ic_shuffle_white_24dp" />
+                        android:src="@drawable/ic_shuffle_white_24dp"
+                        android:layout_marginRight="2dp"
+                        android:layout_marginEnd="2dp" />
 
                 </LinearLayout>
 
-                <RelativeLayout
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical">
 
-                    <SeekBar
-                        android:id="@+id/progress_seek_bar"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/p_prev"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_skip_previous_white_48dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:paddingEnd="15dp"
+                            android:paddingStart="15dp" />
+
+                        <ImageButton
+                            android:id="@+id/pp_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_play_arrow_white_48dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:paddingEnd="15dp"
+                            android:paddingStart="15dp" />
+
+                        <ImageButton
+                            android:id="@+id/p_next"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_skip_next_white_48dp"
+                            android:paddingLeft="15dp"
+                            android:paddingRight="15dp"
+                            android:paddingEnd="15dp"
+                            android:paddingStart="15dp" />
+
+                    </LinearLayout>
+
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:progress="50" />
+                        android:gravity="center_vertical"
+                        android:paddingBottom="8dp">
 
-                    <TextView
-                        android:id="@+id/position_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true"
-                        android:layout_below="@id/progress_seek_bar"
-                        android:layout_marginLeft="@dimen/list_padding"
-                        android:layout_marginStart="@dimen/list_padding"
-                        android:maxLength="6"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="@dimen/small_text_size"
-                        tools:text="ddd" />
+                        <SeekBar
+                            android:id="@+id/progress_seek_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:progress="50" />
+
+                        <TextView
+                            android:id="@+id/position_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_below="@id/progress_seek_bar"
+                            android:layout_marginLeft="@dimen/list_padding"
+                            android:layout_marginStart="@dimen/list_padding"
+                            android:maxLength="6"
+                            android:textColor="?attr/colorAccent"
+                            android:textSize="@dimen/small_text_size"
+                            tools:text="ddd" />
 
 
-                    <TextView
-                        android:id="@+id/duration_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
-                        android:layout_below="@id/progress_seek_bar"
-                        android:layout_marginEnd="@dimen/list_padding"
-                        android:layout_marginRight="@dimen/list_padding"
-                        android:maxLength="6"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="@dimen/small_text_size"
-                        tools:text="ddd" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical|center_horizontal"
-                    android:orientation="horizontal"
-                    android:padding="8dp">
-
-                    <ImageButton
-                        android:id="@+id/p_prev"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="15dp"
-                        android:src="@drawable/ic_skip_previous_white_48dp"
-                        android:tint="?attr/colorControlNormal" />
-
-                    <ImageButton
-                        android:id="@+id/pp_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="15dp"
-                        android:src="@drawable/ic_play_arrow_white_48dp"
-                        android:tint="?attr/colorControlNormal" />
-
-                    <ImageButton
-                        android:id="@+id/p_next"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="15dp"
-                        android:src="@drawable/ic_skip_next_white_48dp"
-                        android:tint="?attr/colorControlNormal" />
+                        <TextView
+                            android:id="@+id/duration_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_below="@id/progress_seek_bar"
+                            android:layout_marginEnd="@dimen/list_padding"
+                            android:layout_marginRight="@dimen/list_padding"
+                            android:maxLength="6"
+                            android:textColor="@color/textPrimary"
+                            android:textSize="@dimen/small_text_size"
+                            tools:text="ddd" />
+                    </RelativeLayout>
 
                 </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
+
 
         <FrameLayout
             android:id="@+id/slider"
@@ -246,70 +255,54 @@
             android:visibility="visible">
 
             <LinearLayout
+                android:id="@+id/top_panel"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/top_panel">
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" />
+                android:layout_height="match_parent">
 
                 <RelativeLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:id="@+id/moving_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@drawable/gradient"
+                    android:orientation="horizontal">
 
-                    <me.arkadiy.geronplayer.views.SquareImageView
-                        android:id="@+id/hide_arrow"
-                        android:layout_width="match_parent"
-                        android:layout_height="68dp"
-                        android:scaleType="center"
-                        android:src="@drawable/ic_expand_more_white_24dp"
-                        android:visibility="invisible"
-                        custom:direction="height" />
 
                     <ImageButton
                         android:id="@+id/queue_button"
                         style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="68dp"
-                        android:layout_height="68dp"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_queue_music_white_24dp"
-                        android:tint="?attr/colorControlNormal" />
+                        android:src="@drawable/ic_queue_music_white_24dp" />
 
                     <ImageButton
                         android:id="@+id/equalizer_button"
                         style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="68dp"
-                        android:layout_height="68dp"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_equalizer_white_24dp"
-                        android:tint="?attr/colorControlNormal" />
+                        android:src="@drawable/ic_equalizer_white_24dp" />
 
                     <Button
                         android:id="@+id/show_lyrics_button"
                         style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:layout_width="68dp"
-                        android:layout_height="68dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="56dp"
                         android:layout_toLeftOf="@id/queue_button"
                         android:layout_toStartOf="@id/queue_button"
+                        android:textColor="@color/textPrimary"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:text="@string/lyrics"
-                        android:textColor="?attr/colorControlNormal"
                         android:textSize="@dimen/small_text_size" />
-
-
                 </RelativeLayout>
-
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/bottom_panel"
                 android:layout_width="match_parent"
-                android:layout_height="68dp"
+                android:layout_height="56dp"
                 android:background="?attr/colorPrimary"
                 android:clickable="false"
                 android:orientation="horizontal"
@@ -349,18 +342,32 @@
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="@dimen/secondary_text_size" />
                 </LinearLayout>
-
+                <ImageButton
+                    android:id="@+id/prev_button"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_skip_previous_white_24dp"
+                    android:tint="?attr/colorControlNormal" />
                 <ImageButton
                     android:id="@+id/playback_button"
-                    android:layout_width="68dp"
-                    android:layout_height="68dp"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_play_arrow_white_24dp"
+                    android:tint="?attr/colorControlNormal" />
+                <ImageButton
+                    android:id="@+id/next_button"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_skip_next_white_24dp"
                     android:tint="?attr/colorControlNormal" />
 
             </LinearLayout>
 
         </FrameLayout>
+
 
     </FrameLayout>
 

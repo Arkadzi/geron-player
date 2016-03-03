@@ -51,6 +51,20 @@
     <string name="choose_theme">Выберите тему</string>
     <string name="theme">Выбор темы</string>
     <string name="license">Лицензии</string>
+    <string name="buy">Купить</string>
+    <string name="cancel">Отмена</string>
+    <string name="trial_dialog_title">Период триальной версии истек</string>
+    <string name="trial_dialog_message">Триальный период бесплатной версии истек. Пожалуйста, купите неограниченную версию.</string>
+    <string name="choose_number">Выберите количество песен для воспроизведения</string>
+    <string name="lyrics">Слова</string>
+    <string name="input_lyrics">Вставьте слова здесь</string>
+    <string name="browse_web">Искать в интернете</string>
+    <string name="no_lyrics">Слова не добавлены</string>
+    <string name="no_songs">Здесь нету песен</string>
+    <string name="no_data">Музыка не найдена</string>
+    <string name="delete_message">Вы уверены?</string>
+
+
     <string-array name="menu_items">
         <item>1</item>
         <item>2</item>

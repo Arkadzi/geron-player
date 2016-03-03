@@ -4,30 +4,26 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.media.AudioManager;
-import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 
-import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.RemoteControlReceiver;
-import me.arkadiy.geronplayer.audio.AudioFocusListener;
 import me.arkadiy.geronplayer.plain.Song;
-import me.arkadiy.geronplayer.statics.Utils;
 
 /**
  * Created by Arkadiy on 11.12.2015.
  */
 public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener {
     private final AudioFocusListener listener;
+    private final Handler handler;
     private AudioManager am;
     private RemoteControlClient remoteControlClient;
-
     private ComponentName remoteControlReceiver;
 
     private boolean isFocused;
@@ -50,32 +46,30 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
         }
 
         this.listener = listener;
+        handler = new Handler();
     }
 
-    public void requestFocusIfNecessary(Song song) {
-//        if (!isFocused) {
+    public void requestFocusIfNecessary(final Song song) {
+        Log.e("AUDIO", "request focus " + isFocused);
+        if (!isFocused) {
             int result = am.requestAudioFocus(this,
                     AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 isFocused = true;
-                Log.e("audio focus", "requested");
+                Log.e("AUDIO", "requested");
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                     am.registerMediaButtonEventReceiver(remoteControlReceiver);
                     am.registerRemoteControlClient(remoteControlClient);
                 }
-                String title = song.getTitle();
-                int length = 30;
-                if (title.length() > length) {
-                    title = title.substring(0, length);
-                }
-                String artist = song.getArtist();
-                if (artist.length() > length) {
-                    artist = artist.substring(0, length);
-                }
-                updateRemoteControl(song);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateRemoteControl(song);
+                    }
+                }, 1500);
             }
-//        }
+        }
     }
 
     public void updateRemoteControl(Song song) {
@@ -88,6 +82,7 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
     }
 
     public void refuseFocusIfNecessary() {
+        Log.e("AUDIO", "refuse " + isFocused);
         if (isFocused) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 am.unregisterRemoteControlClient(remoteControlClient);
@@ -99,20 +94,27 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
     }
 
 
-
     @Override
     public void onAudioFocusChange(int focusChange) {
+        Log.e("AUDIO", "focus changed" + focusChange + " " + isFocused);
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
-                isFocused = false;
+//                isFocused = false;
+                refuseFocusIfNecessary();
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                Log.e("audio focus", String.valueOf(focusChange));
+//                Log.e("audio focus", String.valueOf(focusChange));
                 listener.onFocusLoss();
                 break;
             case AudioManager.AUDIOFOCUS_GAIN:
-                isFocused = true;
-                listener.onFocusGained();
+//                isFocused = true;
+//                re
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onFocusGained();
+                    }
+                }, 300);
                 break;
         }
     }

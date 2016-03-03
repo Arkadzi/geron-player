@@ -2,13 +2,16 @@ package me.arkadiy.geronplayer.statics;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -22,6 +25,26 @@ import me.arkadiy.geronplayer.plain.Song;
 
 public class QueueMenuManager {
     private Dialog menu;
+
+    public static String handleName(String playlistName, List<Category> playlists) {
+        int additionalNumber = 0;
+        int i;
+        do {
+            String name = (additionalNumber == 0) ?
+                    playlistName :
+                    String.format("%s %d", playlistName, additionalNumber);
+            for (i = 0; i < playlists.size(); i++) {
+                if (name.equals(playlists.get(i).getName())) {
+                    additionalNumber++;
+                    break;
+                }
+            }
+        } while (i < playlists.size());
+        if (additionalNumber != 0) {
+            playlistName = String.format("%s %d", playlistName, additionalNumber);
+        }
+        return playlistName;
+    }
 
     public void showMenu(Context c, Song currentSong) {
         menu = createMenuDialog(c, currentSong);
@@ -60,6 +83,7 @@ public class QueueMenuManager {
                 FragmentManager fm = activity.getSupportFragmentManager();
                 fm.popBackStack(Constants.STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 fm.beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container, ToolbarFragment.newInstance(ToolbarFragment.ARTIST, song.getArtistID(), song.getArtist(), null), "artist")
                         .addToBackStack(Constants.STACK)
                         .commit();
@@ -69,6 +93,7 @@ public class QueueMenuManager {
                 FragmentManager fm = activity.getSupportFragmentManager();
                 fm.popBackStack(Constants.STACK, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 fm.beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container, ToolbarFragment.newInstance(ToolbarFragment.ALBUM, song.getAlbumID(), song.getAlbum(), null), "album")
                         .addToBackStack(Constants.STACK)
                         .commit();
@@ -84,9 +109,10 @@ public class QueueMenuManager {
     protected void showPlaylistDialog(final Activity c, final Song song) {
 
         new AsyncTask<Void, Void, Void>() {
-            private Activity context = c;
             List<Song> songs;
             List<Category> playlists;
+            private Activity context = c;
+
             @Override
             protected Void doInBackground(Void... params) {
                 playlists = PlaylistUtils.getPlaylists(context);
@@ -109,7 +135,7 @@ public class QueueMenuManager {
                     @Override
                     public void onClick(DialogInterface dialog, final int which) {
                         if (which == 0) {
-                            showCreateDialog(songs, c, 0, playlists);
+                            showCreateDialog(songs, c, playlists);
                         } else {
                             new Thread() {
                                 @Override
@@ -127,7 +153,7 @@ public class QueueMenuManager {
 
     }
 
-    private void showCreateDialog(final List<Song> songs, final Activity c, int position, final List<Category> playlists) {
+    private void showCreateDialog(final List<Song> songs, final Activity c, final List<Category> playlists) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle(R.string.create_playlist);
         final View view = c.getLayoutInflater().inflate(R.layout.create_dialog, null);
@@ -156,24 +182,33 @@ public class QueueMenuManager {
         menu.show();
     }
 
-    public static String handleName(String playlistName, List<Category> playlists) {
-        int additionalNumber = 0;
-        int i;
-        do {
-            String name = (additionalNumber == 0) ?
-                    playlistName :
-                    String.format("%s %d", playlistName, additionalNumber);
-            for (i = 0; i < playlists.size(); i++) {
-                if (name.equals(playlists.get(i).getName())) {
-                    additionalNumber++;
-                    break;
-                }
+    public void showLyricsEditMenu(final Context c, final Song song) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        View view = View.inflate(c, R.layout.lyrics_edit_dialog, null);
+        builder.setView(view);
+        final TagManager manager = new TagManager();
+        final EditText lyricsView = (EditText) view.findViewById(R.id.edit_text);
+        lyricsView.setText(manager.getLyrics(song));
+        final Button button = (Button) view.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String query = String.format("%s %s", song.getTitle(), song.getArtist());
+                Intent search = new Intent(Intent.ACTION_WEB_SEARCH);
+                search.putExtra(SearchManager.QUERY, query);
+                c.startActivity(search);
             }
-        } while (i < playlists.size());
-        if (additionalNumber != 0) {
-            playlistName = String.format("%s %d", playlistName, additionalNumber);
-        }
-        return playlistName;
+        });
+        builder.setTitle(song.getTitle());
+        builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String lyrics = lyricsView.getText().toString();
+                manager.setLyrics(c, lyrics, song);
+                ((MainActivity) c).setLyrics(song);
+            }
+        });
+        menu = builder.create();
+        menu.show();
     }
-
 }

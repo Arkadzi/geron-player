@@ -10,21 +10,22 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.arkadiy.geronplayer.plain.Resetable;
+import me.arkadiy.geronplayer.fragment.pager.AbstractListFragment;
 import me.arkadiy.geronplayer.plain.Nameable;
 import me.arkadiy.geronplayer.views.RecyclerViewFastScroller;
 
 /**
  * Created by Arkadiy on 10.11.2015.
  */
-public abstract class MyCategoryAdapter<T extends Nameable>
+public abstract class MyCategoryAdapter<T>
         extends RecyclerView.Adapter<MyCategoryAdapter.ViewHolder>
-        implements RecyclerViewFastScroller.BubbleTextGetter, Resetable<T> {
+        implements RecyclerViewFastScroller.BubbleTextGetter {
 
     private int imageId;
     private int viewId;
     private int mainId;
     private int secondaryId;
+    private int thirdId;
     private List<T> categories;
 
     public T getItem(int position) {
@@ -36,10 +37,16 @@ public abstract class MyCategoryAdapter<T extends Nameable>
 
     private ItemClickListener listener;
     private ItemLongClickListener longListener;
+    private DataChangedListener dataChangedListener;
 
     @Override
     public String getTextToShowInBubble(int pos) {
         return Character.toString(Character.toUpperCase(getMainText(categories.get(pos)).charAt(0)));
+    }
+
+    public void setDataChangedListener(DataChangedListener listener) {
+        dataChangedListener = listener;
+        dataChangedListener.onDataChanged(true);
     }
 
     public interface ItemClickListener {
@@ -48,6 +55,10 @@ public abstract class MyCategoryAdapter<T extends Nameable>
 
     public interface ItemLongClickListener {
         void onLongClick(int position);
+    }
+
+    public interface DataChangedListener {
+        void onDataChanged(boolean hasData);
     }
 
     public void setClickListener(ItemClickListener listener) {
@@ -62,33 +73,35 @@ public abstract class MyCategoryAdapter<T extends Nameable>
 
         public final View mView;
 
-        public final TextView secondary;
         public final TextView main;
+        public final TextView secondary;
+        public final TextView third;
         public final ImageView image;
 
-        public ViewHolder(View view, int mainId, int secondaryId, int imageId) {
+        public ViewHolder(View view, int mainId, int secondaryId, int thirdId, int imageId) {
             super(view);
             mView = view;
             main = (TextView) view.findViewById(mainId);
             secondary = (TextView) view.findViewById(secondaryId);
+            third = (TextView) view.findViewById(thirdId);
             image = (ImageView) view.findViewById(imageId);
         }
     }
 
-    public MyCategoryAdapter(List<T> categories, int viewId, int mainId, int secondaryId, int imageId) {
+    public MyCategoryAdapter(List<T> categories, int viewId, int mainId, int secondaryId, int thirdId, int imageId) {
         this.viewId = viewId;
         this.mainId = mainId;
         this.secondaryId = secondaryId;
-        this.categories = new ArrayList<>(categories);
+        this.thirdId = thirdId;
         this.imageId = imageId;
+        this.categories = new ArrayList<>(categories);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(viewId, parent, false);
-
-        return new ViewHolder(view, mainId, secondaryId, imageId);
+        return new ViewHolder(view, mainId, secondaryId, thirdId, imageId);
     }
 
     @Override
@@ -96,6 +109,7 @@ public abstract class MyCategoryAdapter<T extends Nameable>
 
         holder.main.setText(getMainText(categories.get(position)));
         holder.secondary.setText(getSecondaryText(categories.get(position)));
+        holder.third.setText(getThirdText(categories.get(position)));
         setImage(categories.get(position), holder.image);
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,6 +130,7 @@ public abstract class MyCategoryAdapter<T extends Nameable>
         });
     }
 
+
     @Override
     public void onViewRecycled(ViewHolder holder) {
         holder.itemView.setOnLongClickListener(null);
@@ -123,11 +138,15 @@ public abstract class MyCategoryAdapter<T extends Nameable>
         super.onViewRecycled(holder);
     }
 
-    protected abstract void setImage(T element, ImageView image);
 
     @Override
     public int getItemCount() {
         return categories.size();
+    }
+
+
+    public List<T> getData() {
+        return categories;
     }
 
     public void setData(List<T> data) {
@@ -140,23 +159,28 @@ public abstract class MyCategoryAdapter<T extends Nameable>
             categories.addAll(data);
         }
         notifyDataSetChanged();
+        notifyDataChangeListener();
     }
 
     public T removeItem(int position) {
         final T model = categories.remove(position);
         notifyItemRemoved(position);
+        notifyDataChangeListener();
         return model;
     }
 
     public void addItem(int position, T model) {
         categories.add(position, model);
         notifyItemInserted(position);
+        notifyDataChangeListener();
+
     }
 
     public void moveItem(int fromPosition, int toPosition) {
         final T model = categories.remove(fromPosition);
         categories.add(toPosition, model);
         notifyItemMoved(fromPosition, toPosition);
+        notifyDataChangeListener();
     }
 
     public void animateTo(List<T> models) {
@@ -164,6 +188,13 @@ public abstract class MyCategoryAdapter<T extends Nameable>
         applyAndAnimateAdditions(models);
         applyAndAnimateMovedItems(models);
         notifyDataSetChanged();
+        notifyDataChangeListener();
+    }
+
+    private void notifyDataChangeListener() {
+        if (dataChangedListener != null) {
+            dataChangedListener.onDataChanged(categories.size() > 0);
+        }
     }
 
     private void applyAndAnimateRemovals(List<T> newModels) {
@@ -196,4 +227,6 @@ public abstract class MyCategoryAdapter<T extends Nameable>
 
     protected abstract String getMainText(T element);
     protected abstract String getSecondaryText(T element);
+    protected abstract String getThirdText(T element);
+    protected abstract void setImage(T element, ImageView image);
 }

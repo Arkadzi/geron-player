@@ -6,5 +6,4 @@ package me.arkadiy.geronplayer.plain;
 public interface Nameable {
     String getName();
     void setName(String name);
-    long getID();
 }

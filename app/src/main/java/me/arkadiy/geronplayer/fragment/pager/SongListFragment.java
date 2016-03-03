@@ -19,6 +19,7 @@ import java.util.Random;
 import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
+import me.arkadiy.geronplayer.adapters.list_view.FolderSongAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MySongAdapter;
 import me.arkadiy.geronplayer.audio.ShuffleButtonListener;
@@ -92,10 +93,19 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
 
     @Override
     protected MyCategoryAdapter<Song> getNewAdapter(List<Song> data) {
-        return new MySongAdapter(data,
-                R.layout.list_item,
-                R.id.main,
-                R.id.secondary);
+        if (mode == FOLDER){
+            return new FolderSongAdapter(data,
+                    R.layout.list_item,
+                    R.id.main,
+                    R.id.secondary,
+                    R.id.third);
+        } else {
+            return new MySongAdapter(data,
+                    R.layout.list_item,
+                    R.id.main,
+                    R.id.secondary,
+                    R.id.third);
+        }
     }
 
     @Override
@@ -184,9 +194,9 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
     }
 
     @Override
-    protected List<Song> getSongs(Context c, int position) {
+    protected List<Song> getSongs(Context c, Song item) {
         List<Song> queue = new ArrayList<>();
-        queue.add(data.get(position));
+        queue.add(item);
         return queue;
     }
 }

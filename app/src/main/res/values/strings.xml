@@ -51,7 +51,18 @@
     <string name="choose_theme">Choose theme</string>
     <string name="theme">Theme</string>
     <string name="license">License</string>
-    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="buy">Buy</string>
+    <string name="cancel">Cancel</string>
+    <string name="trial_dialog_title">Trial period has expired</string>
+    <string name="trial_dialog_message">Trial period of free version has expired. Please, buy unlimited version.</string>
+    <string name="choose_number">Choose number of songs to play</string>
+    <string name="lyrics">Lyrics</string>
+    <string name="input_lyrics">Insert lyrics here</string>
+    <string name="browse_web">Browse on the Web</string>
+    <string name="no_lyrics">No lyrics</string>
+    <string name="no_songs">There is no songs</string>
+    <string name="no_data">No music found</string>
+    <string name="delete_message">Are you sure?</string>
 
     <string-array name="menu_items">
         <item>1</item>

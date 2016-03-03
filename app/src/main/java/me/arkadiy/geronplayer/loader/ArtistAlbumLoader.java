@@ -14,6 +14,7 @@ import java.util.List;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 /**
  * Created by Arkadiy on 10.11.2015.
@@ -34,29 +35,32 @@ public class ArtistAlbumLoader extends AbstractLoader<Category> {
 
     @Override
     protected Uri getUri() {
-        return MediaStore.Audio.Artists.Albums.getContentUri("external", artistId);
-
+        return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     }
 
     @Override
     protected List<Category> getList() {
         ArrayList<Category> albums = new ArrayList<>();
-//        String[] selection = {MediaStore.Audio.Albums.A};
+
         String[] projection = {MediaStore.Audio.Albums._ID, //0
                 MediaStore.Audio.Artists.Albums.ALBUM,//1
                 MediaStore.Audio.Artists.Albums.NUMBER_OF_SONGS  // 2
         };
 
-        Uri uri = getUri();
+        Uri uri = MediaStore.Audio.Artists.Albums.getContentUri("external", artistId);
         final Cursor musicCursor = musicResolver.query(
                 uri,
                 projection, null, null, null);
         if (musicCursor != null && musicCursor.moveToFirst()) {
             do {
                 Log.e("album", musicCursor.getLong(0) + " " + musicCursor.getString(1));
-                albums.add(new Category(musicCursor.getLong(0),
+                Category newAlbum = new Category(musicCursor.getLong(0),
                         musicCursor.getString(1),
-                        musicCursor.getInt(2)));
+                        musicCursor.getInt(2));
+                long length = MusicRetriever.getLengthByAlbum(getContext(), newAlbum.getID());
+                newAlbum.setLength(length);
+
+                albums.add(newAlbum);
             } while (musicCursor.moveToNext());
 
         }

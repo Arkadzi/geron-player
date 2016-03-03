@@ -54,6 +54,7 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
             public void onClick(int position) {
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.PLAYLIST,
                                         getItem(position).getID(),
@@ -72,6 +73,7 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
                 R.layout.icon_list_item,
                 R.id.main,
                 R.id.secondary,
+                R.id.third,
                 R.id.icon,
                 getResources().getString(R.string.song_count),
                 R.drawable.ic_grade_white_36dp);
@@ -89,6 +91,7 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
             if (code == Constants.MENU.EDIT) {
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.PLAYLIST_EDIT,
                                         getItem(position).getID(),
@@ -108,9 +111,9 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected boolean delete(MusicService c, int item) {
+    protected boolean delete(MusicService c, Category item) {
         DeleteUtils utils = new DeleteUtils();
-        utils.deletePlaylist(c, getItem(item).getID());
+        utils.deletePlaylist(c, item.getID());
         return false;
     }
 
@@ -128,7 +131,7 @@ public class PlaylistFragment extends AbstractListFragment<Category> {
     }
 
     @Override
-    protected List<Song> getSongs(Context c, int position) {
-        return MusicRetriever.getSongsByPlaylist(c, data.get(position).getID());
+    protected List<Song> getSongs(Context c, Category item) {
+        return MusicRetriever.getSongsByPlaylist(c, item.getID());
     }
 }

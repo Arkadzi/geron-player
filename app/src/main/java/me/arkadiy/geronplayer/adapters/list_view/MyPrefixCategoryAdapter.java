@@ -15,8 +15,8 @@ public class MyPrefixCategoryAdapter extends MyCategoryAdapter<Category> {
     private final int resourceId;
 
     public MyPrefixCategoryAdapter(Context c, List<Category> categories, int viewId, int mainId,
-                                   int secondaryId, int imageId, String prefix, int resourceId) {
-        super(categories, viewId, mainId, secondaryId, imageId);
+                                   int secondaryId, int thirdId,  int imageId, String prefix, int resourceId) {
+        super(categories, viewId, mainId, secondaryId, thirdId, imageId);
         this.prefix = prefix;
         this.resourceId = resourceId;
         this.c = c;
@@ -25,10 +25,6 @@ public class MyPrefixCategoryAdapter extends MyCategoryAdapter<Category> {
     @Override
     protected void setImage(Category element, ImageView image) {
         if (c != null)
-//            Picasso.with(c)
-//                    .load(Utils.getArtworks(element.getID()))
-//                    .fit()
-//                    .into(image);
             MainActivity.imageLoader.displayImage(Utils.getArtworks(element.getID()).toString(), image);
         else {
             image.setImageResource(resourceId);
@@ -43,5 +39,10 @@ public class MyPrefixCategoryAdapter extends MyCategoryAdapter<Category> {
     @Override
     protected String getSecondaryText(Category element) {
         return prefix + element.getCount();
+    }
+
+    @Override
+    protected String getThirdText(Category element) {
+        return Utils.formatMillis(element.getLength());
     }
 }

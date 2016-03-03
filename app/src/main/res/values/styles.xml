@@ -2,16 +2,16 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:textColorSecondary">@color/secondaryTextColor</item>
         <item name="android:textColorPrimary">@color/textPrimary</item>
         <!--<item name="buttonTint">#fff</item>-->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
-        <!--<item name="colorAccent">@color/accent</item>-->
         <!--<item name="buttonTint">?android:attr/textColorSecondary</item>-->
         <item name="android:windowBackground">@color/background</item>
         <!--<item name="android:textColorSecondary">@color/secondaryTextColor</item>-->
-        <!--<item name="colorControlActivated">@color/colorActivated</item>-->
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorSecondary">@color/secondaryTextColor</item>
+        <item name="colorControlActivated">@color/accent</item>
         <item name="colorControlHighlight">@color/colorHighlight</item>
         <item name="colorControlNormal">@color/colorControlNormal</item>
         <item name="selectableItemBackground">@drawable/ripple_effect</item>
@@ -19,6 +19,7 @@
         <!--<item name="android:windowActionBarOverlay">true</item>-->
         <!--<item name="alertDialogTheme">@style/AlertDialogCustom</item>-->
         <item name="android:windowTranslucentStatus">true</item>
+        <!--<item name="android:fitsSystemWindows">true</item>-->
         <!--<item name="android:windowTranslucentNavigation">false</item>-->
         <!--<item name="android:textColorPrimary">@color/textPrimary</item>-->
     </style>
@@ -29,14 +30,13 @@
         <!--<item name="buttonTint">#fff</item>-->
         <item name="colorPrimary">@color/primaryO</item>
         <item name="colorPrimaryDark">@color/primaryDarkO</item>
-        <item name="android:colorAccent">@color/accentO</item>
-        <!--<item name="colorAccent">@color/accent</item>-->
+        <item name="colorAccent">@color/accentO</item>
         <!--<item name="buttonTint">?android:attr/textColorSecondary</item>-->
         <item name="android:windowBackground">@color/backgroundO</item>
         <!--<item name="android:textColorSecondary">@color/secondaryTextColor</item>-->
-        <!--<item name="colorControlActivated">@color/colorActivated</item>-->
-        <item name="colorControlHighlight">@color/colorHighlight</item>
+        <item name="colorControlActivated">@color/accent</item>
         <item name="colorControlNormal">@color/colorControlNormalO</item>
+        <item name="colorControlHighlight">@color/colorHighlight</item>
         <item name="selectableItemBackground">@drawable/ripple_effect</item>
         <item name="selectableItemBackgroundBorderless">@drawable/ripple_effect_borderless</item>
         <!--<item name="android:windowActionBarOverlay">true</item>-->
@@ -52,12 +52,12 @@
         <!--<item name="buttonTint">?android:attr/textColorSecondary</item>-->
         <item name="colorPrimary">@color/primaryL</item>
         <item name="colorPrimaryDark">@color/primaryDarkL</item>
-        <!--<item name="colorAccent">@color/accent</item>-->
+        <item name="colorAccent">@color/accent</item>
         <item name="android:windowBackground">@color/backgroundL</item>
         <!--<item name="android:windowBackground">@color/primaryDark</item>-->
         <!--<item name="android:textColorPrimary">@color/textPrimaryL</item>-->
         <!--<item name="android:textColorSecondary">@color/secondaryTextColor</item>-->
-        <!--<item name="colorControlActivated">@color/colorActivated</item>-->
+        <item name="colorControlActivated">@color/accent</item>
         <item name="colorControlHighlight">@color/colorHighlightL</item>
         <item name="colorControlNormal">@color/colorControlNormalL</item>
         <item name="selectableItemBackground">@drawable/ripple_effect_l</item>

@@ -51,6 +51,7 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
             public void onClick(int position) {
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
                                 ToolbarFragment.newInstance(ToolbarFragment.FOLDER,
                                         0,
@@ -68,6 +69,7 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
                 R.layout.three_icon_list_item,
                 R.id.main,
                 R.id.secondary,
+                R.id.third,
                 R.id.icon,
                 R.drawable.ic_folder_white_36dp);
     }
@@ -89,7 +91,7 @@ public class FolderListFragment extends AbstractListFragment<Folder> {
     }
 
     @Override
-    protected List<Song> getSongs(Context c, int position) {
-        return MusicRetriever.getSongsByFolder(c, data.get(position).getPath());
+    protected List<Song> getSongs(Context c, Folder folder) {
+        return MusicRetriever.getSongsByFolder(c, folder.getPath());
     }
 }

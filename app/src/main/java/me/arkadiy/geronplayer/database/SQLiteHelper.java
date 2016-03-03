@@ -17,6 +17,7 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 /**
  * Created by Arkadiy on 21.12.2015.
@@ -115,7 +116,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         }
         db.close();
 
-        List<Song> allSongs = getSongs(ctx);
+        List<Song> allSongs = MusicRetriever.getAllSongs(ctx);
         int size = allSongs.size();
         for (Long id : songIds) {
             for (int i = 0; i < size; i++) {
@@ -148,55 +149,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         return positions;
     }
 
-    protected List<Song> getSongs(Context ctx) {
-        ContentResolver resolver = ctx.getContentResolver();
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String selection = MediaStore.Audio.Media.IS_MUSIC + "!=0";
-        Cursor musicCursor = resolver.query(
-                uri, null, selection, null, null);
-        ArrayList<Song> songs = new ArrayList<>();
-        if (musicCursor != null && musicCursor.moveToFirst()) {
-            int idColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media._ID);
-            int albumIdColumn = musicCursor.getColumnIndex
-                    (MediaStore.Audio.Media.ALBUM_ID);
-            int artistIdColumn = musicCursor.getColumnIndex
-                    (MediaStore.Audio.Media.ARTIST_ID);
-            int titleColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.TITLE);
-            int albumColumn = musicCursor.getColumnIndex
-                    (MediaStore.Audio.Media.ALBUM);
-            int artistColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.ARTIST);
-            int songNumberColumn = musicCursor.getColumnIndex
-                    (MediaStore.Audio.Media.TRACK);
-            do {
-                long thisId = musicCursor.getLong(idColumn);
-                long thisAlbumID = musicCursor.getLong(albumIdColumn);
-                long thisArtistID = musicCursor.getLong(artistIdColumn);
-                String thisTitle = musicCursor.getString(titleColumn);
-                String thisArtist = musicCursor.getString(artistColumn);
-                if (thisArtist.equals("<unknown>")) {
-                    thisArtist = unknownArtist;
-                }
-                String thisAlbum = musicCursor.getString(albumColumn);
-                int thisTrack = musicCursor.getInt(songNumberColumn);
-                String data = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.MIME_TYPE));
-                if (!data.startsWith("application")) {
-                    Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, uri);
-                    songs.add(newSong);
-                }
-            }
-            while (musicCursor.moveToNext());
-            Collections.sort(songs, new Comparator<Song>() {
-                public int compare(Song a, Song b) {
-                    return a.getTitle().compareToIgnoreCase(b.getTitle());
-                }
-            });
-        }
-        if (musicCursor != null) {
-            musicCursor.close();
-        }
-        return songs;
+    public void clear() {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.execSQL("DELETE FROM " + TABLE_SONGS);
+        db.execSQL("DELETE FROM " + TABLE_POSITIONS);
+        db.close();
     }
 }

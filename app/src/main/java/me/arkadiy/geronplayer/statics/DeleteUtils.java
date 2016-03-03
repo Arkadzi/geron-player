@@ -98,7 +98,7 @@ public class DeleteUtils {
 //    }
 //
 //    public void deleteGenre(Context context, long id) {
-//        List<Long> albumIds = MusicRetriever.getAlbumIds(context, id);
+//        List<Long> albumIds = MusicRetriever.getAlbumIdsByGenre(context, id);
 //
 //        for (Long albumId : albumIds) {
 //            deleteAlbum(context, albumId);

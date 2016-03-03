@@ -12,6 +12,8 @@ public class Song implements Nameable {
     private Uri uri;
     private String artist;
     private String path;
+    private long length;
+    private String fileName;
 
     public Song(int track, long id, String title, String album, long albumID, String artist, long artistID, Uri uri) {
         this.track = track;
@@ -31,7 +33,6 @@ public class Song implements Nameable {
         return artistID;
     }
 
-    @Override
     public long getID() {
         return id;
     }
@@ -76,6 +77,14 @@ public class Song implements Nameable {
         this.title = name;
     }
 
+    public void setLength(long length) {
+        this.length = length;
+    }
+
+    public long getLength() {
+        return length;
+    }
+
     public void setArtist(String artist) {
         this.artist = artist;
     }
@@ -90,5 +99,13 @@ public class Song implements Nameable {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

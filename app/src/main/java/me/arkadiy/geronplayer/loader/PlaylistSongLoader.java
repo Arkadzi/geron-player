@@ -15,6 +15,7 @@ import java.util.List;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
+import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 public class PlaylistSongLoader extends AbstractLoader<Song>{
     private final long playlistId;
@@ -35,50 +36,6 @@ public class PlaylistSongLoader extends AbstractLoader<Song>{
 
     @Override
     protected List<Song> getList() {
-        ArrayList<Song> songs = new ArrayList<>();
-        Uri musicUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String[] projection = {MediaStore.Audio.Playlists.Members.AUDIO_ID, //0
-                MediaStore.Audio.Media.TITLE,//1
-                MediaStore.Audio.Media.ALBUM_ID,  // 2
-                MediaStore.Audio.Media.ALBUM,//3
-                MediaStore.Audio.Media.ARTIST_ID,//4
-                MediaStore.Audio.Media.ARTIST,//5
-                MediaStore.Audio.Playlists.Members.PLAY_ORDER,//6
-                MediaStore.Audio.Media.DATA
-        };
-
-        Uri uri = getUri();
-        final Cursor musicCursor = musicResolver.query(
-                uri,
-                projection, null, null, null);
-        if (musicCursor != null && musicCursor.moveToFirst()) {
-            do {
-                String artist = musicCursor.getString(5);
-                if (artist.equals(MediaStore.UNKNOWN_STRING)) {
-                    artist = unknownArtist;
-                }
-                Song newSong = new Song(
-                        musicCursor.getInt(6),
-                        musicCursor.getLong(0),
-                        musicCursor.getString(1),
-                        musicCursor.getString(3),
-                        musicCursor.getInt(2),
-                        artist,
-                        musicCursor.getInt(4),
-                        musicUri);
-                newSong.setPath(musicCursor.getString(7));
-                songs.add(newSong);
-            } while (musicCursor.moveToNext());
-            Collections.sort(songs, new Comparator<Song>() {
-                public int compare(Song a, Song b) {
-                    return a.getTrack() - b.getTrack();
-                }
-            });
-        }
-        if (musicCursor != null) {
-            musicCursor.close();
-        }
-
-        return songs;
+        return MusicRetriever.getSongsByPlaylist(getContext(), playlistId);
     }
 }

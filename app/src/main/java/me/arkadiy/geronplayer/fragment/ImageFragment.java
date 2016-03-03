@@ -1,18 +1,16 @@
 package me.arkadiy.geronplayer.fragment;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+
 import me.arkadiy.geronplayer.MainActivity;
-import me.arkadiy.geronplayer.MyAnimatorListener;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.statics.Utils;
 
@@ -23,30 +21,7 @@ public class ImageFragment extends Fragment {
 
 
     public static final String KEY = "image";
-    private View movingView;
-    private AnimatorSet set;
-
-    private MyAnimatorListener listener = new MyAnimatorListener() {
-        @Override
-        public void onAnimationStart(Animator animation) {
-            super.onAnimationStart(animation);
-            Log.e("ImageFragment", "start " + movingView.getY() + " " + movingView.getTranslationY());
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            super.onAnimationEnd(animation);
-            Log.e("ImageFragment", "stop " + movingView.getY() + " " + movingView.getTranslationY());
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-            Log.e("ImageFragment", "cancel " + movingView.getY() + " " + movingView.getTranslationY());
-
-        }
-    };
-
-
+    private ImageSize imageSize = new ImageSize(500, 500);
     public ImageFragment() {
         // Required empty public constructor
     }
@@ -71,12 +46,15 @@ public class ImageFragment extends Fragment {
 //            Log.e("ImageFragment", movingView.getY() + " " + movingView.getTranslationY());
             ImageView imageView = (ImageView) view.findViewById(R.id.cover_art);
 //            set = new AnimatorSet();
-            imageView.setOnClickListener(new View.OnClickListener() {
+            view.setOnClickListener(new View.OnClickListener() {
                 //                public float y;
 //
                 @Override
                 public void onClick(View v) {
-                    ((MainActivity) getActivity()).animateHighlight();
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null) {
+                        activity.animateHighlight();
+                    }
                 }
             });
 
