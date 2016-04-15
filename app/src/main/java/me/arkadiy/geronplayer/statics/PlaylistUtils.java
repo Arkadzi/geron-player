@@ -24,7 +24,6 @@ public class PlaylistUtils {
         ContentResolver contentResolver = context.getContentResolver();
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
         int size = contentResolver.delete(uri, null, null);
-        Log.e("PlaylistUtils", "delete " + String.valueOf(size));
         insertSongs(contentResolver, playlistId, songs, 0);
     }
 
@@ -104,7 +103,6 @@ public class PlaylistUtils {
     }
 
     public static void insertSongs(ContentResolver contentResolver, long id, List<Song> songs, int shift) {
-        Log.e("PlayListUtils", "insert " + songs.size());
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", id);
         ContentValues[] values = new ContentValues[songs.size()];
         for (int i = 0; i < songs.size(); i++) {
@@ -113,7 +111,5 @@ public class PlaylistUtils {
             values[i].put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songs.get(i).getID());
         }
         int inserted = contentResolver.bulkInsert(uri, values);
-        Log.e("PlayListUtils", "insert " + songs.size() + " " + inserted);
-//        contentResolver.notifyChange(Uri.parse("content://media"), null);
     }
 }

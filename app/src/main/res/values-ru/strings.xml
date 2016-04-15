@@ -63,6 +63,9 @@
     <string name="no_songs">Здесь нету песен</string>
     <string name="no_data">Музыка не найдена</string>
     <string name="delete_message">Вы уверены?</string>
+    <string name="track">Трек</string>
+    <string name="genre">Жанр</string>
+    <string name="path">Путь</string>
 
 
     <string-array name="menu_items">
@@ -71,65 +74,58 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="single_song_menu">
-        <item>@string/set_ringtone</item>
-        <item>@string/go_to_artist</item>
-        <item>@string/go_to_album</item>
-        <item>@string/add_to_playlist</item>
-    </string-array>
+    <!--<string-array name="single_song_menu">-->
+        <!--<item>@string/set_ringtone</item>-->
+        <!--<item>@string/go_to_artist</item>-->
+        <!--<item>@string/go_to_album</item>-->
+        <!--<item>@string/add_to_playlist</item>-->
+    <!--</string-array>-->
 
-    <string-array name="song_menu_items">
-        <item>@string/play</item>
-        <item>@string/add_next</item>
-        <item>@string/add_to_queue</item>
-        <item>@string/add_to_playlist</item>
-        <item>@string/set_ringtone</item>
-        <item>@string/rename</item>
-        <item>@string/delete</item>
-    </string-array>
+    <!--<string-array name="song_menu_items">-->
+        <!--<item>@string/play</item>-->
+        <!--<item>@string/add_next</item>-->
+        <!--<item>@string/add_to_queue</item>-->
+        <!--<item>@string/add_to_playlist</item>-->
+        <!--<item>@string/set_ringtone</item>-->
+        <!--<item>@string/rename</item>-->
+        <!--<item>@string/delete</item>-->
+    <!--</string-array>-->
 
-    <string-array name="category_menu_items">
-        <item>@string/play</item>
-        <item>@string/add_next</item>
-        <item>@string/add_to_queue</item>
-        <item>@string/add_to_playlist</item>
-        <item>@string/rename</item>
-        <item>@string/delete</item>
-    </string-array>
+    <!--<string-array name="category_menu_items">-->
+        <!--<item>@string/play</item>-->
+        <!--<item>@string/add_next</item>-->
+        <!--<item>@string/add_to_queue</item>-->
+        <!--<item>@string/add_to_playlist</item>-->
+        <!--<item>@string/rename</item>-->
+        <!--<item>@string/delete</item>-->
+    <!--</string-array>-->
 
-    <string-array name="album_menu_items">
-        <item>@string/play</item>
-        <item>@string/add_next</item>
-        <item>@string/add_to_queue</item>
-        <item>@string/add_to_playlist</item>
-        <item>@string/set_cover_art</item>
-        <item>@string/rename</item>
-        <item>@string/delete</item>
-    </string-array>
+    <!--<string-array name="album_menu_items">-->
+        <!--<item>@string/play</item>-->
+        <!--<item>@string/add_next</item>-->
+        <!--<item>@string/add_to_queue</item>-->
+        <!--<item>@string/add_to_playlist</item>-->
+        <!--<item>@string/set_cover_art</item>-->
+        <!--<item>@string/rename</item>-->
+        <!--<item>@string/delete</item>-->
+    <!--</string-array>-->
 
-    <string-array name="folder_menu_items">
-        <item>@string/play</item>
-        <item>@string/add_next</item>
-        <item>@string/add_to_queue</item>
-        <item>@string/add_to_playlist</item>
-        <item>@string/delete</item>
-    </string-array>
+    <!--<string-array name="folder_menu_items">-->
+        <!--<item>@string/play</item>-->
+        <!--<item>@string/add_next</item>-->
+        <!--<item>@string/add_to_queue</item>-->
+        <!--<item>@string/add_to_playlist</item>-->
+        <!--<item>@string/delete</item>-->
+    <!--</string-array>-->
 
-    <string-array name="playlist_menu_items">
-        <item>@string/play</item>
-        <item>@string/add_next</item>
-        <item>@string/add_to_queue</item>
-        <item>@string/add_to_playlist</item>
-        <item>@string/edit</item>
-        <item>@string/rename</item>
-        <item>@string/delete</item>
-    </string-array>
+    <!--<string-array name="playlist_menu_items">-->
+        <!--<item>@string/play</item>-->
+        <!--<item>@string/add_next</item>-->
+        <!--<item>@string/add_to_queue</item>-->
+        <!--<item>@string/add_to_playlist</item>-->
+        <!--<item>@string/edit</item>-->
+        <!--<item>@string/rename</item>-->
+        <!--<item>@string/delete</item>-->
+    <!--</string-array>-->
 
-    <string-array name="categories">
-        <item>@string/artists</item>
-        <item>@string/songs</item>
-        <item>@string/genres</item>
-        <item>@string/playlists</item>
-        <item>@string/folders</item>
-    </string-array>
 </resources>

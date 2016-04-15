@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import java.util.List;
 
-import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyPrefixCategoryAdapter;
@@ -13,7 +12,6 @@ import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.GenreLoader;
 import me.arkadiy.geronplayer.plain.Category;
 import me.arkadiy.geronplayer.plain.Song;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 import me.arkadiy.geronplayer.statics.TagManager;
 
@@ -54,10 +52,10 @@ public class GenreListFragment extends AbstractListFragment<Category> {
                         .beginTransaction()
                         .setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_in, R.anim.pop_out)
                         .replace(R.id.fragment_container,
-                 ToolbarFragment.newInstance(ToolbarFragment.GENRE,
-                         getItem(position).getID(),
-                         getItem(position).getName(),
-                         null))
+                                ToolbarFragment.newInstance(ToolbarFragment.GENRE,
+                                        getItem(position).getID(),
+                                        getItem(position).getName(),
+                                        null))
                         .addToBackStack(null)
                         .commit();
             }
@@ -73,7 +71,7 @@ public class GenreListFragment extends AbstractListFragment<Category> {
                 R.id.secondary,
                 R.id.third,
                 R.id.icon,
-                getResources().getString(R.string.album_count),
+                getResources().getString(R.string.song_count),
                 R.drawable.ic_music_note_white_36dp);
     }
 

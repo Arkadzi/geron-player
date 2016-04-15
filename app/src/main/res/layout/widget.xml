@@ -1,79 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="64dp"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
     android:background="@color/primary"
-    android:alpha="0.9"
     android:orientation="horizontal">
 
     <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
         android:id="@+id/album_art"
-        android:layout_marginEnd="@dimen/grid_padding"
-        android:layout_marginRight="@dimen/grid_padding"
-        android:background="@drawable/default_album_art"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/default_album_art_small"
         android:scaleType="centerCrop" />
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical" >
+        android:orientation="vertical">
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:paddingLeft="@dimen/grid_padding"
+            android:paddingStart="@dimen/grid_padding"
+            android:paddingRight="@dimen/grid_padding"
+            android:paddingEnd="@dimen/grid_padding"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
             android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
             android:layout_weight="1">
 
             <TextView
+                android:id="@+id/widget_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:textColor="@color/textPrimary"
-                android:textSize="@dimen/main_text_size"
-                android:id="@+id/widget_title"
-                tools:text="fghj"
-                android:singleLine="true" />
+                android:textSize="@dimen/secondary_text_size"
+                tools:text="fghj" />
 
             <TextView
+                android:id="@+id/widget_artist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
                 android:text="New Text"
-                android:id="@+id/widget_artist"
                 android:textColor="@color/secondaryTextColor"
-                android:textSize="@dimen/secondary_text_size"
-                android:singleLine="true" />
-
+                android:textSize="@dimen/small_text_size" />
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/widget_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_effect"
-            android:tint="@color/colorControlNormal"
-            android:src="@drawable/ic_skip_previous_white_24dp"
-            android:padding="5dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <ImageButton
-            android:id="@+id/widget_pp"
-            android:layout_width="wrap_content"
-            android:background="@drawable/ripple_effect"
-            android:layout_height="wrap_content"
-            android:tint="@color/colorControlNormal"
-            android:src="@drawable/ic_pause_white_24dp"
-            android:padding="5dp" />
+            <ImageButton
+                android:id="@+id/widget_prev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/ripple_effect"
+                android:src="@drawable/ic_skip_previous_white_24dp"
+                android:padding="4dp" />
 
-        <ImageButton
-            android:id="@+id/widget_next"
-            android:layout_width="wrap_content"
-            android:background="@drawable/ripple_effect"
-            android:layout_height="wrap_content"
-            android:tint="@color/colorControlNormal"
-            android:src="@drawable/ic_skip_next_white_24dp"
-            android:padding="5dp" />
+            <ImageButton
+                android:id="@+id/widget_pp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/ripple_effect"
+                android:src="@drawable/ic_pause_white_24dp"
+                android:padding="4dp" />
+
+            <ImageButton
+                android:id="@+id/widget_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/ripple_effect"
+                android:src="@drawable/ic_skip_next_white_24dp"
+                android:padding="4dp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

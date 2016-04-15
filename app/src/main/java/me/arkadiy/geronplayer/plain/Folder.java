@@ -10,12 +10,10 @@ public class Folder implements Nameable {
     private String name;
     private String path;
     private long length;
-//    private List<Song> songs;
 
     public Folder(String name, String path) {
         this.name = name;
         this.path = path;
-//        songs = new ArrayList<>();
     }
 
     @Override
@@ -40,7 +38,4 @@ public class Folder implements Nameable {
         return path;
     }
 
-//    public List<Song> getSongs() {
-//        return songs;
-//    }
 }

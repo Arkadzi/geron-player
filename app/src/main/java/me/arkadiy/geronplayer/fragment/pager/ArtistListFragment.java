@@ -52,7 +52,6 @@ public class ArtistListFragment extends AbstractListFragment<Category> {
         adapter.setClickListener(new MyCategoryAdapter.ItemClickListener() {
             @Override
             public void onClick(int position) {
-//                Log.e("category", getItem(position).toString());
 
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()

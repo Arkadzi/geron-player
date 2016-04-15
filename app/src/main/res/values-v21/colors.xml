@@ -2,4 +2,7 @@
 <resources>
     <color name="colorHighlight">#64ffffff</color>
     <color name="colorHighlightL">#64000000</color>
+    <color name="notification_secondary">@color/colorControlNormalL</color>
+    <color name="notification_main_text">@color/textPrimaryL</color>
+
 </resources>

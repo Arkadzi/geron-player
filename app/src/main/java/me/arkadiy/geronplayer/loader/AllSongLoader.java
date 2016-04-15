@@ -29,7 +29,6 @@ public class AllSongLoader extends AbstractLoader<Song> {
 
     @Override
     public List<Song> getList() {
-        Log.e("myloader", "AllSongLoader");
         return MusicRetriever.getAllSongs(getContext());
     }
 }

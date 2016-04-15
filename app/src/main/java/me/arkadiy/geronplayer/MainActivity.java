@@ -12,9 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,7 +27,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
@@ -65,8 +62,6 @@ import me.arkadiy.geronplayer.statics.Utils;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SongControlListener {
 
-    public static ImageLoader imageLoader;
-    public static DisplayImageOptions options;
     public int position;
     private ViewPager mPager;
     private ScreenSlidePagerAdapter mPagerAdapter;
@@ -99,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SeekBar songDurationView;
     private boolean isFingerSlide;
     private DisplayImageOptions gaussOptions;
-    private ImageSize imageSize;
+    private ImageSize smallImageSize;
     private AlphaAnimation fadeImage;
     private int[] colors;
     private SimpleImageLoadingListener imageListener = new SimpleImageLoadingListener() {
@@ -138,47 +133,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             timeHandler.postDelayed(this, post);
         }
     };
-    private ServiceConnection musicConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-
-            mService = binder.getService();
-            mBound = true;
-            mService.addSongListener(MainActivity.this);
-
-            updateRepeatButton(mService.getRepeatState());
-            updateShuffleButton(mService.getShuffleState());
-            Log.e("MusicService", mService.hasSongs() + " " + mService.isPrepared());
-            if (mService.hasSongs()) {
-                mPagerAdapter.setService(mService);
-                mPagerAdapter.setSongs(mService.getQueue());
-                mPagerAdapter.notifyDataSetChanged();
-
-//                if (mService.isPrepared()) {
-                    onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition(), mService.getCurrentSongIndex());
-                    if (mService.isPrepared() && mService.isPlaying()) {
-                        onStartPlaying(mService.getCurrentSong());
-                    } else {
-                        onStopPlaying(mService.getCurrentSong());
-                    }
-//                }
-            } else {
-                panel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.e("MainActivity", "onServiceDisconnected() null " + (mService == null));
-            mService.removeSongListener(MainActivity.this);
-            mBound = false;
-            mService = null;
-            mPagerAdapter.setService(null);
-        }
-    };
-
     private FragmentManager.OnBackStackChangedListener fragmentStackListener = new FragmentManager.OnBackStackChangedListener() {
         @Override
         public void onBackStackChanged() {
@@ -198,7 +152,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button lyricsButton;
     private View lyricsBackground;
     private TextView lyricsView;
+    private ServiceConnection musicConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+
+            mService = binder.getService();
+            mBound = true;
+            mService.addSongListener(MainActivity.this);
+
+            updateRepeatButton(mService.getRepeatState());
+            updateShuffleButton(mService.getShuffleState());
+            if (mService.hasSongs()) {
+                mPagerAdapter.setService(mService);
+                mPagerAdapter.setSongs(mService.getQueue());
+                mPagerAdapter.notifyDataSetChanged();
+
+                onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition(), mService.getCurrentSongIndex());
+                if (mService.isPrepared() && mService.isPlaying()) {
+                    onStartPlaying(mService.getCurrentSong());
+                } else {
+                    onStopPlaying(mService.getCurrentSong());
+                }
+            } else {
+                panel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService.removeSongListener(MainActivity.this);
+            mBound = false;
+            mService = null;
+            mPagerAdapter.setService(null);
+        }
+    };
     private Button lyricsEditButton;
+    private ImageSize imageSize;
 
     @Override
     public void onClick(View v) {
@@ -243,7 +234,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void showLyricsView() {
         if (lyricsBackground.getVisibility() == View.GONE) {
             lyricsBackground.setVisibility(View.VISIBLE);
-//            Log.e("Lyrics", lyricsView.getText().toString());
             setLyrics(getService().getCurrentSong());
         } else {
             lyricsBackground.setVisibility(View.GONE);
@@ -288,9 +278,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void updateActionBar(Toolbar toolbar) {
-//        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.action_ok, R.string.action_ok);
-//        mDrawerLayout.setDrawerListener(mDrawerToggle);
-//        mDrawerToggle.syncState();
     }
 
 
@@ -333,6 +320,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setTheme(R.style.AppTheme);
         } else if (theme == Constants.THEME.LIGHT) {
             setTheme(R.style.AppThemeLight);
+        } else if (theme == Constants.THEME.BLUE) {
+            setTheme(R.style.AppThemeBlue);
         }
     }
 
@@ -340,7 +329,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         playFromFileBrowser(intent);
-        Log.e("NEW INTENT", intent.getAction() + " " + intent.getData());
     }
 
     @Override
@@ -348,7 +336,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setCurrentTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.e("CREATE INTENT", getIntent().getAction() + " " + getIntent().getData());
         backPressListeners = new HashSet<>();
         timeHandler = new Handler();
         menuManager = new QueueMenuManager();
@@ -371,8 +358,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             fragmentTransaction.commit();
         }
         playFromFileBrowser(getIntent());
-//        getWindow().getDecorView().setSystemUiVisibility(
-//                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
     }
 
     private void playFromFileBrowser(Intent intent) {
@@ -380,7 +365,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String action = intent.getAction();
             Uri uri = intent.getData();
             if (Intent.ACTION_VIEW.equals(action) && uri != null) {
-                Log.e("INTENT", "playFromFileBrowser");
                 Intent newIntent = new Intent(this, MusicService.class);
                 newIntent.setAction(Intent.ACTION_VIEW);
                 newIntent.setData(uri);
@@ -392,7 +376,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setColorArray() {
         if (colors == null) {
             colors = new int[2];
-//            colors[0] = Utils.getColorAttribute(this, R.attr.colorControlNormal);
             colors[0] = Color.WHITE;
             colors[1] = Utils.getColorAttribute(this, R.attr.colorAccent);
         }
@@ -402,10 +385,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        if (BuildConfig.FLAVOR.equals("free")) {
-            checkTrial();
-        }
-//        Log.e("RESUME INTENT", getIntent().getAction() + " " + getIntent().getData());
+        checkTrial();
+
         Intent playIntent = new Intent(this, MusicService.class);
         playIntent.setAction(Constants.ACTION.STOP_FOREGROUND_ACTION);
         startService(playIntent);
@@ -433,7 +414,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
 
         dismissTrialDialog();
-//        menuManager.dismissMenu();
         timeHandler.removeCallbacks(runnable);
 
         if (mBound) {
@@ -458,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onUserLeaveHint() {
-        if (mBound)/*mService.isPrepared() && mService.isPlaying())*/ {
+        if (mBound) {
             Intent playIntent = new Intent(this, MusicService.class);
             playIntent.setAction(Constants.ACTION.BEGIN_FOREGROUND_ACTION);
             startService(playIntent);
@@ -475,29 +455,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initImageLoader() {
-        DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .imageScaleType(ImageScaleType.EXACTLY)
-                .bitmapConfig(Bitmap.Config.RGB_565)
-                .resetViewBeforeLoading(true)
-//                .cacheInMemory(true)
-                .build();
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
-                .threadPriority(Thread.NORM_PRIORITY - 2)
-                .memoryCacheSize(5000000)
-                .defaultDisplayImageOptions(options)
-//                .denyCacheImageMultipleSizesInMemory()
-//                .memoryCache(new UsingFreqLimitedMemoryCache(5000000))
-                .build();
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
+        float density = getResources().getDisplayMetrics().density;
+        int normalSize = (int) (density * 280);
+        smallImageSize = new ImageSize(50, 50);
 
-        MainActivity.options = new DisplayImageOptions.Builder()
-                .imageScaleType(ImageScaleType.EXACTLY)
-                .bitmapConfig(Bitmap.Config.RGB_565)
-//                .resetViewBeforeLoading(true)
-                .cacheInMemory(true)
-                .build();
-        imageSize = new ImageSize(50, 50);
+        imageSize = new ImageSize(normalSize, normalSize);
         gaussOptions = new DisplayImageOptions.Builder()
                 .cacheInMemory(true)
                 .preProcessor(new BitmapProcessor() {
@@ -657,12 +619,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
-        if (Build.VERSION.SDK_INT >= 19) {
-            View topPanel = findViewById(R.id.top_panel);
-            int statusBarHeight = getStatusBarHeight();
-            topPanel.setPadding(0, statusBarHeight, 0, 0);
-            mPager.setPadding(0, statusBarHeight, 0, 0);
-        }
         panel.setDragView(slider);
     }
 
@@ -694,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 songTitleView.setText(song.getName());
                 artistNameView.setText(song.getArtist());
-            } else  {
+            } else {
                 songTitleView.setText(String.format("%s - %s", song.getName(), song.getArtist()));
             }
             subSongTitleView.setText(song.getName());
@@ -709,10 +665,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             songDurationView.setProgress(songPosition / 1000);
 
             String uri = Utils.getArtworks(song.getAlbumID()).toString();
-            imageLoader.displayImage(uri, subCoverArtView);
+            Utils.getLoader(this).displayImage(uri, subCoverArtView);
             boolean showAnimation = uri == null || !uri.equals(backgroundCoverView.getTag());
             if (showAnimation) {
-                imageLoader.loadImage(uri, imageSize, gaussOptions, imageListener);
+                Utils.getLoader(this).loadImage(uri, smallImageSize, gaussOptions, imageListener);
             }
 
             if (panel.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN) {
@@ -757,7 +713,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             songTitleView.setText(song.getName());
             artistNameView.setText(song.getArtist());
-        } else  {
+        } else {
             songTitleView.setText(String.format("%s - %s", song.getName(), song.getArtist()));
         }
         subSongTitleView.setText(song.getName());
@@ -791,8 +747,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onShuffleStateChange(int state) {
         updateShuffleButton(state);
-        //TODO return setAdapter
-//        mPager.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
 
         onPreparedPlaying(mService.getCurrentSong(), mService.getCurrentSongPosition(), mService.getCurrentSongIndex());
@@ -801,8 +755,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onQueueChanged(List<Song> songs, int position, int index) {
         mPagerAdapter.setSongs(songs);
-        //TODO return setAdapter
-//        mPager.setAdapter(mPagerAdapter);
         mPagerAdapter.notifyDataSetChanged();
         mPager.setCurrentItem(position, false);
         this.position = position;
@@ -814,15 +766,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             shuffleView.setColorFilter(colors[0]);
         }
-    }
-
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
 
     public void animateHighlight() {
@@ -840,7 +783,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void checkTrial() {
         try {
-            if (Utils.trialTimeLeft(this) < 0) {
+            if (!Utils.isShouldPlay(this)) {
                 showTrialDialog();
             }
         } catch (PackageManager.NameNotFoundException e) {

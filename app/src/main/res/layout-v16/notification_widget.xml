@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="64dp"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/primary"
     android:orientation="horizontal">
 
     <ImageView
@@ -12,7 +11,7 @@
         android:id="@+id/album_art"
         android:layout_marginEnd="@dimen/grid_padding"
         android:layout_marginRight="@dimen/grid_padding"
-        android:background="@drawable/default_album_art"
+        android:background="@drawable/default_album_art_small"
         android:scaleType="centerCrop" />
 
     <LinearLayout
@@ -30,7 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/textPrimary"
+                android:textColor="@color/notification_main_text"
                 android:textSize="@dimen/main_text_size"
                 android:id="@+id/notification_title"
                 tools:text="fghj"
@@ -41,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:text="New Text"
                 android:id="@+id/notification_artist"
-                android:textColor="@color/secondaryTextColor"
+                android:textColor="@color/notification_secondary"
                 android:textSize="@dimen/secondary_text_size"
                 android:singleLine="true" />
 
@@ -49,39 +48,43 @@
 
         <ImageButton
             android:id="@+id/notification_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="@drawable/ripple_effect"
-            android:tint="@color/colorControlNormal"
+            android:tint="@color/notification_secondary"
             android:src="@drawable/ic_skip_previous_white_24dp"
+            android:scaleType="fitXY"
             android:padding="5dp" />
 
         <ImageButton
             android:id="@+id/notification_pp"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:background="@drawable/ripple_effect"
-            android:layout_height="wrap_content"
-            android:tint="@color/colorControlNormal"
+            android:layout_height="40dp"
+            android:tint="@color/notification_secondary"
             android:src="@drawable/ic_pause_white_24dp"
+            android:scaleType="fitXY"
             android:padding="5dp" />
 
         <ImageButton
             android:id="@+id/notification_next"
-            android:layout_width="wrap_content"
+            android:layout_width="40dp"
             android:background="@drawable/ripple_effect"
-            android:layout_height="wrap_content"
-            android:tint="@color/colorControlNormal"
+            android:layout_height="40dp"
+            android:tint="@color/notification_secondary"
             android:src="@drawable/ic_skip_next_white_24dp"
+            android:scaleType="fitXY"
             android:padding="5dp" />
 
         <ImageButton
             android:id="@+id/notification_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="@drawable/ripple_effect"
             android:tint="@color/colorControlNormal"
             android:src="@drawable/ic_action_cancel"
-            android:visibility="visible"
+            android:visibility="gone"
+            android:scaleType="fitStart"
             android:padding="5dp" />
 
     </LinearLayout>

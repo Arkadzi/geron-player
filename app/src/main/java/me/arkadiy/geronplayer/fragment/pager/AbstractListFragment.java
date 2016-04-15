@@ -71,6 +71,8 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
                 theme = Constants.THEME.LIGHT;
             } else if (v.getId() == R.id.dark) {
                 theme = Constants.THEME.DARK;
+            } else if (v.getId() == R.id.blue) {
+                theme = Constants.THEME.BLUE;
             }
             menuDialog.cancel();
             SharedPreferences prefs = activity.getPreferences(Context.MODE_PRIVATE);
@@ -104,9 +106,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         super.onPause();
         dismissDialog();
         ((MainActivity) getActivity()).removeBackPressListener(this);
-//        if (loader != null) {
-//            loader.unregisterObserver();
-//        }
     }
 
     protected void dismissDialog() {
@@ -118,7 +117,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public Loader<List<T>> onCreateLoader(int id, Bundle args) {
-        Log.e("myloader", "create loader");
         if (loader == null) {
             loader = getNewLoader();
             loader.registerObserver();
@@ -130,7 +128,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onDestroy() {
-        Log.e("myloader", "onDestroy() " + loader);
         if (loader != null) {
             loader.unregisterObserver();
         }
@@ -144,16 +141,11 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         super.onResume();
 
         ((MainActivity) getActivity()).addBackPressListener(this);
-//        if (loader != null) {
-//            loader.registerObserver();
-//        }
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.e("myloader", "init loader");
-//        if (loader == null)
         getLoaderManager().initLoader(0, null, this);
 
     }
@@ -222,7 +214,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         picker.setValue(10);
 
         final SwitchCompat switchButton = (SwitchCompat) view.findViewById(R.id.switch_button);
-        Log.e("switch", String.valueOf(service.isTimerEnabled()));
         switchButton.setChecked(service.isTimerEnabled());
 
         builder.setPositiveButton(R.string.action_ok, new DialogInterface.OnClickListener() {
@@ -241,6 +232,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
         view.findViewById(R.id.dark).setOnClickListener(themePickListener);
         view.findViewById(R.id.light).setOnClickListener(themePickListener);
+        view.findViewById(R.id.blue).setOnClickListener(themePickListener);
 
         builder.setView(view);
 
@@ -320,7 +312,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
 
     @Override
     public void onLoadFinished(Loader<List<T>> loader, List<T> data) {
-        Log.e("myloader", "onLoadFinished()");
         if (this.loader == null) {
             this.loader = (AbstractLoader<T>) loader;
             this.loader.registerObserver();
@@ -348,7 +339,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         builder.setItems(menuItems(), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.e("Dialog", String.valueOf(which));
                 onMenuItemClick(position, menuCodes()[which]);
             }
         });
@@ -505,7 +495,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
                 break;
             case Constants.MENU.DELETE:
                 showDeleteDialog(position, activity);
-//                delete(position, activity);
                 break;
             case Constants.MENU.RENAME:
                 showRenameDialog(getItem(position));
@@ -520,9 +509,7 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         final T item = getItem(position);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        View view = getActivity().getLayoutInflater().inflate(R.layout.create_dialog, null);
 
-//        builder.setView(view);
         builder.setTitle(item.getName());
         builder.setMessage(R.string.delete_message);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
@@ -541,8 +528,6 @@ public abstract class AbstractListFragment<T extends Nameable> extends Fragment
         new Thread() {
             @Override
             public void run() {
-//                List<Song> songs = activity.getService().getQueue();
-//                int currentSong = activity.getService().getCurrentSongPosition();
                 final MusicService service = activity.getService();
                 if (service != null) {
                     final boolean changed = delete(service, item);

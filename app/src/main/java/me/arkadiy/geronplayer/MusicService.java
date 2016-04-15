@@ -174,7 +174,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
      */
     @Override
     public void onCompletion(MediaPlayer mp) {
-        Log.e("MusicService", "onCompletion()");
         if (isTimerEnabled()) {
             songsLeft--;
             if (songsLeft < 0) {
@@ -216,7 +215,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Log.e("MusicService", "onPrepared() " + currentSong + " " + getCurrentSongIndex());
         isPrepared = true;
         afHelper.updateRemoteControl(getCurrentSong());
         if (isShouldStart()) {
@@ -239,15 +237,18 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("MusicService", "onCreate() " + isStarted);
         displays = new HashSet<>();
         initMediaPlayer();
         initEqualizer();
-        initQueue();
+        try {
+            if (Utils.isShouldPlay(this))
+            initQueue();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         noisyAudioReceiver = new NoisyAudioReceiver();
         noisyFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(noisyAudioReceiver, noisyFilter);
-        Log.e("MusicService", "onCreate() " + isStarted);
     }
 
     private void initQueue() {
@@ -305,21 +306,17 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e("MusicService", "onBind() " + isStarted);
-
         return musicBind;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.e("MusicService", "onUnbind() " + isStarted);
         return false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) return super.onStartCommand(intent, flags, startId);
-        Log.e("MusicService", "onStartCommand() isStarted " + intent.getAction());
         if (intent.getAction().equals(Intent.ACTION_VIEW)) {
             Uri uri = intent.getData();
             playSongFromFileBrowser(uri);
@@ -348,7 +345,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         } else if (intent.getAction().equals(Constants.ACTION.STOP_SERVICE_ACTION)) {
             finishSelf();
         } else if (intent.getAction().equals(Constants.WIDGET.PLAY_PAUSE_ACTION)) {
-            Log.e("MusicService", "pause play action");
             if (hasSongs()) {
                 if (!foregroundManager.isForeground()) {
                     foregroundManager.beginForeground(getCurrentSong(), false);
@@ -383,7 +379,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         } else if (intent.getAction().equals(Constants.ACTION.STOP_FOREGROUND_ACTION)) {
             foregroundManager.endForeground();
         } else if (intent.getAction().equals(Constants.ACTION.PAUSE_ACTION)) {
-            Log.e("headset", "onActivityResult()");
             resumePlaying = false;
             if (isPrepared() && isPlaying()) {
                 pause();
@@ -405,7 +400,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 for (SongControlListener listener : displays) {
                     listener.onError(songs.get(0));
                 }
-                Log.e("INTENT", "ERROR");
             }
         }
     }
@@ -423,7 +417,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onDestroy() {
-        Log.e("MusicService", "onDestroy() " + displays.size());
         isStarted = false;
         unregisterReceiver(noisyAudioReceiver);
         displays.clear();
@@ -445,7 +438,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     private void saveState() {
         try {
-            if (BuildConfig.FLAVOR.equals("free") && Utils.trialTimeLeft(this) < 0) {
+            if (!Utils.isShouldPlay(this)) {
                 queue = new ArrayList<>();
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -506,12 +499,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public void start() {
-        Log.e("MusicService", "start()");
         player.start();
-//        if (!isRegistered) {
-//            registerReceiver(noisyAudioReceiver, noisyFilter);
-//            isRegistered = true;
-//        }
         afHelper.requestFocusIfNecessary(getCurrentSong());
         foregroundManager.updateRemoteView(getCurrentSong(), true);
         for (SongControlListener display : displays) {
@@ -522,13 +510,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public void pause() {
-        Log.e("MusicService", "pause()");
         setShouldStart(false);
         player.pause();
-//        if (isRegistered) {
-//            unregisterReceiver(noisyAudioReceiver);
-//            isRegistered = false;
-//        }
         for (SongControlListener display : displays) {
             display.onStopPlaying(getCurrentSong());
         }
@@ -564,7 +547,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 break;
             } catch (Exception e) {
                 count++;
-                Log.e("MusicService", "playNext()");
             }
         }
         if (count == 3) {
@@ -606,7 +588,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onFocusGained() {
-        Log.e("headset", "onFocusGained() " + resumePlaying);
         if (isPrepared() && resumePlaying) {
                 start();
         }
@@ -614,7 +595,6 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onFocusLoss() {
-        Log.e("headset", "onFocusLoss() " + resumePlaying);
         if (isPrepared()) {
             resumePlaying = isPlaying();
             if (resumePlaying) {
@@ -714,7 +694,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public boolean hasSongs() {
-        return queue != null && queue.size() > 0;
+        return queue != null && !queue.isEmpty();
     }
 
     public Song getCurrentSong() throws NullPointerException {

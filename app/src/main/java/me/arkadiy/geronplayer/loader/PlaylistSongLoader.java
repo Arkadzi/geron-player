@@ -19,14 +19,10 @@ import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 public class PlaylistSongLoader extends AbstractLoader<Song>{
     private final long playlistId;
-    private String unknownArtist;
 
     public PlaylistSongLoader(Context context, String param, long id) {
         super(context, param);
         this.playlistId = id;
-        try {
-            this.unknownArtist = context.getResources().getString(R.string.unknown_artist);
-        } catch (Exception e) { }
     }
 
     @Override

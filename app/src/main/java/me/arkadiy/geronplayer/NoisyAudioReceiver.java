@@ -16,7 +16,6 @@ public class NoisyAudioReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-            Log.e("NoisyAudioReceiver", "onReceive()");
             Intent newIntent = new Intent(context, MusicService.class);
             newIntent.setAction(Constants.ACTION.PAUSE_ACTION);
             context.startService(newIntent);

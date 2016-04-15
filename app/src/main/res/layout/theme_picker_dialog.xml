@@ -58,4 +58,30 @@
             android:textColor="@color/secondaryTextColorL" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/backgroundG"
+        android:padding="@dimen/list_padding"
+        android:id="@+id/blue">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/textPrimary"
+            android:text="Blue" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="theme"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/secondaryTextColorG" />
+
+    </LinearLayout>
 </LinearLayout>

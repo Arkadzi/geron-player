@@ -19,6 +19,12 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,17 +32,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import me.arkadiy.geronplayer.BuildConfig;
 import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.R;
 
 public class Utils {
 
-    public static long trialTimeLeft(Context c) throws PackageManager.NameNotFoundException {
+    private static ImageLoader LOADER;
+    private static DisplayImageOptions OPTIONS;
+
+    public static boolean isShouldPlay(Context c) throws PackageManager.NameNotFoundException {
             PackageInfo info = c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
             long currentTimeDifference = System.currentTimeMillis() - info.firstInstallTime;
             int days = 15;
             long trialTime = days * 24 * 60 * 60 * 1000;
-            return trialTime - currentTimeDifference;
+            long trialTimeLeft =  trialTime - currentTimeDifference;
+            return !(BuildConfig.FLAVOR.equals("free") && trialTimeLeft < 0);
     }
 
     public static String formatMillis(long millis) {
@@ -57,11 +68,6 @@ public class Utils {
 
     public static Bitmap fastblur(Bitmap sentBitmap, int radius) {
 
-//        int width = Math.round(50);
-//        int height = Math.round(50);
-        /*Bitmap newSentBitmap = Bitmap.createScaledBitmap(sentBitmap, 50, 50, false);
-        sentBitmap.recycle();
-*/
         Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
         sentBitmap.recycle();
 
@@ -213,7 +219,6 @@ public class Utils {
             yi = x;
             stackpointer = radius;
             for (y = 0; y < h; y++) {
-                // Preserve alpha channel: ( 0xff000000 & pix[yi] )
                 pix[yi] = (0xff000000 & pix[yi]) | (dv[rsum] << 16) | (dv[gsum] << 8) | dv[bsum];
 
                 rsum -= routsum;
@@ -269,7 +274,6 @@ public class Utils {
     public static Uri getArtworks(long album_id) {
         Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
         Uri uri = ContentUris.withAppendedId(artworkUri, album_id);
-        Log.e("uri", uri.toString());
         return uri;
     }
 
@@ -296,36 +300,6 @@ public class Utils {
         return typedValue.data;
     }
 
-    public static void setArtwork(Context c, Uri uri, long id) {
-        Log.e("Utils", "setArtwork Uri " + uri + " " + id);
-        if (uri != null && id != 0) {
-            InputStream stream = null;
-            try {
-                stream = c.getContentResolver().openInputStream(uri);
-                Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                Utils.setArtwork(c, bitmap, id);
-            } catch (IOException e) {
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                    }
-                }
-            }
-        }
-    }
-
-    public static void setArtwork(Context c, Bitmap bitmap, long id) {
-        Log.e("Utils", "setArtwork Bitmap " + id);
-        if (id > 0) {
-            String file = saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()));
-            if (file != null) {
-                setArtwork(c, id, file);
-            }
-        }
-    }
-
     public static void setArtwork(Context c, long id, String file) {
         ContentResolver res = c.getContentResolver();
 
@@ -338,51 +312,69 @@ public class Utils {
         res.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null);
     }
 
-    public static Bitmap getBitmap(Uri uri) {
-        return MainActivity.imageLoader.loadImageSync(uri.toString());
-    }
-
     public static String saveImage(Context c, Bitmap image, String name) {
         try {
-            int scale = getScale(image, 500);
+            Log.e("size", image.getWidth() + " " + image.getHeight());
+//            int scale = getScale(image, 500);
             File root = new File(Environment.getExternalStorageDirectory()
                     + "/albumthumbs/");
             root.mkdirs();
-//            int width = image.getWidth();
-//            int height = image.getHeight();
-//            int max = 800;
-//            if (width > max) {
-//                float scale = (1f * max) / width;
-//                width = max;
-//                height = (int)(max * scale);
-//            }
-//            if (height > max) {
-//                float scale = (1f * max) / height;
-//                height = max;
-//                width = (int)(max * scale);
-//            }
-//            Bitmap scaledBitmap = Bitmap.createScaledBitmap(image, width, height, false);
+
             String filePath = root.toString() + File.separator + name;// + ".jpg";
             OutputStream fOut = new FileOutputStream(filePath);
             BufferedOutputStream bos = new BufferedOutputStream(fOut);
 
-            image.compress(Bitmap.CompressFormat.JPEG, 2 * scale / 3, bos);
-
+            image.compress(Bitmap.CompressFormat.JPEG, 100, bos);
             bos.flush();
             bos.close();
-//            scaledBitmap.recycle();
             image.recycle();
 
             ContentValues cv = new ContentValues();
             cv.put(MediaStore.Images.Media.DATA, filePath);
             cv.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
             c.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
-//            MediaScannerConnection.scanFile(c, new String[]{filePath}, null, null);
             return filePath;
         } catch (Exception e) {
             Log.e("error", e.getLocalizedMessage());
         }
         return null;
+    }
+
+    public static Bitmap getBitmap(Context c, Uri uri, ImageSize size) {
+        return getLoader(c).loadImageSync(uri.toString(), size);
+    }
+
+    public static ImageLoader getLoader(Context c) {
+        if (LOADER == null) {
+            initLoader(c.getApplicationContext());
+        }
+        return LOADER;
+    }
+
+    private static void initLoader(Context c) {
+
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                .resetViewBeforeLoading(true)
+//                .cacheInMemory(true)
+                .build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(c.getApplicationContext())
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .memoryCacheSize(5000000)
+                .defaultDisplayImageOptions(options)
+//                .denyCacheImageMultipleSizesInMemory()
+//                .memoryCache(new UsingFreqLimitedMemoryCache(5000000))
+                .build();
+
+        LOADER = ImageLoader.getInstance();
+        LOADER.init(config);
+        OPTIONS = new DisplayImageOptions.Builder()
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+//                .resetViewBeforeLoading(true)
+                .cacheInMemory(true)
+                .build();
     }
 
     public static int getScale(Bitmap image, float maxSize) {
@@ -405,5 +397,12 @@ public class Utils {
             }
             cursor.close();
         }
+    }
+
+    public static DisplayImageOptions getOptions(Context context) {
+        if (OPTIONS == null) {
+            initLoader(context);
+        }
+        return OPTIONS;
     }
 }

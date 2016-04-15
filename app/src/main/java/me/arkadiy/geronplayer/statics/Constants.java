@@ -67,5 +67,6 @@ public class Constants {
         String THEME = "theme";
         int LIGHT = 0;
         int DARK = 1;
+        int BLUE = 2;
     }
 }

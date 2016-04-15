@@ -9,7 +9,6 @@ import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
 import android.os.Build;
 import android.os.Handler;
-import android.util.Log;
 
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 
@@ -50,14 +49,12 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
     }
 
     public void requestFocusIfNecessary(final Song song) {
-        Log.e("AUDIO", "request focus " + isFocused);
         if (!isFocused) {
             int result = am.requestAudioFocus(this,
                     AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN);
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 isFocused = true;
-                Log.e("AUDIO", "requested");
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                     am.registerMediaButtonEventReceiver(remoteControlReceiver);
                     am.registerRemoteControlClient(remoteControlClient);
@@ -82,7 +79,6 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
     }
 
     public void refuseFocusIfNecessary() {
-        Log.e("AUDIO", "refuse " + isFocused);
         if (isFocused) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 am.unregisterRemoteControlClient(remoteControlClient);
@@ -96,14 +92,12 @@ public class AudioFocusHelper implements AudioManager.OnAudioFocusChangeListener
 
     @Override
     public void onAudioFocusChange(int focusChange) {
-        Log.e("AUDIO", "focus changed" + focusChange + " " + isFocused);
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_LOSS:
 //                isFocused = false;
                 refuseFocusIfNecessary();
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-//                Log.e("audio focus", String.valueOf(focusChange));
                 listener.onFocusLoss();
                 break;
             case AudioManager.AUDIOFOCUS_GAIN:

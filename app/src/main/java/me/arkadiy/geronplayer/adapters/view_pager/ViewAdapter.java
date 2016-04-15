@@ -17,26 +17,16 @@ import me.arkadiy.geronplayer.fragment.pager.SongListFragment;
  */
 public class ViewAdapter extends FragmentPagerAdapter {
     final int PAGE_COUNT = 5;
-    private String mTabTitles[] = new String[]{"Artists", "Songs", "Genres", "Playlists", "Folders"};
+    private String mTabTitles[];
     private ArrayList<Fragment> fragments = new ArrayList<>(PAGE_COUNT);
     public ViewAdapter(FragmentManager fm, String[] tabTitles) {
         super(fm);
         mTabTitles = tabTitles;
+        fragments.add(GenreListFragment.newInstance("3"));
         fragments.add(ArtistListFragment.newInstance("1"));
         fragments.add(SongListFragment.newInstance(SongListFragment.ALL, 0, true, null));
-        fragments.add(GenreListFragment.newInstance("3"));
-        fragments.add(PlaylistFragment.newInstance("4"));
         fragments.add(FolderListFragment.newInstance("5"));
-//        fragments.add(new SongListFragment());
-//        fragments.add(new SongListFragment());
-//        fragments.add(new SongListFragment());
-//        fragments.add(new SongListFragment());
-//        fragments.add(new SongListFragment());
-//        fragments.add(new CursorLoaderListFragment());
-//        fragments.add(new CursorLoaderListFragment());
-//        fragments.add(new CursorLoaderListFragment());
-//        fragments.add(new CursorLoaderListFragment());
-//        fragments.add(new CursorLoaderListFragment());
+        fragments.add(PlaylistFragment.newInstance("4"));
     }
 
     @Override

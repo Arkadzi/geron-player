@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -23,29 +24,21 @@ public class PlaybackWidgetProvider extends AppWidgetProvider {
     }
 
     public static void updateWidget(Context context, AppWidgetManager appWidgetManager,
-                                    int widgetID, Song song, boolean isPlaying) {
+                                    int widgetID, Song song, boolean isPlaying, Bitmap bitmap) {
 
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget);
         views.setOnClickPendingIntent(R.id.album_art, pendingIntent);
-        Log.e("widget", "updateWidget isStarted " + MusicService.isStarted() + " " + context.getPackageName() + " " + song);
 
         if (MusicService.isStarted() && song == null) {
             Intent playIntent = new Intent(context, MusicService.class);
             playIntent.setAction(Constants.WIDGET.UPDATE_ACTION);
             context.startService(playIntent);
         }
-//        if (song != null) {
-            views.setOnClickPendingIntent(R.id.widget_prev, getPendingIntent(context, Constants.WIDGET.PREV_ACTION));
-            views.setOnClickPendingIntent(R.id.widget_next, getPendingIntent(context, Constants.WIDGET.NEXT_ACTION));
-            views.setOnClickPendingIntent(R.id.widget_pp, getPendingIntent(context, Constants.WIDGET.PLAY_PAUSE_ACTION));
-//        }
-//        else if (!MusicService.isStarted()) {
-//            views.setOnClickPendingIntent(R.id.widget_prev, pendingIntent);
-//            views.setOnClickPendingIntent(R.id.widget_next, pendingIntent);
-//            views.setOnClickPendingIntent(R.id.widget_pp, pendingIntent);
-//        }
+        views.setOnClickPendingIntent(R.id.widget_prev, getPendingIntent(context, Constants.WIDGET.PREV_ACTION));
+        views.setOnClickPendingIntent(R.id.widget_next, getPendingIntent(context, Constants.WIDGET.NEXT_ACTION));
+        views.setOnClickPendingIntent(R.id.widget_pp, getPendingIntent(context, Constants.WIDGET.PLAY_PAUSE_ACTION));
 
         if (song == null) {
             views.setTextViewText(R.id.widget_title, "-");
@@ -53,6 +46,9 @@ public class PlaybackWidgetProvider extends AppWidgetProvider {
         } else {
             views.setTextViewText(R.id.widget_title, song.getTitle());
             views.setTextViewText(R.id.widget_artist, song.getArtist());
+            if (bitmap != null)
+            views.setImageViewBitmap(R.id.album_art, bitmap);
+            else
             views.setImageViewUri(R.id.album_art, Utils.getArtworks(song.getAlbumID()));
         }
 
@@ -67,12 +63,9 @@ public class PlaybackWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         final int N = appWidgetIds.length;
 
-        // Perform this loop procedure for each App Widget that belongs to this provider
         for (int i = 0; i < N; i++) {
             int appWidgetId = appWidgetIds[i];
-            Log.e("widget", "onUpdate() " + appWidgetId);
-            // Tell the AppWidgetManager to perform an update on the current app widget
-            updateWidget(context, appWidgetManager, appWidgetId, null, false);
+            updateWidget(context, appWidgetManager, appWidgetId, null, false, null);
         }
 
     }

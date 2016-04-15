@@ -10,16 +10,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.arkadiy.geronplayer.fragment.pager.AbstractListFragment;
-import me.arkadiy.geronplayer.plain.Nameable;
-import me.arkadiy.geronplayer.views.RecyclerViewFastScroller;
-
 /**
  * Created by Arkadiy on 10.11.2015.
  */
 public abstract class MyCategoryAdapter<T>
-        extends RecyclerView.Adapter<MyCategoryAdapter.ViewHolder>
-        implements RecyclerViewFastScroller.BubbleTextGetter {
+        extends RecyclerView.Adapter<MyCategoryAdapter.ViewHolder> {
 
     private int imageId;
     private int viewId;
@@ -27,6 +22,17 @@ public abstract class MyCategoryAdapter<T>
     private int secondaryId;
     private int thirdId;
     private List<T> categories;
+    private ItemClickListener listener;
+    private ItemLongClickListener longListener;
+    private DataChangedListener dataChangedListener;
+    public MyCategoryAdapter(List<T> categories, int viewId, int mainId, int secondaryId, int thirdId, int imageId) {
+        this.viewId = viewId;
+        this.mainId = mainId;
+        this.secondaryId = secondaryId;
+        this.thirdId = thirdId;
+        this.imageId = imageId;
+        this.categories = new ArrayList<>(categories);
+    }
 
     public T getItem(int position) {
         if (position >= 0 && position < categories.size()) {
@@ -35,30 +41,9 @@ public abstract class MyCategoryAdapter<T>
         return null;
     }
 
-    private ItemClickListener listener;
-    private ItemLongClickListener longListener;
-    private DataChangedListener dataChangedListener;
-
-    @Override
-    public String getTextToShowInBubble(int pos) {
-        return Character.toString(Character.toUpperCase(getMainText(categories.get(pos)).charAt(0)));
-    }
-
     public void setDataChangedListener(DataChangedListener listener) {
         dataChangedListener = listener;
         dataChangedListener.onDataChanged(true);
-    }
-
-    public interface ItemClickListener {
-        void onClick(int position);
-    }
-
-    public interface ItemLongClickListener {
-        void onLongClick(int position);
-    }
-
-    public interface DataChangedListener {
-        void onDataChanged(boolean hasData);
     }
 
     public void setClickListener(ItemClickListener listener) {
@@ -67,34 +52,6 @@ public abstract class MyCategoryAdapter<T>
 
     public void setLongClickListener(ItemLongClickListener listener) {
         this.longListener = listener;
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        public final View mView;
-
-        public final TextView main;
-        public final TextView secondary;
-        public final TextView third;
-        public final ImageView image;
-
-        public ViewHolder(View view, int mainId, int secondaryId, int thirdId, int imageId) {
-            super(view);
-            mView = view;
-            main = (TextView) view.findViewById(mainId);
-            secondary = (TextView) view.findViewById(secondaryId);
-            third = (TextView) view.findViewById(thirdId);
-            image = (ImageView) view.findViewById(imageId);
-        }
-    }
-
-    public MyCategoryAdapter(List<T> categories, int viewId, int mainId, int secondaryId, int thirdId, int imageId) {
-        this.viewId = viewId;
-        this.mainId = mainId;
-        this.secondaryId = secondaryId;
-        this.thirdId = thirdId;
-        this.imageId = imageId;
-        this.categories = new ArrayList<>(categories);
     }
 
     @Override
@@ -130,7 +87,6 @@ public abstract class MyCategoryAdapter<T>
         });
     }
 
-
     @Override
     public void onViewRecycled(ViewHolder holder) {
         holder.itemView.setOnLongClickListener(null);
@@ -138,12 +94,10 @@ public abstract class MyCategoryAdapter<T>
         super.onViewRecycled(holder);
     }
 
-
     @Override
     public int getItemCount() {
         return categories.size();
     }
-
 
     public List<T> getData() {
         return categories;
@@ -226,7 +180,41 @@ public abstract class MyCategoryAdapter<T>
     }
 
     protected abstract String getMainText(T element);
+
     protected abstract String getSecondaryText(T element);
+
     protected abstract String getThirdText(T element);
+
     protected abstract void setImage(T element, ImageView image);
+
+    public interface ItemClickListener {
+        void onClick(int position);
+    }
+
+    public interface ItemLongClickListener {
+        void onLongClick(int position);
+    }
+
+    public interface DataChangedListener {
+        void onDataChanged(boolean hasData);
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        public final View mView;
+
+        public final TextView main;
+        public final TextView secondary;
+        public final TextView third;
+        public final ImageView image;
+
+        public ViewHolder(View view, int mainId, int secondaryId, int thirdId, int imageId) {
+            super(view);
+            mView = view;
+            main = (TextView) view.findViewById(mainId);
+            secondary = (TextView) view.findViewById(secondaryId);
+            third = (TextView) view.findViewById(thirdId);
+            image = (ImageView) view.findViewById(imageId);
+        }
+    }
 }

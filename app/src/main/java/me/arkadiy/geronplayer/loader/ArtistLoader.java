@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.renderscript.RenderScript;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -34,13 +35,7 @@ public class ArtistLoader extends AbstractLoader<Category> {
     }
 
     @Override
-    public void notifyChanges() {
-        musicResolver.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null);
-    }
-
-    @Override
     protected List<Category> getList() {
-        Log.e("myloader", "ArtistLoader");
         ArrayList<Category> categories = new ArrayList<>();
 
         String[] columns = {MediaStore.Audio.Artists._ID,
@@ -59,7 +54,6 @@ public class ArtistLoader extends AbstractLoader<Category> {
                 Category newArtist = new Category(thisId, thisName, thisAlbumCount);
                 long length = MusicRetriever.getLengthByArtist(getContext(), newArtist.getID());
                 newArtist.setLength(length);
-
                 categories.add(newArtist);
 
             } while (musicCursor.moveToNext());

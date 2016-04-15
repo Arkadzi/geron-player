@@ -25,7 +25,7 @@ public class MyPrefixCategoryAdapter extends MyCategoryAdapter<Category> {
     @Override
     protected void setImage(Category element, ImageView image) {
         if (c != null)
-            MainActivity.imageLoader.displayImage(Utils.getArtworks(element.getID()).toString(), image);
+            Utils.getLoader(c).displayImage(Utils.getArtworks(element.getID()).toString(), image);
         else {
             image.setImageResource(resourceId);
         }

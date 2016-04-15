@@ -39,15 +39,4 @@
         android:layout_gravity="end" />
 
 
-    <!--<me.arkadiy.geronplayer.views.RecyclerViewFastScroller-->
-        <!--android:id="@+id/fast_scroller"-->
-        <!--android:layout_marginTop="4dp"-->
-        <!--android:layout_marginBottom="4dp"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_alignBottom="@id/list"-->
-        <!--android:layout_alignParentEnd="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignTop="@id/list"-->
-        <!--/>-->
 </FrameLayout>

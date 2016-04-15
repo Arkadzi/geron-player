@@ -8,7 +8,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+
+import com.nostra13.universalimageloader.core.assist.ImageSize;
 
 import org.jaudiotagger.tag.FieldKey;
 
@@ -29,33 +30,30 @@ import me.arkadiy.geronplayer.statics.Utils;
 
 public class AlbumListFragment extends AbstractListFragment<Category> {
     public final static int ARTIST = 10;
-    public final static int GENRE = 11;
     public static final int REQUEST_CODE = 111;
     private static final String ALBUM_ID = "albumId";
     private int mode;
-    //    private String param;
     private long id;
     private long albumId;
 
     public static AlbumListFragment newInstance(int mode, long id) {
         AlbumListFragment fragment = new AlbumListFragment();
         Bundle args = new Bundle();
-//        args.putString("asd", param1);
+
         args.putInt("mode", mode);
         args.putLong("id", id);
         fragment.setArguments(args);
+
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("Utils", "onCreate()");
         if (savedInstanceState != null) {
             albumId = savedInstanceState.getLong(ALBUM_ID);
         }
         if (getArguments() != null) {
-//            param = getArguments().getString("asd");
             mode = getArguments().getInt("mode");
             id = getArguments().getLong("id");
             showScroller = false;
@@ -64,7 +62,6 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
 
     @Override
     public AbstractLoader<Category> getNewLoader() {
-        Log.e("Utils", "getNewLoader()");
         return AlbumLoader.getLoader(getActivity(), "", mode, id);
     }
 
@@ -105,7 +102,6 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
 
     @Override
     protected MyCategoryAdapter<Category> getNewAdapter(List<Category> data) {
-        Log.e("Utils", "getNewAdapter()");
         return new MyPrefixCategoryAdapter(getActivity(),
                 data,
                 R.layout.album_item,
@@ -135,8 +131,6 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
                         dismissDialog();
                     }
                 });
-//                loader.notifyChanges();
-//                c.getContentResolver().notifyChange(MediaStore.Audio.Artists.Albums.getContentUri("external", id), null);
             }
         }.start();
     }
@@ -201,21 +195,21 @@ public class AlbumListFragment extends AbstractListFragment<Category> {
     @Override
     public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         if (resultCode == Activity.RESULT_OK && requestCode == AlbumListFragment.REQUEST_CODE) {
-            Log.e("Utils", "onActivityResult OK" + data.getData());
             final Context c = getActivity();
             new Thread() {
                 final Uri uri = data.getData();
 
                 @Override
                 public void run() {
-                    Log.e("Utils", "Thread " + albumId);
-                    Bitmap bitmap = Utils.getBitmap(uri);
+//                    Bitmap bitmap = Utils.getBitmap(uri);
+                    float density = c.getResources().getDisplayMetrics().density;
+                    int size = (int) (density * 250);
+                    Bitmap bitmap = Utils.getBitmap(getContext(), uri, new ImageSize(size, size));
+
+//                    String path = Utils.saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()));
                     String path = Utils.saveImage(c, bitmap, String.valueOf(System.currentTimeMillis()));
-//                    List<Song> songs = MusicRetriever.getSongsByAlbum(c, albumId);
-//                    new TagManager().setArtwork(c, songs, path);
-                    MainActivity.imageLoader.clearMemoryCache();
                     Utils.setArtwork(c, albumId, path);
-//                    MainActivity.imageLoader.clearMemoryCache();
+                    Utils.getLoader(c).clearMemoryCache();
                 }
             }.start();
 

@@ -22,15 +22,10 @@ import me.arkadiy.geronplayer.statics.MusicRetriever;
 public class ArtistAlbumLoader extends AbstractLoader<Category> {
 
     private final long artistId;
-    private String unknownArtist;
 
     public ArtistAlbumLoader(Context context, String param, long id) {
         super(context, param);
         this.artistId = id;
-        try {
-            this.unknownArtist = context.getResources().getString(R.string.unknown_artist);
-        } catch (Exception e) {
-        }
     }
 
     @Override
@@ -53,7 +48,6 @@ public class ArtistAlbumLoader extends AbstractLoader<Category> {
                 projection, null, null, null);
         if (musicCursor != null && musicCursor.moveToFirst()) {
             do {
-                Log.e("album", musicCursor.getLong(0) + " " + musicCursor.getString(1));
                 Category newAlbum = new Category(musicCursor.getLong(0),
                         musicCursor.getString(1),
                         musicCursor.getInt(2));

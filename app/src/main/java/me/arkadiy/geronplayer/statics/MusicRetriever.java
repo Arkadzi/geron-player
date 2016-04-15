@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +16,7 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 
 public class MusicRetriever {
-    private final static Comparator<Song> TRACK =  new Comparator<Song>() {
+    private final static Comparator<Song> TRACK = new Comparator<Song>() {
         public int compare(Song a, Song b) {
             return a.getTrack() - b.getTrack();
         }
@@ -74,7 +73,6 @@ public class MusicRetriever {
                 }
                 String thisAlbum = musicCursor.getString(albumColumn);
                 int thisTrack = musicCursor.getInt(songNumberColumn);
-                Log.e("song", String.format("%s %s %d", thisTitle, data, thisLength));
                 String folderPath = thisPath.substring(0, thisPath.indexOf(thisFileName));
                 if (!data.startsWith("application") && ((path == null) || folderPath.equals(path))) {
                     Song newSong = new Song(thisTrack, thisId, thisTitle, thisAlbum, thisAlbumID, thisArtist, thisArtistID, musicUri);
@@ -110,12 +108,18 @@ public class MusicRetriever {
     }
 
     public static List<Song> getSongsByGenre(Context context, long id) {
-        List<Song> songs = new ArrayList<>();
-        List<Long> albumIds = getAlbumIdsByGenre(context, id);
-        for (Long albumId : albumIds) {
-            songs.addAll(getSongsByAlbum(context, albumId));
+        Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external", id);
+        List<Song> list = getSongs(context, null, null, uri, null, false, TITLE);
+        for (int i = 0; i < list.size(); i++) {
+            Song song = list.get(i);
+            int indexOf = list.indexOf(song);
+            int lastIndexOf = list.lastIndexOf(song);
+            while (indexOf != lastIndexOf) {
+                list.remove(lastIndexOf);
+                lastIndexOf = list.lastIndexOf(song);
+            }
         }
-        return songs;
+        return list;
     }
 
     public static List<Song> getSongsByPlaylist(Context c, long id) {
@@ -127,7 +131,6 @@ public class MusicRetriever {
 
     public static List<Song> getSongsByFolder(Context context, String path) {
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!=0";
-        Log.e("path", path);
         Uri uri = MediaStore.Audio.Media.getContentUriForPath(path);
         return getSongs(context, selection, null, uri, path, false, FILE_NAME);
     }

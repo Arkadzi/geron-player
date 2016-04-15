@@ -9,14 +9,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
@@ -27,7 +26,6 @@ import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.audio.ShuffleButtonListener;
 import me.arkadiy.geronplayer.fragment.EqualizerFragment;
 import me.arkadiy.geronplayer.fragment.QueueFragment;
-import me.arkadiy.geronplayer.fragment.SettingsFragment;
 import me.arkadiy.geronplayer.statics.Utils;
 
 /**
@@ -36,15 +34,12 @@ import me.arkadiy.geronplayer.statics.Utils;
 public class ToolbarFragment extends Fragment {
     public final static int ARTIST = 0;
     public final static int GENRE = 1;
-
-
     public final static int PLAYLIST = 2;
     public final static int FOLDER = 3;
     public final static int ALBUM = 4;
     public final static int PLAYLIST_EDIT = 5;
     public final static int QUEUE = 6;
     public final static int EQUALIZER = 7;
-    public final static int SETTINGS = 8;
     private int what;
     private long id;
     private String toolbarText;
@@ -69,7 +64,6 @@ public class ToolbarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("Utils", "onCreate() Toolbar");
 
         what = getArguments().getInt("what");
         id = getArguments().getLong("id");
@@ -78,10 +72,7 @@ public class ToolbarFragment extends Fragment {
         options = new DisplayImageOptions.Builder()
                 .imageScaleType(ImageScaleType.EXACTLY)
                 .bitmapConfig(Bitmap.Config.RGB_565)
-                        .displayer(new FadeInBitmapDisplayer(1000))
-//                .resetViewBeforeLoading(true)
-//                .showImageOnFail(R.drawable.default_album_art)
-//                .cacheInMemory(true)
+                .displayer(new FadeInBitmapDisplayer(1000))
                 .build();
     }
 
@@ -98,14 +89,13 @@ public class ToolbarFragment extends Fragment {
             ((MainActivity) getActivity()).updateActionBar(toolbar);
         }
         Fragment fragment = getChildFragmentManager().findFragmentById(R.id.child_fragment_container);
-        Log.e("Utils", "onViewCreated() Toolbar " + (fragment == null));
         if (fragment == null) {
             switch (what) {
                 case ARTIST:
                     fragment = AlbumListFragment.newInstance(AlbumListFragment.ARTIST, id);
                     break;
                 case GENRE:
-                    fragment = AlbumListFragment.newInstance(AlbumListFragment.GENRE, id);
+                    fragment = SongListFragment.newInstance(SongListFragment.GENRE, id, true, null);
                     break;
                 case PLAYLIST:
                     fragment = SongListFragment.newInstance(SongListFragment.PLAYLIST, id, false, null);
@@ -125,8 +115,6 @@ public class ToolbarFragment extends Fragment {
                 case EQUALIZER:
                     fragment = EqualizerFragment.newInstance();
                     break;
-                case SETTINGS:
-                    fragment = SettingsFragment.newInstance();
             }
             getChildFragmentManager().beginTransaction()
                     .replace(R.id.child_fragment_container, fragment).commit();
@@ -152,9 +140,7 @@ public class ToolbarFragment extends Fragment {
                 }
             });
             ImageView coverArt = (ImageView) view.findViewById(R.id.large_cover_art);
-//            Picasso.with(getActivity())
-//                    .load(Utils.getArtworks(id)).placeholder(R.drawable.default_album_art).into(coverArt);
-            MainActivity.imageLoader.displayImage(Utils.getArtworks(id).toString(), coverArt, options);
+            Utils.getLoader(getActivity()).displayImage(Utils.getArtworks(id).toString(), coverArt, options);
             return view;
         }
 

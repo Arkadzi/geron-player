@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +22,6 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.DraggableAdapter;
-import me.arkadiy.geronplayer.adapters.list_view.QueueAdapter;
 import me.arkadiy.geronplayer.loader.PlaylistSongLoader;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.PlaylistUtils;
@@ -54,7 +52,6 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        Log.e("PlaylistEditFragment", "onCreate()");
         playlistId = getArguments().getLong("id");
     }
 
@@ -81,7 +78,6 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
             final Context c = getActivity();
             final List<Song> songs = songList;
             final long playlistId = this.playlistId;
-            Log.e("PlaylistEditFragment", "size " + songs.size());
             if (wasChanged) {
                 new Thread() {
                     @Override
@@ -160,7 +156,6 @@ public class PlaylistEditFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<List<Song>> loader, List<Song> data) {
         this.songList = data;
-        Log.e("PlaylistEditFragment", String.valueOf(songList.size()));
         if (listView != null) {
             listView.setAlpha(0);
             listView.animate().alpha(1);

@@ -19,7 +19,6 @@ public class RemoteControlReceiver extends BroadcastReceiver {
         if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
             KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                Log.e("RemoteControlReceiver", "keycode " + event.getKeyCode() + context.getClass().getName() + " " + hashCode());
                 Intent newIntent = new Intent(context, MusicService.class);
                 if (KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE == event.getKeyCode()) {
                     newIntent.setAction(Constants.ACTION.PAUSE_PLAY_ACTION);

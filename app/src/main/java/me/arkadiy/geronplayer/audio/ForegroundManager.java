@@ -8,28 +8,43 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
 
 import me.arkadiy.geronplayer.MainActivity;
 import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
+import me.arkadiy.geronplayer.statics.Utils;
 import me.arkadiy.geronplayer.widget.PlaybackWidgetProvider;
 
 public class ForegroundManager {
     private final Service c;
+    private final ImageSize remoteImageSize;
+    private final ImageSize expandedImageSize;
+    private final ImageSize widgetImageSize;
     private boolean isForeground;
 
     public ForegroundManager(Service c) {
         this.c = c;
+        float density = c.getResources().getDisplayMetrics().density;
+        int remoteSize = (int) (density * 64);
+        int widgetSize = (int) (density * 80);
+        int expandedSize = (int) (density * 128);
+        remoteImageSize = new ImageSize(remoteSize, remoteSize);
+        widgetImageSize = new ImageSize(widgetSize, widgetSize);
+        expandedImageSize = new ImageSize(expandedSize, expandedSize);
     }
 
     public void beginForeground(Song song, boolean isPlaying) {
-        Log.e("ForegroundManager", "foreground " + isForeground);
         if (!isForeground()) {
             c.startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, getNotification(song, isPlaying));
             isForeground = true;
@@ -54,8 +69,9 @@ public class ForegroundManager {
     public void updateWidget(Song song, boolean isPlaying) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(c);
         int ids[] = AppWidgetManager.getInstance(c.getApplication()).getAppWidgetIds(new ComponentName(c.getApplication(), PlaybackWidgetProvider.class));
+        Bitmap widgetBitmap = Utils.getBitmap(c, Utils.getArtworks(song.getAlbumID()), widgetImageSize);
         for (int id : ids) {
-            PlaybackWidgetProvider.updateWidget(c, appWidgetManager, id, song, isPlaying);
+            PlaybackWidgetProvider.updateWidget(c, appWidgetManager, id, song, isPlaying, widgetBitmap);
         }
     }
 
@@ -97,8 +113,12 @@ public class ForegroundManager {
             expandedView.setTextViewText(R.id.notification_artist, song.getArtist());
             expandedView.setTextViewText(R.id.notification_title, song.getTitle());
 
-            remoteViews.setImageViewUri(R.id.album_art, Constants.getArtworks(song.getAlbumID()));
-            expandedView.setImageViewUri(R.id.album_art, Constants.getArtworks(song.getAlbumID()));
+            Bitmap remoteBitmap = Utils.getBitmap(c, Utils.getArtworks(song.getAlbumID()), remoteImageSize);
+            Bitmap expandedBitmap = Utils.getBitmap(c, Utils.getArtworks(song.getAlbumID()), expandedImageSize);
+            remoteViews.setImageViewBitmap(R.id.album_art,remoteBitmap);
+            expandedView.setImageViewBitmap(R.id.album_art, expandedBitmap);
+//            remoteViews.setImageViewUri(R.id.album_art, Constants.getArtworks(song.getAlbumID()));
+//            expandedView.setImageViewUri(R.id.album_art, Constants.getArtworks(song.getAlbumID()));
 
             expandedView.setOnClickPendingIntent(R.id.notification_prev, prev);
             expandedView.setOnClickPendingIntent(R.id.notification_next, next);

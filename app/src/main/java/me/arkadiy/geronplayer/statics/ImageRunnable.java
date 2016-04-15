@@ -34,11 +34,9 @@ public class ImageRunnable implements Runnable {
         Bitmap bmp = imageLoader.loadImageSync(uri, imageSize);
         if (bmp != null) {
             bmp = Utils.fastblur(bmp, 8);
-//            titleView.setTextColor(getDominantColor(bmp));
             imageView.setImageBitmap(bmp);
 
         } else {
-//            titleView.setTextColor(Color.WHITE);
             imageView.setImageBitmap(defaultBmp);
         }
 
@@ -48,50 +46,6 @@ public class ImageRunnable implements Runnable {
         this.uri = uri;
     }
 
-
-//    public static int getDominantColor(Bitmap bitmap) {
-//        long redBucket = 0;
-//        long greenBucket = 0;
-//        long blueBucket = 0;
-//        int width = bitmap.getWidth();
-//        int height = bitmap.getHeight();
-//        int[] pixels = new int[width * height/16];
-//        long pixelCount = pixels.length;
-//        bitmap.getPixels(pixels, 0, width/4, 3*width/8,3*height/8, width/4, height/4);
-//        for (int i = 0; i < pixelCount; i++) {
-//                redBucket += Color.red(pixels[i]);
-//                greenBucket += Color.green(pixels[i]);
-//                blueBucket += Color.blue(pixels[i]);
-//        }
-//        int red = (int) (redBucket / pixelCount);
-//        int green = (int) (greenBucket / pixelCount);
-//        int blue = (int) (blueBucket / pixelCount);
-//        if (red < 120 && green < 120 && blue < 120) {
-//            if (red > green && red > blue) {
-//                if (red <= 80) {
-//                    green += 25;
-//                    blue += 25;
-//                }
-//                red += 100;
-//            } else if (green > red && green > blue) {
-//                if (green <= 80) {
-//                    red += 25;
-//                    blue += 25;
-//                }
-//                green += 100;
-//            } else {
-//                if (blue <= 80) {
-//                    red += 25;
-//                    green += 25;
-//                }
-//                blue += 100;
-//            }
-//        }
-//        Log.e("rgb", String.format("%d %d %d", red, green, blue));
-//        return Color.rgb(red,
-//                green,
-//                blue);
-//    }
 
     public static int getDominantColor(Bitmap bitmap) {
         Bitmap bitmap1 = Bitmap.createScaledBitmap(bitmap, 1, 1, true);
@@ -132,7 +86,6 @@ public class ImageRunnable implements Runnable {
         if (red > 255) red = 255;
         if (green > 255) green = 255;
         if (blue > 255) blue = 255;
-        Log.e("rgb after", String.format("%d %d %d", red, green, blue));
         return Color.rgb(red,
                 green,
                 blue);

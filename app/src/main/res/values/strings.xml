@@ -9,13 +9,13 @@
     <string name="song_count">songs:</string>
     <string name="action_search">Search</string>
     <string name="load_error">Unable to load song</string>
-    <string name="user_preset">User</string>
+    <string name="user_preset">Custom</string>
     <string name="virtualizer">Virtualizer</string>
     <string name="bass_boost">Bass Boost</string>
     <string name="equalizer">Equalizer</string>
     <string name="ringtone_set">Ringtone is set</string>
-    <string name="unable_to_delete">Can\'t delete while shuffle mode is ON</string>
-    <string name="unable_to_move">Can\'t move while shuffle mode is ON</string>
+    <string name="unable_to_delete">Unable to delete while shuffle mode is ON</string>
+    <string name="unable_to_move">Unable to move while shuffle mode is ON</string>
     <string name="action_accept">Accept</string>
     <string name="create_playlist">Create new playlist</string>
     <string name="action_ok">OK</string>
@@ -59,10 +59,13 @@
     <string name="lyrics">Lyrics</string>
     <string name="input_lyrics">Insert lyrics here</string>
     <string name="browse_web">Browse on the Web</string>
-    <string name="no_lyrics">No lyrics</string>
+    <string name="no_lyrics">There is no lyrics</string>
     <string name="no_songs">There is no songs</string>
     <string name="no_data">No music found</string>
     <string name="delete_message">Are you sure?</string>
+    <string name="track">Track</string>
+    <string name="genre">Genre</string>
+    <string name="path">Path</string>
 
     <string-array name="menu_items">
         <item>1</item>
@@ -125,11 +128,11 @@
     </string-array>
 
     <string-array name="categories">
+        <item>@string/genres</item>
         <item>@string/artists</item>
         <item>@string/songs</item>
-        <item>@string/genres</item>
-        <item>@string/playlists</item>
         <item>@string/folders</item>
+        <item>@string/playlists</item>
     </string-array>
 
 </resources>

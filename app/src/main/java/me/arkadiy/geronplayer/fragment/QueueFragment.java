@@ -60,7 +60,6 @@ public class QueueFragment extends Fragment implements SongControlListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setRetainInstance(true);
         setHasOptionsMenu(true);
         menuManager = new QueueMenuManager();
     }
@@ -71,7 +70,6 @@ public class QueueFragment extends Fragment implements SongControlListener {
 
         Intent intent = new Intent(getActivity(), MusicService.class);
         getActivity().getApplicationContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        Log.e("QueueFragment", "onResume()");
     }
 
     @Override
@@ -80,7 +78,6 @@ public class QueueFragment extends Fragment implements SongControlListener {
         if (mBound) {
             getActivity().getApplicationContext().unbindService(connection);
             onUnbind();
-            Log.e("QueueFragment", "onPause()");
         }
         super.onPause();
     }
@@ -241,7 +238,6 @@ public class QueueFragment extends Fragment implements SongControlListener {
         songAdapter.setSongs(songList);
         songAdapter.setSong(index);
         songAdapter.notifyDataSetChanged();
-        Log.e("QueueFragment", "onQueueChanged() " + queue.size() + " " + songAdapter.getCount());
     }
 
     public void onServiceConnected(MusicService service) {

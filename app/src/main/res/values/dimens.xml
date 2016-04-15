@@ -20,4 +20,5 @@
     <dimen name="shadow_height">4dp</dimen>
     <dimen name="status_bar_padding">0dp</dimen>
     <dimen name="mstatus_bar_padding">0dp</dimen>
+    <dimen name="view_pager_portrait_margin">56dp</dimen>
 </resources>

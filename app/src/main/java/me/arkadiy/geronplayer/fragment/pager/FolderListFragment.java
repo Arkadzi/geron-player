@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import java.util.List;
 
-import me.arkadiy.geronplayer.MusicService;
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.adapters.list_view.FolderAdapter;
 import me.arkadiy.geronplayer.adapters.list_view.MyCategoryAdapter;
@@ -14,7 +13,6 @@ import me.arkadiy.geronplayer.loader.FolderLoader;
 import me.arkadiy.geronplayer.plain.Folder;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 public class FolderListFragment extends AbstractListFragment<Folder> {

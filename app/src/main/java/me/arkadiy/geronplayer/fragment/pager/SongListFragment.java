@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.jaudiotagger.tag.FieldKey;
 
@@ -27,15 +28,16 @@ import me.arkadiy.geronplayer.loader.AbstractLoader;
 import me.arkadiy.geronplayer.loader.SongLoader;
 import me.arkadiy.geronplayer.plain.Song;
 import me.arkadiy.geronplayer.statics.Constants;
-import me.arkadiy.geronplayer.statics.DeleteUtils;
 import me.arkadiy.geronplayer.statics.MyRingtoneManager;
 import me.arkadiy.geronplayer.statics.TagManager;
 
 public class SongListFragment extends AbstractListFragment<Song> implements ShuffleButtonListener {
-    public final static int ALL = 0;
-    public final static int PLAYLIST = 1;
-    public final static int ALBUM = 2;
-    public final static int FOLDER = 3;
+    public static final int ALL = 0;
+    public static final int PLAYLIST = 1;
+    public static final int ALBUM = 2;
+    public static final int FOLDER = 3;
+    public static final int GENRE = 4;
+
     private int mode;
     private long id;
     private String additional;
@@ -79,21 +81,14 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
         adapter.setClickListener(new MyCategoryAdapter.ItemClickListener() {
             @Override
             public void onClick(int position) {
-                Log.e("SongListFragment", "onClick");
-//                int size = data.size();
-//                for (int i = 0; i < size; i++) {
-//                    if (data.get(i).getID() == getItem(position).getID()) {
                 ((MainActivity) getActivity()).playQueue(data, position);
-//                        break;
-//                    }
-//                }
             }
         });
     }
 
     @Override
     protected MyCategoryAdapter<Song> getNewAdapter(List<Song> data) {
-        if (mode == FOLDER){
+        if (mode == FOLDER) {
             return new FolderSongAdapter(data,
                     R.layout.list_item,
                     R.id.main,
@@ -167,9 +162,17 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
         final EditText mTitle = (EditText) view.findViewById(R.id.name);
         final EditText mArtist = (EditText) view.findViewById(R.id.artist);
         final EditText mAlbum = (EditText) view.findViewById(R.id.album);
+        final EditText mTrack = (EditText) view.findViewById(R.id.track);
+        final EditText mGenre = (EditText) view.findViewById(R.id.genre);
+        final TextView mPath = (TextView) view.findViewById(R.id.path);
+        final TagManager tagManager = new TagManager();
         mTitle.setText(pojo.getName());
         mArtist.setText(pojo.getArtist());
         mAlbum.setText(pojo.getAlbum());
+        mTrack.setText(String.valueOf(pojo.getTrack()));
+        mGenre.setText(tagManager.getField(pojo.getPath(), FieldKey.GENRE));
+        mPath.setText(pojo.getPath());
+
         builder.setView(view);
         builder.setTitle(R.string.rename);
         builder.setPositiveButton(R.string.action_accept, new DialogInterface.OnClickListener() {
@@ -178,15 +181,21 @@ public class SongListFragment extends AbstractListFragment<Song> implements Shuf
                 String newTitle = mTitle.getText().toString();
                 String newArtist = mArtist.getText().toString();
                 String newAlbum = mAlbum.getText().toString();
-                TagManager tagManager = new TagManager();
-                if (!newTitle.isEmpty() && !newArtist.isEmpty() && !newAlbum.isEmpty()) {
+                String newTrack = mTrack.getText().toString();
+                String newGenre = mGenre.getText().toString();
+                if (!newTitle.isEmpty() && !newArtist.isEmpty() && !newAlbum.isEmpty() && !newTrack.isEmpty()) {
                     pojo.setName(newTitle);
                     pojo.setAlbum(newAlbum);
                     pojo.setArtist(newArtist);
+                    try {
+                        pojo.setTrack(Integer.parseInt(newTrack));
+                    } catch (Exception e) {
+                        Log.e("Exception", e.getMessage());
+                    }
                     tagManager.rename(getActivity(),
                             pojo.getPath(),
-                            new FieldKey[]{FieldKey.TITLE, FieldKey.ARTIST, FieldKey.ALBUM},
-                            new String[]{pojo.getTitle(), pojo.getArtist(), pojo.getAlbum()});
+                            new FieldKey[]{FieldKey.TITLE, FieldKey.ARTIST, FieldKey.ALBUM, FieldKey.TRACK, FieldKey.GENRE},
+                            new String[]{pojo.getTitle(), pojo.getArtist(), pojo.getAlbum(), String.valueOf(pojo.getTrack()), newGenre});
                 }
             }
         });

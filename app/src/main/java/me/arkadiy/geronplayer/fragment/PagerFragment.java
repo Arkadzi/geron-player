@@ -60,22 +60,10 @@ public class PagerFragment extends Fragment {
         adapter = new ViewAdapter(getChildFragmentManager(), getResources().getStringArray(R.array.categories));
         panel = (SlidingUpPanelLayout) getActivity().findViewById(R.id.sliding_layout);
         viewPager = (ViewPager) view.findViewById(R.id.pager);
-        viewPager.setPageTransformer(false, new ViewPager.PageTransformer() {
-            @Override
-            public void transformPage(View page, float position) {
-                /**ROATAION TRANSFORMATION**/
-                page.setRotationY(position * -15);
-            }
-        });
-        viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(adapter);
         tabLayout = (TabLayout) view.findViewById(R.id.sliding_tabs);
-        tabLayout.post(new Runnable() {
-            @Override
-            public void run() {
                 tabLayout.setupWithViewPager(viewPager);
-            }
-        });
+                viewPager.setCurrentItem(2);
     }
 
     @Override

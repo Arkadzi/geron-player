@@ -2,4 +2,5 @@
 <resources>
     <dimen name="status_bar_padding">25dp</dimen>
     <dimen name="mstatus_bar_padding">-25dp</dimen>
+    <dimen name="view_pager_portrait_margin">81dp</dimen>
 </resources>

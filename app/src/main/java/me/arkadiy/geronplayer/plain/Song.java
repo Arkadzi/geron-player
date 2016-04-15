@@ -108,4 +108,8 @@ public class Song implements Nameable {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
+    public void setTrack(int track) {
+        this.track = track;
+    }
 }

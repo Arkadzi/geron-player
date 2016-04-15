@@ -53,7 +53,6 @@ public class EqualizerFragment extends Fragment {
                 inflateEqualizer(binder.getService(), inflater);
             }
             updatePresetText();
-            Log.e("QueueFragment", "onServiceConnected()");
         }
 
         @Override
@@ -144,13 +143,10 @@ public class EqualizerFragment extends Fragment {
         equalizerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.e("Equalizer", "onCheckedChanged " + isChecked);
                 if (mBound) {
-
                     mService.getEqualizer().setEnabled(isChecked);
                     mService.getVirtualizer().setEnabled(isChecked);
                     mService.getBassBoost().setEnabled(isChecked);
-//                layout.setEnabled(enable);
                     enableDisableAllView(isChecked);
                 }
             }

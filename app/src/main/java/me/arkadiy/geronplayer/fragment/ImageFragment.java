@@ -21,7 +21,6 @@ public class ImageFragment extends Fragment {
 
 
     public static final String KEY = "image";
-    private ImageSize imageSize = new ImageSize(500, 500);
     public ImageFragment() {
         // Required empty public constructor
     }
@@ -42,10 +41,7 @@ public class ImageFragment extends Fragment {
         if (getArguments() != null) {
             long id = getArguments().getLong(KEY, -1);
             String uri = Utils.getArtworks(id).toString();
-//            movingView = view.findViewById(R.id.moving_view);
-//            Log.e("ImageFragment", movingView.getY() + " " + movingView.getTranslationY());
             ImageView imageView = (ImageView) view.findViewById(R.id.cover_art);
-//            set = new AnimatorSet();
             view.setOnClickListener(new View.OnClickListener() {
                 //                public float y;
 //
@@ -58,34 +54,7 @@ public class ImageFragment extends Fragment {
                 }
             });
 
-//            movingView.setOnTouchListener(new View.OnTouchListener() {
-//                public float downY;
-//                public float startY;
-//
-//                @Override
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    int eid = event.getAction();
-//                    switch (eid) {
-//                        case MotionEvent.ACTION_MOVE:
-//                            float mv = event.getY() - downY;
-//                            movingView.setY((int)(startY + mv));
-//                            this.startY = movingView.getY();
-//                            break;
-//                        case MotionEvent.ACTION_DOWN :
-//                            this.downY = event.getY();
-//                            this.startY = movingView.getY();
-//                            break;
-//                        case MotionEvent.ACTION_UP :
-//                            // Nothing have to do
-//                            break;
-//                        default :
-//                            break;
-//                    }
-//                    return true;
-//                }
-//            });
-            MainActivity.imageLoader.displayImage(uri, imageView, MainActivity.options);
-//            Picasso.with(getActivity()).load(uri).into(imageView);
+            Utils.getLoader(getActivity()).displayImage(uri, imageView, Utils.getOptions(getActivity()));
         }
         return view;
     }

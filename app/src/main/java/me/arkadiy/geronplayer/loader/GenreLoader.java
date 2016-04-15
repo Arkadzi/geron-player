@@ -12,7 +12,6 @@ import java.util.List;
 
 import me.arkadiy.geronplayer.R;
 import me.arkadiy.geronplayer.plain.Category;
-import me.arkadiy.geronplayer.statics.MusicRetriever;
 
 /**
  * Created by Arkadiy on 06.11.2015.
@@ -48,12 +47,12 @@ public class GenreLoader extends AbstractLoader<Category> {
                 if (thisName.equals(MediaStore.UNKNOWN_STRING)) {
                     thisName = unknown;
                 }
-                int numberOfAlbums = numberOfAlbums(thisId);
-//                int numberOfAlbums = 1;
-                if (numberOfAlbums > 0) {
-                    Category newGenre = new Category(thisId, thisName, numberOfAlbums);
-                    long length = MusicRetriever.getLengthByGenre(getContext(), newGenre.getID());
-                    newGenre.setLength(length);
+
+                long[] totalLength = totalLength(thisId);
+                if (totalLength[0] > 0) {
+                    Category newGenre = new Category(thisId, thisName, (int) totalLength[0]);
+//                    long length = MusicRetriever.getLengthByGenre(getContext(), newGenre.getID());
+                    newGenre.setLength(totalLength[1]);
 
                     categories.add(newGenre);
                 }
@@ -86,5 +85,25 @@ public class GenreLoader extends AbstractLoader<Category> {
             cursor.close();
         }
         return number;
+    }
+
+    private long[] totalLength(long genreId) {
+        long[] songInfo = new long[2];
+        Cursor cursor = musicResolver.query(
+                MediaStore.Audio.Genres.Members.getContentUri("external", genreId),
+                new String[]{String.format("distinct %s", MediaStore.Audio.Media._ID), MediaStore.Audio.Media.DURATION},
+                null,
+                null,
+                null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                songInfo[0] = cursor.getCount();
+                do {
+                    songInfo[1] += cursor.getLong(1);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        return songInfo;
     }
 }
